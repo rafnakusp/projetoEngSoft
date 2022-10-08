@@ -13,7 +13,7 @@ Grupo 4
 
 ## Informações Gerais
     
-    Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643, que é um webapp em django para monitorar os voos de um aeroporto hipotético.
+Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643, que é um webapp em django para monitorar os voos de um aeroporto hipotético.
 
 ## Exigências de ambiente
 
