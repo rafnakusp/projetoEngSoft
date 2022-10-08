@@ -21,6 +21,13 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 
 ## Guia de uso:
 
-- Entrar na pasta source e ativar o ambiente virtual do python com o comando '.\env\bin\Activate.ps1'
+# Para iniciar o ambiente:
+- Criar um ambiente virtual chamado env usando: python -m venv env
+- Ativar o ambiente virtual do python com o comando '.\env\scripts\Activate.ps1'
 - Instalar o django utilizando o pip com 'pip install django'
 - Inicializar o servidor com o comando 'python manage.py runserver'
+
+# Para subir o banco de dados e testá-lo:
+- Criar a migração do banco: 'python manage.py makemigrations'
+- Criar o banco de dados SQLite: 'python manage.py migrate'
+- Executar os testes: 'python manage.py test'
