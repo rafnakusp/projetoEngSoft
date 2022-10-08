@@ -11,11 +11,11 @@ Grupo 4
 - Rafael Katsuo Nakata     - 11803819
 - Vinicius de Castro Lopes - 10770134
 
-## Informações Gerais:
+## Informações Gerais
     
     Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643, que é um webapp em django para monitorar os voos de um aeroporto hipotético.
 
-## Exigências de ambiente:
+## Exigências de ambiente
 
 - python versão 3.6 ou superior
 
