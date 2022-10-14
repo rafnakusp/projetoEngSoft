@@ -22,7 +22,7 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 ## Guia de uso:
 
 ### Para baixar o projeto
-- Na pasta que preferir, executar o comando 'git clone https://github.com/rafnakusp/projetoEngSoft.git'
+- Na pasta que preferir, executar o comando `git clone https://github.com/rafnakusp/projetoEngSoft.git`
 
 ### Para iniciar o ambiente:
 - Entrar na pasta .\projetoEngSoft\source do projeto
