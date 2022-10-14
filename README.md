@@ -25,14 +25,14 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 - Na pasta que preferir, executar o comando `git clone https://github.com/rafnakusp/projetoEngSoft.git`
 
 ### Para iniciar o ambiente:
-- Entrar na pasta .\projetoEngSoft\source do projeto
-- Criar um ambiente virtual chamado env usando: python -m venv env
-- Ativar o ambiente virtual do python com o comando '.\env\scripts\Activate.ps1'
-- Instalar o django utilizando o pip com 'pip install django'
+- Entrar na pasta `.\projetoEngSoft\source do projeto`
+- Criar um ambiente virtual chamado env usando: `python -m venv env`
+- Ativar o ambiente virtual do python com o comando `.\env\scripts\Activate.ps1`
+- Instalar o django utilizando o pip com `pip install django`
 - Ir para a pasta .\MyProj
-- Inicializar o servidor com o comando 'python manage.py runserver'
+- Inicializar o servidor com o comando `python manage.py runserver`
 
 ### Para subir o banco de dados e testá-lo:
-- Criar a migração do banco: 'python manage.py makemigrations'
-- Criar o banco de dados SQLite: 'python manage.py migrate'
-- Executar os testes: 'python manage.py test'
+- Criar a migração do banco: `python manage.py makemigrations`
+- Criar o banco de dados SQLite: `python manage.py migrate`
+- Executar os testes: `python manage.py test`
