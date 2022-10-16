@@ -5,8 +5,21 @@
   </head>
 
   <body>
-    <p>Hello tela inicial</p>
+    <p>Tela inicial</p>
     <p>Usuário: {{ username }}</p>
+
+    {% if username == "operadordevoos" %}
+    <button>CRUD</button>
+    {% endif %}
+
+    {% if username == "usuariostatus" %}
+    <button>Monitoramento de Voos</button>
+    {% endif %}
+
+    {% if username == "gerentedeoperacoes" %}
+    <button>Geração de Relatórios</button>
+    {% endif %}
+
   </body>
 </html>
 

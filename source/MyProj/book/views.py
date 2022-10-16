@@ -16,14 +16,14 @@ def bookview(request):
         global USUARIO_LOGADO
         return render(request, "login.html")
     elif request.method == "POST":
-        if request.POST["username"] == "admin" and request.POST["password"] == "admin":
-            USUARIO_LOGADO = "admin"
+        if request.POST["username"] == "operadordevoos" and request.POST["password"] == "senha":
+            USUARIO_LOGADO = "operadordevoos"
             return redirect("/telainicial/")
-        elif request.POST["username"] == "piloto" and request.POST["password"] == "piloto":
-            USUARIO_LOGADO = "piloto"
+        elif request.POST["username"] == "usuariostatus" and request.POST["password"] == "senha":
+            USUARIO_LOGADO = "usuariostatus"
             return redirect("/telainicial/")
-        elif request.POST["username"] == "torre" and request.POST["password"] == "torre":
-            USUARIO_LOGADO = "torre"
+        elif request.POST["username"] == "gerentedeoperacoes" and request.POST["password"] == "senha":
+            USUARIO_LOGADO = "gerentedeoperacoes"
             return redirect("/telainicial/")
         else:
             return render(request, "login.html")
