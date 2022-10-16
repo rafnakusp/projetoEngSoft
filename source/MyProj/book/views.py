@@ -5,28 +5,38 @@ from django.http import HttpResponse
 from django.template import loader
 
 USUARIO_LOGADO = ""
+CONTAGEM_DE_FALHAS_NO_LOGIN = 0
 
 @csrf_exempt
 def bookview(request):
+    global CONTAGEM_DE_FALHAS_NO_LOGIN
     print("==========================================")
     print(request.method)
     print(request.POST)
     
+    if CONTAGEM_DE_FALHAS_NO_LOGIN >= 3:
+        return render(request, "loginbloqueado.html")
+
     if request.method == "GET":
         global USUARIO_LOGADO
         return render(request, "login.html")
+
     elif request.method == "POST":
         if request.POST["username"] == "operadordevoos" and request.POST["password"] == "senha":
             USUARIO_LOGADO = "operadordevoos"
-            return redirect("/telainicial/")
         elif request.POST["username"] == "usuariostatus" and request.POST["password"] == "senha":
             USUARIO_LOGADO = "usuariostatus"
-            return redirect("/telainicial/")
         elif request.POST["username"] == "gerentedeoperacoes" and request.POST["password"] == "senha":
-            USUARIO_LOGADO = "gerentedeoperacoes"
-            return redirect("/telainicial/")
+            USUARIO_LOGADO = "gerentedeoperacoes"        
+        
         else:
+            CONTAGEM_DE_FALHAS_NO_LOGIN += 1
+            if CONTAGEM_DE_FALHAS_NO_LOGIN >= 3:
+                return render(request, "loginbloqueado.html")
             return render(request, "login.html")
+
+        CONTAGEM_DE_FALHAS_NO_LOGIN = 0
+        return redirect("/telainicial/")
 
 def telainicial(request):
     template = loader.get_template('telainicial.html')
