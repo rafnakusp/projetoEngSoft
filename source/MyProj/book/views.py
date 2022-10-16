@@ -34,3 +34,12 @@ def telainicial(request):
         'username': USUARIO_LOGADO,
     }
     return HttpResponse(template.render(context, request))
+
+def crud(request):
+    return render(request, "crud.html")
+
+def monitoramentodevoos(request):
+    return render(request, "monitoramentodevoos.html")
+
+def geracaoderelatorios(request):
+    return render(request, "geracaoderelatorios.html")

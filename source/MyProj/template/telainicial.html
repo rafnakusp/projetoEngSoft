@@ -9,15 +9,15 @@
     <p>Usuário: {{ username }}</p>
 
     {% if username == "operadordevoos" %}
-    <button>CRUD</button>
+    <a href="/crud/">CRUD</a>
     {% endif %}
 
     {% if username == "usuariostatus" %}
-    <button>Monitoramento de Voos</button>
+    <a href="/monitoramentodevoos/">Monitoramento de Voos</a>
     {% endif %}
 
     {% if username == "gerentedeoperacoes" %}
-    <button>Geração de Relatórios</button>
+    <a href="/geracaoderelatorios/">Geração de Relatórios</a>
     {% endif %}
 
   </body>
