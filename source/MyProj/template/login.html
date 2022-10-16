@@ -20,7 +20,7 @@
   </head>
 
   <body>
-    <form class="form-signin" action="/login" method="GET">
+    <form class="form-signin" action="." method="POST">
       <div class="text-center mb-4">
         <img class="mb-4" src="https://e7.pngegg.com/pngimages/130/90/png-clipart-airplane-fixed-wing-aircraft-flight-aeroplane-drawing-silhouette-website-thumbnail.png" alt="" width="72" height="72">
         <h1 class="h3 mb-3 font-weight-normal">Sistema de Controle do Aeroporto</h1>
@@ -28,12 +28,12 @@
       </div>
 
       <div class="form-label-group">
-        <input id="inputName" class="form-control" placeholder="Username" required autofocus>
+        <input id="inputName" name="username" class="form-control" placeholder="Username" required autofocus>
         <label for="inputName">Nome de usuário</label>
       </div>
 
       <div class="form-label-group">
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
         <label for="inputPassword">Senha</label>
       </div>
 
