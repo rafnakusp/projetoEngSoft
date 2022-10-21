@@ -28,8 +28,8 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 - Criar um ambiente virtual chamado env usando: `python -m venv env`
 
 ### Para ativar o ambiente e rodar a aplicação
-- Ativar o ambiente virtual do python com o comando `.\env\scripts\Activate.ps1`
-- Se já não instalado, instalar o django utilizando o pip com `pip install django`
+- Ativar o ambiente virtual do python com o comando `.\env\scripts\Activate.ps1` ou `.\env\bin\Activate.ps1`
+- Se já não instalado, instalar as dependências com `pip install -r requirements.txt`
 - Ir para a pasta `.\source\MyProj`
 - Inicializar o servidor com o comando `python manage.py runserver`
 
