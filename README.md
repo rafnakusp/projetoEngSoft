@@ -37,3 +37,7 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 - Criar a migração do banco: `python manage.py makemigrations`
 - Criar o banco de dados SQLite: `python manage.py migrate`
 - Executar os testes: `python manage.py test`
+- Inicializar o servidor com o comando `python manage.py runserver`
+
+### Para acessar os templates da aplicação a partir da pasta do projeto
+- Entrar na pasta '.\template'
