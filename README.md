@@ -40,4 +40,4 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 - Inicializar o servidor com o comando `python manage.py runserver`
 
 ### Para acessar os templates da aplicação a partir da pasta do projeto
-- Entrar na pasta '.\template'
+- Entrar na pasta `.\template`
