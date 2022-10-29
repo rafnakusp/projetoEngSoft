@@ -58,7 +58,7 @@ def monitoramentodevoos(request):
     template = loader.get_template('monitoramentodevoos.html')
     painel = PainelDeMonitoracao()
     context = {
-        "voo_list": painel.apresentavoosnaofinalizados() # context é a lista de voos já convertida
+        "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
     }
     return HttpResponse(template.render(context, request))
 
