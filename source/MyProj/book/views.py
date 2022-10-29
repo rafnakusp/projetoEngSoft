@@ -71,18 +71,25 @@ def geracaoderelatorios(request):
     return render(request, "geracaoderelatorios.html")
 
 def crud(request):
+    controladorCrud = ControladorCrud()
+
     if request.method == "GET":
         form = formularioCadastroVoo()
         return render(request, "crud.html", {'formulario': form})
     elif request.method == "POST":
         form = formularioCadastroVoo(request.POST)
         if form.is_valid():
-            ControladorCrud.createVoo(form)
+            companhia = form.data['companhia']
+            partida = form.data['horario_partida']
+            chegada = form.data['horario_chegada']
+            rota = form.data['rota']
+
+            controladorCrud.createVoo(companhia=companhia, partida=partida, chegada=chegada, rota_str=rota)
             return render(request, "cadastrarvoosucesso.html")
 
-def criarTabelasProducao(request):
-    Status.objects.all().delete()
+def criarTabelasProducao():
 
+    Status.objects.all().delete()
     Status.objects.create(status_nome='Aterrisado')
     Status.objects.create(status_nome='Cancelado')
     Status.objects.create(status_nome='Embarcando')
@@ -93,13 +100,16 @@ def criarTabelasProducao(request):
     Status.objects.create(status_nome='Autorizado')
     Status.objects.create(status_nome='Em voo')
 
-
     Rota.objects.all().delete()
-
     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
     Rota.objects.create(outro_aeroporto='GRU',chegada=False)
     Rota.objects.create(outro_aeroporto='Brasília',chegada=False)
 
+    Voo.objects.all().delete()
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=(datetime.now(tz=timezone.utc) - timedelta(minutes = 50)),horario_chegada_previsto=(datetime.now(tz=timezone.utc) + timedelta(hours = 2)), rota_voo=Rota.objects.get(outro_aeroporto='GRU'))
+
+def criarTabelasProducaoComRequest(request):
+    criarTabelasProducao()
     return render(request, "telainicial.html")
 
 ################################################################################
@@ -107,14 +117,9 @@ def criarTabelasProducao(request):
 ################################################################################
 
 class ControladorCrud():
-    def createVoo(self, form):
-        companhia = form.data['companhia']
-        partida = form.data['horario_partida']
-        chegada = form.data['horario_chegada']
-        rota = form.data['rota']
-
-        Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=(datetime.now(tz=timezone.utc) - timedelta(minutes = 50)),horario_chegada_previsto=(datetime.now(tz=timezone.utc) + timedelta(hours = 2)), rota_voo = rota)
-
+    def createVoo(self, companhia, partida, chegada, rota_str):
+        rota = Rota.objects.get(outro_aeroporto=rota_str)
+        Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=partida,horario_chegada_previsto=chegada, rota_voo = rota)
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####
