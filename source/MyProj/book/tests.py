@@ -230,7 +230,7 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
     Status.objects.create(status_nome='Em voo')
     Status.objects.create(status_nome='Cancelado')
     Status.objects.create(status_nome='Aterrisado')
-    Status.objects.create(status_nome='Embarque')
+    Status.objects.create(status_nome='Embarcando')
     Status.objects.create(status_nome='Programado')
     Status.objects.create(status_nome='Taxiando')
     Status.objects.create(status_nome='Pronto')
@@ -269,7 +269,7 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
     # voo em embarque (diferente de 'cancelado' ou 'aterrisado')
     Voo.objects.create(companhia_aerea='American Air',horario_partida_previsto=(agora + timedelta(minutes = 20)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
     voo = Voo.objects.get(companhia_aerea='American Air')
-    status4 = Status.objects.get(status_nome='Embarque')
+    status4 = Status.objects.get(status_nome='Embarcando')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
     # voo programado (diferente de 'cancelado' ou 'aterrisado')

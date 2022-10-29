@@ -37,18 +37,18 @@
         </tr>
 
         <tr>
-          <td>2</td>
-          <td>TAM</td>
-          <td>Este aeroporto</td>
-          <td>GRU</td>
-          <td>22:30</td>
-          <td>23:37</td>
-          <td>22:32</td>
-          <td>-</td>
+          <td>{{voo.voo_id}}</td>
+          <td>{{voo.companhia_aerea}}</td>
+          <td>{{voo.aeroporto_origem}}</td>
+          <td>{{voo.aeroporto_destino}}</td>  
+          <td>{{voo.horario_partida_previsto}}</td>
+          <td>{{voo.horario_chegada_previsto}}</td>
+          <td>{{voo.horario_partida_real}}</td>
+          <td>{{voo.horario_chegada_real}}</td>
         </tr>
     </table>
 
-    <p>Estado atual: taxiando</p>
+    <p>Estado atual: {{voo.status}}</p>
     <p>Selecione o próximo estado:</p>
     <button>Pronto</button>
 

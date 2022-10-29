@@ -23,6 +23,7 @@ urlpatterns = [
     path('telainicial/', views.telainicial),
     path('crud/', views.crud, name="crud"),
     path('monitoramentodevoos/', views.monitoramentodevoos),
+    path('monitoramentodevooseditar/<int:vooid>/', views.monitoramentodevooseditar),
     path('geracaoderelatorios/', views.geracaoderelatorios),
     path('criartabelasproducao/', views.criarTabelasProducaoComRequest),
 ]
