@@ -70,22 +70,51 @@ def monitoramentodevoos(request):
 def geracaoderelatorios(request):
     return render(request, "geracaoderelatorios.html")
 
+def crud(request):
+    if request.method == "GET":
+        form = formularioCadastroVoo()
+        return render(request, "crud.html", {'formulario': form})
+    elif request.method == "POST":
+        form = formularioCadastroVoo(request.POST)
+        if form.is_valid():
+            ControladorCrud.createVoo(form)
+            return render(request, "cadastrarvoosucesso.html")
+
+def criarTabelasProducao(request):
+    Status.objects.all().delete()
+
+    Status.objects.create(status_nome='Aterrisado')
+    Status.objects.create(status_nome='Cancelado')
+    Status.objects.create(status_nome='Embarcando')
+    Status.objects.create(status_nome='Programado')
+    Status.objects.create(status_nome='Taxiando')
+    Status.objects.create(status_nome='Taxiando')
+    Status.objects.create(status_nome='Pronto')
+    Status.objects.create(status_nome='Autorizado')
+    Status.objects.create(status_nome='Em voo')
+
+
+    Rota.objects.all().delete()
+
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    Rota.objects.create(outro_aeroporto='GRU',chegada=False)
+    Rota.objects.create(outro_aeroporto='Brasília',chegada=False)
+
+    return render(request, "telainicial.html")
+
 ################################################################################
 ####                               CRUD de voos                             ####
 ################################################################################
 
-def crud(request):
-    form = formularioCadastroVoo()
-    return render(request, "crud.html", {'formulario': form})
-
-def cadastra_voo(request):
-    form = formularioCadastroVoo(request.POST)
-    if form.is_valid():
-        comp = form.data['companhia']
+class ControladorCrud():
+    def createVoo(self, form):
+        companhia = form.data['companhia']
         partida = form.data['horario_partida']
         chegada = form.data['horario_chegada']
         rota = form.data['rota']
-        return HttpResponse('hmm')
+
+        Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=(datetime.now(tz=timezone.utc) - timedelta(minutes = 50)),horario_chegada_previsto=(datetime.now(tz=timezone.utc) + timedelta(hours = 2)), rota_voo = rota)
+
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####
