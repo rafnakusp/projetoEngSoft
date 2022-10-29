@@ -85,7 +85,6 @@ def cadastra_voo(request):
         partida = form.data['horario_partida']
         chegada = form.data['horario_chegada']
         rota = form.data['rota']
-        print('Boa')
         return HttpResponse('hmm')
 
 ################################################################################
