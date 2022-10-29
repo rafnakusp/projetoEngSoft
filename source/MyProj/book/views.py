@@ -47,7 +47,7 @@ def bookview(request):
         return redirect("/telainicial/")
 
 def telainicial(request):
-    criarTabelasProducao(request)
+    criarTabelasProducao()
     template = loader.get_template('telainicial.html')
     context = {
         'username': USUARIO_LOGADO,
