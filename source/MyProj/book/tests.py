@@ -4,7 +4,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
-from book.views import ControladorAtualizarStatusDeVoo, PainelDeMonitoracao
+from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, criarTabelasProducao
 
 
 class RotaModelTest(TestCase):
@@ -164,6 +164,32 @@ class ProgressoVooModelTest(TestCase):
     self.assertEqual(progresso_1.horario_chegada_real.strftime('%H:%M, %d of %B, %Y'), '12:40, 11 of August, 2022')
 
 
+################################################################################
+####                             CRUD                                       ####
+################################################################################
+
+class ControladorCrudTest(TestCase):
+
+  controladorCrud = ControladorCrud()
+
+  @classmethod
+  def setUpTestData(cls):
+    criarTabelasProducao()
+
+  def test_create_voo(self):
+
+    dados_voo = {
+      "companhia_aerea": "American Airlines", 
+      "horario_partida_previsto": "2022-10-29 20:07:21.973675+00:00", 
+      "horario_chegada_previsto": "2022-10-29 22:57:21.973675+00:00", 
+      "rota_voo": "GRU",
+    }
+
+    self.controladorCrud.createVoo(companhia=dados_voo["companhia_aerea"], partida=dados_voo["horario_partida_previsto"], chegada=dados_voo["horario_partida_previsto"], rota_str=dados_voo["rota_voo"])
+    rota = Rota.objects.get(outro_aeroporto=dados_voo["rota_voo"])
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia_aerea"], horario_partida_previsto=dados_voo["horario_partida_previsto"], horario_chegada_previsto=dados_voo["horario_partida_previsto"], rota_voo=rota)
+
+    self.assertTrue(voo_filtrado.exists())
 
 
 ################################################################################

@@ -24,5 +24,5 @@ urlpatterns = [
     path('crud/', views.crud, name="crud"),
     path('monitoramentodevoos/', views.monitoramentodevoos),
     path('geracaoderelatorios/', views.geracaoderelatorios),
-    path('criartabelasproducao/', views.criarTabelasProducao),
+    path('criartabelasproducao/', views.criarTabelasProducaoComRequest),
 ]
