@@ -16,6 +16,8 @@ class Voo(models.Model):
     horario_partida_previsto = models.DateTimeField(null=False)
     horario_chegada_previsto = models.DateTimeField(null=False)
     rota_voo = models.ForeignKey(Rota, on_delete=models.CASCADE)
+    def __str__(self):
+      return self.voo_id
     class Meta:
       db_table = 'voo'
 

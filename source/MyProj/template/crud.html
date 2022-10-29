@@ -8,27 +8,16 @@
     <p>Tela de CRUD de voos</p>
     <p>filtrar por:</p>
 
-    <form>
-      <div>
-        <label>Nome da companhia aérea:</label>
-        <input>
-      </div>
-      <div>
-        <label>Código do voo:</label>
-        <input>
-      </div>
-      <div>
-        <label>Tempo estimado de voo:</label>
-        <input>
-      </div>
-      <div>
-        <label>Nome da rota (Aeroporto de origem ou destino):</label>
-        <input>
-      </div>
-      <button>filtrar</button>
-    </form>
+    <form action="{% url 'crud' %}" method="POST">{% csrf_token %}
+      
+      <table>
+        {{formulario.as_table}}
+      </table>
+      
+      <button>Filtrar</button>
+      <input type="submit" value="Cadastrar Voo">
 
-    <button>Criar um novo voo</button>
+    </form>
 
   </body>
 </html>

@@ -30,27 +30,27 @@
           <th>companhia aérea</th>
           <th>origem</th>
           <th>destino</th>
-          <th>status</th>
           <th>horário de partida previsto</th>
           <th>horário de chegada previsto</th>
           <th>horário de partida</th>
           <th>horário de chegada</th>
         </tr>
-        {% for voo in voo_list %}
-          <tr>
-            <td>{{voo.voo_id}}</td>
-            <td>{{voo.companhia_aerea}}</td>
-            <td>{{voo.aeroporto_origem}}</td>
-            <td>{{voo.aeroporto_destino}}</td>
-            <td>{{voo.status}}<button>editar</button></td>
-            <td>{{voo.horario_partida_previsto}}</td>
-            <td>{{voo.horario_chegada_previsto}}</td>
-            <td>{{voo.horario_partida}}</td>
-            <td>{{voo.horario_chegada}}</td>
-          </tr>
-        {% endfor %}
 
-      </table>
+        <tr>
+          <td>2</td>
+          <td>TAM</td>
+          <td>Este aeroporto</td>
+          <td>GRU</td>
+          <td>22:30</td>
+          <td>23:37</td>
+          <td>22:32</td>
+          <td>-</td>
+        </tr>
+    </table>
+
+    <p>Estado atual: taxiando</p>
+    <p>Selecione o próximo estado:</p>
+    <button>Pronto</button>
 
   </body>
 </html>

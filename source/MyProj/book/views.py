@@ -8,6 +8,8 @@ from django.template import loader
 from datetime import datetime, timedelta, tzinfo
 from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
+from django.db.models import Q
+from .forms import formularioCadastroVoo
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
@@ -15,9 +17,10 @@ CONTAGEM_DE_FALHAS_NO_LOGIN = 0
 @csrf_exempt
 def bookview(request):
     global CONTAGEM_DE_FALHAS_NO_LOGIN
-    print("==========================================")
-    print(request.method)
-    print(request.POST)
+    print("====================Debug======================")
+    print(f"{request.method=}")
+    print(f"{request.body=}")
+    print(f"{request.POST=}")
     
     if CONTAGEM_DE_FALHAS_NO_LOGIN >= 3:
         return render(request, "loginbloqueado.html")
@@ -50,23 +53,68 @@ def telainicial(request):
     }
     return HttpResponse(template.render(context, request))
 
-def crud(request):
-    return render(request, "crud.html")
 
+@csrf_exempt
 def monitoramentodevoos(request):
-    template = loader.get_template('monitoramentodevoos.html')
-    painel = PainelDeMonitoracao()
-    context = {
-        "voo_list": painel.apresentavoosnaofinalizados() # context é a lista de voos já convertida
-    }
-    return HttpResponse(template.render(context, request))
+    if request.method == "GET":
+        template = loader.get_template('monitoramentodevoos.html')
+        painel = PainelDeMonitoracao()
+        context = {
+            "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
+        }
+        return HttpResponse(template.render(context, request))
+    elif request.method == "POST":
+        print(f"{request.POST['id']}")
+        return render(request, "monitoramentodevooseditar.html")
 
 def geracaoderelatorios(request):
     return render(request, "geracaoderelatorios.html")
 
+def crud(request):
+    if request.method == "GET":
+        form = formularioCadastroVoo()
+        return render(request, "crud.html", {'formulario': form})
+    elif request.method == "POST":
+        form = formularioCadastroVoo(request.POST)
+        if form.is_valid():
+            ControladorCrud.createVoo(form)
+            return render(request, "cadastrarvoosucesso.html")
+
+def criarTabelasProducao(request):
+    Status.objects.all().delete()
+
+    Status.objects.create(status_nome='Aterrisado')
+    Status.objects.create(status_nome='Cancelado')
+    Status.objects.create(status_nome='Embarcando')
+    Status.objects.create(status_nome='Programado')
+    Status.objects.create(status_nome='Taxiando')
+    Status.objects.create(status_nome='Taxiando')
+    Status.objects.create(status_nome='Pronto')
+    Status.objects.create(status_nome='Autorizado')
+    Status.objects.create(status_nome='Em voo')
+
+
+    Rota.objects.all().delete()
+
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    Rota.objects.create(outro_aeroporto='GRU',chegada=False)
+    Rota.objects.create(outro_aeroporto='Brasília',chegada=False)
+
+    return render(request, "telainicial.html")
+
 ################################################################################
 ####                               CRUD de voos                             ####
 ################################################################################
+
+class ControladorCrud():
+    def createVoo(self, form):
+        companhia = form.data['companhia']
+        partida = form.data['horario_partida']
+        chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+
+        Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=(datetime.now(tz=timezone.utc) - timedelta(minutes = 50)),horario_chegada_previsto=(datetime.now(tz=timezone.utc) + timedelta(hours = 2)), rota_voo = rota)
+
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####
