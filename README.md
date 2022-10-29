@@ -41,3 +41,9 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 
 ### Para acessar os templates da aplicação a partir da pasta do projeto
 - Entrar na pasta `.\template`
+
+### Para acessar a aplicação no navegador
+- Acessar a url: `localhost:8000/login/`
+
+### Para gerar as tabelas básicas
+- Acessar a url: `localhost:8000/criartabelasproducao/`
