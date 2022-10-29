@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, tzinfo
 from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
 from django.db.models import Q
+from .forms import formularioCadastroVoo
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
@@ -52,8 +53,6 @@ def telainicial(request):
     }
     return HttpResponse(template.render(context, request))
 
-def crud(request):
-    return render(request, "crud.html")
 
 @csrf_exempt
 def monitoramentodevoos(request):
@@ -74,6 +73,20 @@ def geracaoderelatorios(request):
 ################################################################################
 ####                               CRUD de voos                             ####
 ################################################################################
+
+def crud(request):
+    form = formularioCadastroVoo()
+    return render(request, "crud.html", {'formulario': form})
+
+def cadastra_voo(request):
+    form = formularioCadastroVoo(request.POST)
+    if form.is_valid():
+        comp = form.data['companhia']
+        partida = form.data['horario_partida']
+        chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+        print('Boa')
+        return HttpResponse('hmm')
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####

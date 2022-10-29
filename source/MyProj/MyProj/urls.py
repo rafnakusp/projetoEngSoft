@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', views.bookview),
     path('telainicial/', views.telainicial),
-    path('crud/', views.crud),
+    path('crud/', views.crud, name="crud"),
     path('monitoramentodevoos/', views.monitoramentodevoos),
     path('geracaoderelatorios/', views.geracaoderelatorios),
 ]
