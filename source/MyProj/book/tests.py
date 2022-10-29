@@ -214,6 +214,10 @@ class ControladorCrudTest(TestCase):
 #     self.assertEqual(progresso_1.voo.voo_id, 1)
 
 class ControladorAtualizarStatusDeVooTest(TestCase):
+  def __init__(self, methodName: str = ...) -> None:
+    self.controlador = ControladorAtualizarStatusDeVoo()
+    super().__init__(methodName)
+
   @classmethod
   def setUpTestData(cls):
     agora = datetime.now(tz=timezone.utc)
@@ -295,8 +299,7 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
   def test_apresentacao_voos(self):
     agora = datetime.now(tz=timezone.utc)
     #controlador
-    controlador = ControladorAtualizarStatusDeVoo()
-    voos = controlador.apresentaVoosNaoFinalizados()
+    voos = self.controlador.apresentaVoosNaoFinalizados()
     
     #verifica se os voos cancelado(id=3) e aterrisado(id=5) a mais de 1 hora não estão na lista
     for voo in voos:
@@ -309,5 +312,6 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
       self.assertNotIn(voo.get('voo_id'), [3, 5])
       self.assertTrue((voo.get('status') not in ['Em voo', 'Aterrisado']) & (voo.get('horario_partida_real') == voo.get('horario_chegada_real') == '-') | ((voo.get('status') == 'Em voo') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') == '-')) | ((voo.get('status') == 'Aterrisado') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') != '-')))
 
-    
+  def test_atualizacao_status_voo(self):
+    pass
 

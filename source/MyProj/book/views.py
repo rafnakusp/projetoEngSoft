@@ -47,6 +47,7 @@ def bookview(request):
         return redirect("/telainicial/")
 
 def telainicial(request):
+    criarTabelasProducao(request)
     template = loader.get_template('telainicial.html')
     context = {
         'username': USUARIO_LOGADO,
@@ -89,7 +90,11 @@ def crud(request):
 
 def criarTabelasProducao():
 
+    ProgressoVoo.objects.all().delete()
+    Voo.objects.all().delete()
     Status.objects.all().delete()
+    Rota.objects.all().delete()
+
     Status.objects.create(status_nome='Aterrisado')
     Status.objects.create(status_nome='Cancelado')
     Status.objects.create(status_nome='Embarcando')
@@ -100,13 +105,16 @@ def criarTabelasProducao():
     Status.objects.create(status_nome='Autorizado')
     Status.objects.create(status_nome='Em voo')
 
-    Rota.objects.all().delete()
+
     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
     Rota.objects.create(outro_aeroporto='GRU',chegada=False)
     Rota.objects.create(outro_aeroporto='Brasília',chegada=False)
 
-    Voo.objects.all().delete()
-    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=(datetime.now(tz=timezone.utc) - timedelta(minutes = 50)),horario_chegada_previsto=(datetime.now(tz=timezone.utc) + timedelta(hours = 2)), rota_voo=Rota.objects.get(outro_aeroporto='GRU'))
+    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=timezone.utc), rota_voo = rota_1)
+    voo = Voo.objects.get(companhia_aerea='American Airlines')
+    status = Status.objects.get(status_nome='Em voo')
+    ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=None)
 
 def criarTabelasProducaoComRequest(request):
     criarTabelasProducao()
@@ -132,8 +140,8 @@ class PainelDeMonitoracao():
     def apresentaVoosNaoFinalizados(self):
         return self.controlador.apresentaVoosNaoFinalizados()
 
-    def atualizarVoo():
-        pass
+    def atualizaStatusDeVoo(self, vooid):
+        return self.controlador.atualizaStatusDeVoo(vooid)
 
 class ControladorAtualizarStatusDeVoo():
 
@@ -162,6 +170,9 @@ class ControladorAtualizarStatusDeVoo():
             voosformatados.append(vooformatado)
 
         return voosformatados
+
+    def atualizaStatusDeVoo(self, vooid):
+        return vooid
 
 ################################################################################
 ####                            Geração de relatório                        ####
