@@ -8,7 +8,6 @@ from django.template import loader
 from datetime import datetime, timedelta, tzinfo
 from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
-from django.db.models import Q
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
@@ -91,7 +90,7 @@ class ControladorAtualizarStatusDeVoo():
         voosfiltrados = []
         for voo in voos:
             hcr = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc) if voo.horario_chegada_real==None else voo.horario_chegada_real
-            if ((voo.status_voo.status_nome != ('Cancelado' or 'Aterrisado')) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
+            if ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrisado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
                voosfiltrados.append(voo)
         
         voosformatados = []
