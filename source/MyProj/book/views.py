@@ -16,9 +16,10 @@ CONTAGEM_DE_FALHAS_NO_LOGIN = 0
 @csrf_exempt
 def bookview(request):
     global CONTAGEM_DE_FALHAS_NO_LOGIN
-    print("==========================================")
-    print(request.method)
-    print(request.POST)
+    print("====================Debug======================")
+    print(f"{request.method=}")
+    print(f"{request.body=}")
+    print(f"{request.POST=}")
     
     if CONTAGEM_DE_FALHAS_NO_LOGIN >= 3:
         return render(request, "loginbloqueado.html")
@@ -54,13 +55,18 @@ def telainicial(request):
 def crud(request):
     return render(request, "crud.html")
 
+@csrf_exempt
 def monitoramentodevoos(request):
-    template = loader.get_template('monitoramentodevoos.html')
-    painel = PainelDeMonitoracao()
-    context = {
-        "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
-    }
-    return HttpResponse(template.render(context, request))
+    if request.method == "GET":
+        template = loader.get_template('monitoramentodevoos.html')
+        painel = PainelDeMonitoracao()
+        context = {
+            "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
+        }
+        return HttpResponse(template.render(context, request))
+    elif request.method == "POST":
+        print(f"{request.POST['id']}")
+        return render(request, "monitoramentodevooseditar.html")
 
 def geracaoderelatorios(request):
     return render(request, "geracaoderelatorios.html")
