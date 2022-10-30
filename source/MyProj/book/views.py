@@ -180,6 +180,11 @@ def criarTabelasProducao():
     status4 = Status.objects.get(status_nome='Autorizado')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
+    # voo sem status
+    Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='C')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
 def criarTabelasProducaoComRequest(request):
     criarTabelasProducao()
     return render(request, "telainicial.html")
@@ -221,7 +226,9 @@ class ControladorAtualizarStatusDeVoo():
         voosfiltrados = []
         for voo in voos:
             hcr = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc) if voo.horario_chegada_real==None else voo.horario_chegada_real
-            if ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrissado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
+            if voo.status_voo == None:
+                voosfiltrados.append(voo)
+            elif ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrissado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
                voosfiltrados.append(voo)
         
         voosformatados = []
@@ -231,7 +238,7 @@ class ControladorAtualizarStatusDeVoo():
                 "companhia_aerea": voofiltrado.voo.companhia_aerea,
                 "aeroporto_origem": voofiltrado.voo.rota_voo.outro_aeroporto if voofiltrado.voo.rota_voo.chegada else "Este aeroporto",
                 "aeroporto_destino": "Este aeroporto" if voofiltrado.voo.rota_voo.chegada else voofiltrado.voo.rota_voo.outro_aeroporto,
-                "status": voofiltrado.status_voo.status_nome,
+                "status": "-" if voofiltrado.status_voo == None else voofiltrado.status_voo.status_nome,
                 "horario_partida_previsto": voofiltrado.voo.horario_partida_previsto.strftime('%H:%M'),
                 "horario_chegada_previsto": voofiltrado.voo.horario_chegada_previsto.strftime('%H:%M'),
                 "horario_partida_real": "-" if voofiltrado.horario_partida_real == None else voofiltrado.horario_partida_real.strftime('%H:%M'),
@@ -249,7 +256,7 @@ class ControladorAtualizarStatusDeVoo():
                 "companhia_aerea": voo.voo.companhia_aerea,
                 "aeroporto_origem": voo.voo.rota_voo.outro_aeroporto if voo.voo.rota_voo.chegada else "Este aeroporto",
                 "aeroporto_destino": "Este aeroporto" if voo.voo.rota_voo.chegada else voo.voo.rota_voo.outro_aeroporto,
-                "status": voo.status_voo.status_nome,
+                "status": "-" if voo.status_voo == None else voo.status_voo.status_nome,
                 "horario_partida_previsto": voo.voo.horario_partida_previsto.strftime('%H:%M'),
                 "horario_chegada_previsto": voo.voo.horario_chegada_previsto.strftime('%H:%M'),
                 "horario_partida_real": "-" if voo.horario_partida_real == None else voo.horario_partida_real.strftime('%H:%M'),
@@ -270,7 +277,7 @@ class ControladorAtualizarStatusDeVoo():
         autorizado = todos_status.get(status_nome='Autorizado')
         aterrissado = todos_status.get(status_nome='Aterrissado')
 
-        status = voo.status_voo.status_nome
+        status = None if voo.status_voo == None else voo.status_voo.status_nome
         if status == None:
             status_possiveis = [embarque, cancelado, em_voo]
         elif status == 'Embarque':
@@ -287,7 +294,7 @@ class ControladorAtualizarStatusDeVoo():
             status_possiveis = [aterrissado]
         else:
             status_possiveis = []
-            
+
         return status_possiveis
 
     def atualizaStatusDeVoo(self, vooid):

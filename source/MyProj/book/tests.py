@@ -296,6 +296,11 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
     status4 = Status.objects.get(status_nome='Autorizado')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
+    # voo sem status
+    Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='C')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
   def test_apresentacao_voos(self):
     agora = datetime.now(tz=timezone.utc)
     #controlador
@@ -311,6 +316,48 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
       self.assertFalse((voo.get('status') == 'Cancelado') & (agora - timedelta(hours=1) >= hpp)) #testa se não existem voos cancelados a mais de 1 hora (não devem haver)
       self.assertNotIn(voo.get('voo_id'), [3, 5])
       self.assertTrue((voo.get('status') not in ['Em voo', 'Aterrissado']) & (voo.get('horario_partida_real') == voo.get('horario_chegada_real') == '-') | ((voo.get('status') == 'Em voo') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') == '-')) | ((voo.get('status') == 'Aterrissado') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') != '-')))
+
+  def test_status_possiveis(self):
+    # status vazio
+    vooid = Voo.objects.filter(companhia_aerea='C').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Embarque'), Status.objects.get(status_nome='Cancelado'), Status.objects.get(status_nome='Em voo')])
+
+    # status 'embarque'
+    vooid = Voo.objects.filter(companhia_aerea='American Air').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Programado'), Status.objects.get(status_nome='Cancelado')])
+
+    # status 'programado'
+    vooid = Voo.objects.filter(companhia_aerea='Amer').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Taxiando'), Status.objects.get(status_nome='Cancelado')])
+
+    # status 'taxiando'
+    vooid = Voo.objects.filter(companhia_aerea='American').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Pronto'), Status.objects.get(status_nome='Cancelado')])
+
+    # status 'pronto'
+    vooid = Voo.objects.filter(companhia_aerea='A').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Autorizado'), Status.objects.get(status_nome='Cancelado')])
+
+    # status 'autorizado'
+    vooid = Voo.objects.filter(companhia_aerea='B').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Em voo')])
+
+    # status 'cancelado'
+    vooid = Voo.objects.filter(companhia_aerea='Azul').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [])
+
+    # status 'aterrissado'
+    vooid = Voo.objects.filter(companhia_aerea='LATAM').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [])
+
 
   def test_atualizacao_status_voo(self):
     pass

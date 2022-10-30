@@ -29,7 +29,7 @@ class Status(models.Model):
 
 class ProgressoVoo(models.Model):
  progresso_id = models.IntegerField(primary_key=True)
- status_voo = models.ForeignKey(Status, on_delete=models.CASCADE)
+ status_voo = models.ForeignKey(Status, on_delete=models.CASCADE, null=True)
  voo = models.ForeignKey(Voo, on_delete=models.CASCADE, null=False)
  horario_partida_real = models.DateTimeField(null=True)
  horario_chegada_real = models.DateTimeField(null=True)
