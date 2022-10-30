@@ -366,13 +366,19 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
     status4 = Status.objects.get(status_nome='Autorizado')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
-    # voo sem status
+    # voo sem status que terminará a menos de 2 dias de agora
     Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
     voo = Voo.objects.get(companhia_aerea='C')
     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
+    # voo sem status que terminará a mais de 2 dias de agora
+    Voo.objects.create(companhia_aerea='D',horario_partida_previsto=(agora+timedelta(days = 1, hours=22)),horario_chegada_previsto=(agora + timedelta(days = 2, hours=1)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='D')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
   def test_apresentacao_voos(self):
     agora = datetime.now(tz=timezone.utc)
+    voo_D_chegada = agora + timedelta(days = 2, hours=1)
     #controlador
     voos = self.controlador.apresentaVoosNaoFinalizados()
     
@@ -382,9 +388,12 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
       hcr = hcr if voo.get('horario_chegada_real')=='-' else datetime(agora.year, agora.month, agora.day, hcr.hour, hcr.minute, tzinfo=timezone.utc)
       hpp = datetime.strptime(voo.get('horario_partida_previsto'), '%H:%M')
       hpp = datetime(agora.year, agora.month, agora.day, hpp.hour, hpp.minute, tzinfo=timezone.utc)
+      hcp = datetime.strptime(voo.get('horario_chegada_previsto'), '%H:%M')
+      hcp = datetime(voo_D_chegada.year, voo_D_chegada.month, voo_D_chegada.day, hcp.hour, hcp.minute, tzinfo=timezone.utc) if voo.get('companhia_aerea') == 'D' else datetime(agora.year, agora.month, agora.day, hcp.hour, hcp.minute, tzinfo=timezone.utc)
       self.assertFalse((voo.get('status') == 'Aterrissado') & (agora - timedelta(hours=1) >= hcr)) #testa se não existem voos Aterrissados a mais de 1 hora (não devem haver)
       self.assertFalse((voo.get('status') == 'Cancelado') & (agora - timedelta(hours=1) >= hpp)) #testa se não existem voos cancelados a mais de 1 hora (não devem haver)
-      self.assertNotIn(voo.get('voo_id'), [3, 5])
+      self.assertFalse((voo.get('status') == '-') & (agora + timedelta(days=2) <= hcp)) #testa se não existem voos cadastrados que ocorrerão somente em dois dias ou mais (não devem ser monitorados)
+      self.assertNotIn(voo.get('voo_id'), [3, 5, 12])
       self.assertTrue((voo.get('status') not in ['Em voo', 'Aterrissado']) & (voo.get('horario_partida_real') == voo.get('horario_chegada_real') == '-') | ((voo.get('status') == 'Em voo') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') == '-')) | ((voo.get('status') == 'Aterrissado') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') != '-')))
 
   def test_status_possiveis(self):
@@ -430,7 +439,42 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
 
 
   def test_atualizacao_status_voo(self):
-    pass
+    agora = datetime.now(tz=timezone.utc)
+
+    # alteração normal (sem alteração de outros campos)
+    vooid = Voo.objects.filter(companhia_aerea='C').values('voo_id')[0].get('voo_id')
+    pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
+    self.assertIsNone(pvoo.status_voo)
+    embarqueid = Status.objects.filter(status_nome='Embarque').values('status_id')[0].get('status_id')
+    self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
+    pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Embarque')
+
+    # alteração para status de 'Autorizado', deve preencher campo de horario_partida_real
+    vooid = Voo.objects.filter(companhia_aerea='A').values('voo_id')[0].get('voo_id')
+    pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Pronto')
+    self.assertIsNone(pvoo.horario_partida_real)
+    self.assertIsNone(pvoo.horario_chegada_real)
+    embarqueid = Status.objects.filter(status_nome='Autorizado').values('status_id')[0].get('status_id')
+    self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
+    pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Autorizado')
+    self.assertTrue(abs(pvoo.horario_partida_real-agora) < timedelta(seconds=1))
+    self.assertIsNone(pvoo.horario_chegada_real)
+
+    # alteração para status de 'Aterrissado', deve preencher campo de horario_chegada_real
+    vooid = Voo.objects.filter(companhia_aerea='American Airlines').values('voo_id')[0].get('voo_id')
+    pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Em voo')
+    self.assertIsNotNone(pvoo.horario_partida_real)
+    self.assertIsNone(pvoo.horario_chegada_real)
+    embarqueid = Status.objects.filter(status_nome='Aterrissado').values('status_id')[0].get('status_id')
+    self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
+    pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Aterrissado')
+    self.assertIsNotNone(pvoo.horario_partida_real)
+    self.assertTrue(abs(pvoo.horario_chegada_real-agora) < timedelta(seconds=1))
 
 ################################################################################
 ####                           Geração de relatórios                        ####

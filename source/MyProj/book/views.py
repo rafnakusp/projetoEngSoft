@@ -166,7 +166,6 @@ def criarTabelasProducao():
     status = Status.objects.get(status_nome='Em voo')
     ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=None)
 
-    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
     Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 16, tzinfo=timezone.utc), rota_voo = rota_1)
 
     # voo cancelado a menos de 1 hora
@@ -292,7 +291,8 @@ class ControladorAtualizarStatusDeVoo():
         for voo in voos:
             hcr = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc) if voo.horario_chegada_real==None else voo.horario_chegada_real
             if voo.status_voo == None:
-                voosfiltrados.append(voo)
+                if datetime.now(tz=timezone.utc) + timedelta(days=2) > voo.voo.horario_chegada_previsto:
+                   voosfiltrados.append(voo)
             elif ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrissado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
                voosfiltrados.append(voo)
         
@@ -363,7 +363,6 @@ class ControladorAtualizarStatusDeVoo():
         return status_possiveis
 
     def atualizaStatusDeVoo(self, vooid, novo_status_id):
-        print(novo_status_id)
         voo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
         voo.status_voo = Status.objects.get(status_id=novo_status_id)
         if voo.status_voo.status_nome == "Autorizado":
