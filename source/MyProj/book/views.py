@@ -67,17 +67,17 @@ def monitoramentodevoos(request):
     
 
 def monitoramentodevooseditar(request, vooid):
-    if request.method == "GET":
-        template = loader.get_template('monitoramentodevooseditar.html')
-        painel = PainelDeMonitoracao()
-        context = {
+    painel = PainelDeMonitoracao()
+    template = loader.get_template('monitoramentodevooseditar.html')  
+
+    if request.method == "POST" and 'status' in request.POST:
+        painel.atualizaStatusDeVoo(vooid, request.POST['status'])
+
+    context = {
             "voo": painel.apresentaVoo(vooid), # context é a lista de voos já convertida
             "status_possiveis": painel.statusPossiveis(vooid)
-        }
-        return HttpResponse(template.render(context, request))
-    elif request.method == "POST":
-        print(f"{request.POST['id']}")
-        return render(request, "monitoramentodevooseditar.html")
+    }
+    return HttpResponse(template.render(context, request))
 
 def geracaoderelatorios(request):
     return render(request, "geracaoderelatorios.html")
@@ -215,8 +215,8 @@ class PainelDeMonitoracao():
     def statusPossiveis(self, vooid):
         return self.controlador.statusPossiveis(vooid)
 
-    def atualizaStatusDeVoo(self, vooid):
-        return self.controlador.atualizaStatusDeVoo(vooid)
+    def atualizaStatusDeVoo(self, vooid, statusid):
+        self.controlador.atualizaStatusDeVoo(vooid, statusid)
 
 class ControladorAtualizarStatusDeVoo():
 
@@ -297,8 +297,15 @@ class ControladorAtualizarStatusDeVoo():
 
         return status_possiveis
 
-    def atualizaStatusDeVoo(self, vooid):
-        return vooid
+    def atualizaStatusDeVoo(self, vooid, novo_status_id):
+        print(novo_status_id)
+        voo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+        voo.status_voo = Status.objects.get(status_id=novo_status_id)
+        if voo.status_voo.status_nome == "Autorizado":
+            voo.horario_partida_real = datetime.now(tz=timezone.utc)
+        elif voo.status_voo.status_nome == "Aterrissado":
+            voo.horario_chegada_real = datetime.now(tz=timezone.utc)
+        voo.save()
 
 ################################################################################
 ####                            Geração de relatório                        ####

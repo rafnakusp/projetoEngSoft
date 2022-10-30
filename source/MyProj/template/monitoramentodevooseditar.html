@@ -48,14 +48,19 @@
         </tr>
     </table>
 
-    <p>Estado atual: {{voo.status}}</p>
-    <p>Selecione o próximo estado:</p>
-    <select>
-      {% for status in status_possiveis %}
-      <option value="{{status.status_id}}">{{status.status_nome}}</option>
-      {% endfor %}
-    </select>
-    <button>Pronto</button>
+    <p>Status atual: {{voo.status}}</p>
+    <p>Selecione o próximo status:</p>
+    <form method="POST" action=".">
+      {% csrf_token %}
+      <select name="status">
+        {% for status in status_possiveis %}
+        <option value="{{status.status_id}}">{{status.status_nome}}</option>
+        {% endfor %}
+      </select>
+      <input type="submit" name="pronto" value="Pronto" />
+    </form>
+
+    <a href="/monitoramentodevoos/"><button>Cancelar</button></a>
 
   </body>
 </html>
