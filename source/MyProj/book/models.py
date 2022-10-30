@@ -41,11 +41,3 @@ class ProgressoVoo(models.Model):
  horario_chegada_real = models.DateTimeField(null=True)
  class Meta:
    db_table = 'progressoVoo' 
-
-class MudancaEstado(models.Model):
-    mudancaestado_id = models.IntegerField(primary_key=True)
-    voo = models.ForeignKey(Voo, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField()
-    proximoestado = models.ForeignKey(Status, on_delete=models.CASCADE)
-    class Meta:
-        db_table = 'mudancaEstado'
