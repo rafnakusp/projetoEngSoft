@@ -4,11 +4,17 @@ import datetime
 # Create your models here.
 
 class Rota(models.Model):
- rota_id = models.IntegerField(primary_key=True)
- outro_aeroporto = models.CharField(max_length=50, null=False)
- chegada = models.BooleanField(null=False)
- class Meta:
-   db_table = 'rota'
+  rota_id = models.IntegerField(primary_key=True)
+  outro_aeroporto = models.CharField(max_length=50, null=False)
+  chegada = models.BooleanField(null=False)
+  def __str__(self):
+    if self.chegada == False:
+      return f"Deste aeroporto até {self.outro_aeroporto}"
+    else:
+      return f"De {self.outro_aeroporto} até este aeroporto"
+
+  class Meta:
+    db_table = 'rota'
 
 class Voo(models.Model):
     voo_id = models.IntegerField(primary_key=True)

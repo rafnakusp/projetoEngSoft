@@ -185,12 +185,39 @@ class ControladorCrudTest(TestCase):
       "rota_voo": "GRU",
     }
 
-    self.controladorCrud.createVoo(companhia=dados_voo["companhia_aerea"], partida=dados_voo["horario_partida_previsto"], chegada=dados_voo["horario_partida_previsto"], rota_str=dados_voo["rota_voo"])
+    self.controladorCrud.createVoo(companhia=dados_voo["companhia_aerea"], horario_partida=dados_voo["horario_partida_previsto"], horario_chegada=dados_voo["horario_partida_previsto"], rota=dados_voo["rota_voo"])
     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota_voo"])
     voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia_aerea"], horario_partida_previsto=dados_voo["horario_partida_previsto"], horario_chegada_previsto=dados_voo["horario_partida_previsto"], rota_voo=rota)
 
     self.assertTrue(voo_filtrado.exists())
 
+  def test_read_voos_campos_preenchidos(self):
+    
+    dados_voo = {
+      "companhia_aerea": "American Airlines", 
+      "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
+      "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
+      "rota_voo": "Santos Dumont",
+      "chegada": True,
+    }
+    
+    voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+
+    self.assertEqual(1, len(voos))
+
+  def test_read_voos_campos_em_branco(self):
+    
+    dados_voo = {
+      "companhia_aerea": "", 
+      "horario_partida_previsto": "", 
+      "horario_chegada_previsto": "", 
+      "rota_voo": "",
+      "chegada": True,
+    }
+    
+    voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+
+    self.assertEqual(12, len(voos))
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####

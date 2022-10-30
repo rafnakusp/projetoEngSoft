@@ -89,15 +89,29 @@ def crud(request):
         form = formularioCadastroVoo()
         return render(request, "crud.html", {'formulario': form})
     elif request.method == "POST":
-        form = formularioCadastroVoo(request.POST)
-        if form.is_valid():
-            companhia = form.data['companhia']
-            partida = form.data['horario_partida']
-            chegada = form.data['horario_chegada']
-            rota = form.data['rota']
+        print(request.POST)
 
-            controladorCrud.createVoo(companhia=companhia, partida=partida, chegada=chegada, rota_str=rota)
-            return render(request, "cadastrarvoosucesso.html")
+        form = formularioCadastroVoo(request.POST)
+
+        companhia = form.data['companhia']
+        horario_partida = form.data['horario_partida']
+        horario_chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+        chegada = True if 'chegada' in form.data else False
+
+        if request.POST["tipo"] == "cadastrar":
+            if form.is_valid():
+                controladorCrud.createVoo(companhia=companhia, horario_partida=horario_partida, horario_chegada=horario_chegada, rota=rota)
+                return render(request, "cadastrarvoosucesso.html")
+
+        elif request.POST["tipo"] == "filtrar":
+            template = loader.get_template('crudlistavoos.html')
+            fronteira = FronteiraCrud()
+            context = {
+                "voo_list": fronteira.apresentaVoosFiltrados(companhia, horario_partida, horario_chegada, rota, chegada) # context é a lista de voos já convertida
+            }
+            return HttpResponse(template.render(context, request))
+
 
 def criarTabelasProducao():
     agora = datetime.now(tz=timezone.utc)
@@ -126,6 +140,9 @@ def criarTabelasProducao():
     voo = Voo.objects.get(companhia_aerea='American Airlines')
     status = Status.objects.get(status_nome='Em voo')
     ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=None)
+
+    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 16, tzinfo=timezone.utc), rota_voo = rota_1)
 
     # voo cancelado a menos de 1 hora
     rota_2 = Rota.objects.get(outro_aeroporto='GRU')
@@ -194,9 +211,22 @@ def criarTabelasProducaoComRequest(request):
 ################################################################################
 
 class ControladorCrud():
-    def createVoo(self, companhia, partida, chegada, rota_str):
-        rota = Rota.objects.get(outro_aeroporto=rota_str)
-        Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=partida,horario_chegada_previsto=chegada, rota_voo = rota)
+    def createVoo(self, companhia, horario_partida, horario_chegada, rota):
+        rota = Rota.objects.get(outro_aeroporto=rota)
+        Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo = rota)
+
+    def readVoos(self, companhia, horario_partida, horario_chegada, rota, chegada):
+        if companhia != "":
+            rota = Rota.objects.get(outro_aeroporto=rota, chegada=chegada)
+            return Voo.objects.all().filter(companhia_aerea=companhia, horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo=rota)
+        else:
+            return Voo.objects.all()
+
+class FronteiraCrud():
+    controladorCrud = ControladorCrud()
+    def apresentaVoosFiltrados(self, companhia, horario_partida, horario_chegada, rota, chegada):
+        return self.controladorCrud.readVoos(companhia, horario_partida, horario_chegada, rota, chegada)
+
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####

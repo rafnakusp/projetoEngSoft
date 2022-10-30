@@ -6,3 +6,5 @@ class formularioCadastroVoo(forms.Form):
     horario_partida = forms.DateTimeField(required=False)
     horario_chegada = forms.DateTimeField(required=False)
     rota = forms.CharField(max_length=50, required=False)
+    chegada = forms.BooleanField(label="O destino é este aeroporto?", required=False)
+
