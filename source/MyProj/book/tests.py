@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.test import TestCase
 
 # Create your tests here.
-from book.models import Rota, Voo, Status, ProgressoVoo
+from book.models import Rota, Voo, Status, ProgressoVoo, MudancaEstado
 from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, criarTabelasProducao
 
 
@@ -162,6 +162,25 @@ class ProgressoVooModelTest(TestCase):
     self.assertTrue(progresso_1.voo.rota_voo.chegada)
     self.assertEqual(progresso_1.horario_partida_real.strftime('%H:%M, %d of %B, %Y'), '10:42, 11 of August, 2022')
     self.assertEqual(progresso_1.horario_chegada_real.strftime('%H:%M, %d of %B, %Y'), '12:40, 11 of August, 2022')
+
+
+class MudancaEstadoModelTest(TestCase):
+  @classmethod
+  def setUpTestData(cls):
+    Status.objects.create(status_nome='Programado')
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=timezone.utc), rota_voo = rota_1)
+
+  def test_criacao(self):
+    voo_teste = Voo.objects.get(voo_id=1)
+    timestamp_teste = "2022-08-11 10:30:00+00:00"
+    status_programado = Status.objects.get(status_nome="Programado")
+
+    MudancaEstado.objects.create(voo=voo_teste, timestamp=timestamp_teste, proximoestado=status_programado)
+    mudancaEstado = MudancaEstado.objects.get(mudancaestado_id=1)
+
+    self.assertEqual(timestamp_teste, mudancaEstado.timestamp.__str__())
 
 
 ################################################################################
@@ -413,3 +432,30 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
   def test_atualizacao_status_voo(self):
     pass
 
+################################################################################
+####                           Geração de relatórios                        ####
+################################################################################
+
+class AtualizacaoDaTabelaMudancaEstadoTest(TestCase):
+  controladorAtualizarStatusDeVoo = ControladorAtualizarStatusDeVoo()
+  @classmethod
+  def setUpTestData(cls):
+    Status.objects.create(status_nome='Programado')
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=timezone.utc), rota_voo = rota_1)
+    voo = Voo.objects.get(companhia_aerea='American Airlines')
+    status = Status.objects.get(status_nome='Programado')
+    ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=None)
+
+
+  def test_atualizacao(self):
+    dados_atualizacao = {
+      "vooid": 1,
+      "novo_status_id": 1
+    }
+
+    self.controladorAtualizarStatusDeVoo.atualizaStatusDeVoo(dados_atualizacao['vooid'], dados_atualizacao['novo_status_id'])
+    status_nome_esperado = MudancaEstado.objects.get(mudancaestado_id=1).proximoestado.status_nome
+
+    self.assertEqual("Programado", status_nome_esperado)

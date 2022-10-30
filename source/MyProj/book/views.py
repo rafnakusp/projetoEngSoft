@@ -7,8 +7,9 @@ from django.http import HttpResponse
 from django.template import loader
 from datetime import datetime, timedelta, tzinfo
 from django.utils import timezone
-from book.models import Rota, Voo, Status, ProgressoVoo
+from book.models import Rota, Voo, Status, ProgressoVoo, MudancaEstado
 from django.db.models import Q
+
 from .forms import formularioCadastroVoo
 
 USUARIO_LOGADO = ""
@@ -370,6 +371,9 @@ class ControladorAtualizarStatusDeVoo():
         elif voo.status_voo.status_nome == "Aterrissado":
             voo.horario_chegada_real = datetime.now(tz=timezone.utc)
         voo.save()
+
+        vooAtualizado = Voo.objects.get(voo_id=vooid)
+        MudancaEstado.objects.create(voo=vooAtualizado, timestamp=datetime.now(), proximoestado=voo.status_voo)
 
 ################################################################################
 ####                            Geração de relatório                        ####
