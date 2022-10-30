@@ -71,7 +71,8 @@ def monitoramentodevooseditar(request, vooid):
         template = loader.get_template('monitoramentodevooseditar.html')
         painel = PainelDeMonitoracao()
         context = {
-            "voo": painel.apresentaVoo(vooid) # context é a lista de voos já convertida
+            "voo": painel.apresentaVoo(vooid), # context é a lista de voos já convertida
+            "status_possiveis": painel.statusPossiveis(vooid)
         }
         return HttpResponse(template.render(context, request))
     elif request.method == "POST":
@@ -106,9 +107,9 @@ def criarTabelasProducao():
     Status.objects.all().delete()
     Rota.objects.all().delete()
 
-    Status.objects.create(status_nome='Aterrisado')
+    Status.objects.create(status_nome='Aterrissado')
     Status.objects.create(status_nome='Cancelado')
-    Status.objects.create(status_nome='Embarcando')
+    Status.objects.create(status_nome='Embarque')
     Status.objects.create(status_nome='Programado')
     Status.objects.create(status_nome='Taxiando')
     Status.objects.create(status_nome='Pronto')
@@ -138,42 +139,42 @@ def criarTabelasProducao():
     voo2 = Voo.objects.get(companhia_aerea='GOL')
     ProgressoVoo.objects.create(status_voo = status2, voo = voo2, horario_partida_real=None, horario_chegada_real=None)
 
-    # voo aterrisado a menos de 1 hora
+    # voo Aterrissado a menos de 1 hora
     Voo.objects.create(companhia_aerea='LATAM',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora - timedelta(hours = 1)), rota_voo = rota_1)
     voo2 = Voo.objects.get(companhia_aerea='LATAM')
-    status3 = Status.objects.get(status_nome='Aterrisado')
+    status3 = Status.objects.get(status_nome='Aterrissado')
     ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 118)), horario_chegada_real=(agora - timedelta(minutes = 50)))
 
-    # voo aterrisado a mais de 1 hora
+    # voo Aterrissado a mais de 1 hora
     Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto=(agora - timedelta(hours = 3)),horario_chegada_previsto=(agora - timedelta(minutes = 2)), rota_voo = rota_1)
     voo2 = Voo.objects.get(companhia_aerea='TAM')
     ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 179)), horario_chegada_real=(agora - timedelta(minutes = 65)))
 
-    # voo em embarque (diferente de 'cancelado' ou 'aterrisado')
+    # voo em Embarque (diferente de 'cancelado' ou 'Aterrissado')
     Voo.objects.create(companhia_aerea='American Air',horario_partida_previsto=(agora + timedelta(minutes = 20)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
     voo = Voo.objects.get(companhia_aerea='American Air')
-    status4 = Status.objects.get(status_nome='Embarcando')
+    status4 = Status.objects.get(status_nome='Embarque')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
-    # voo programado (diferente de 'cancelado' ou 'aterrisado')
+    # voo programado (diferente de 'cancelado' ou 'Aterrissado')
     Voo.objects.create(companhia_aerea='Amer',horario_partida_previsto=(agora + timedelta(minutes = 15)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
     voo = Voo.objects.get(companhia_aerea='Amer')
     status4 = Status.objects.get(status_nome='Programado')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
-    # voo taxiando (diferente de 'cancelado' ou 'aterrisado')
+    # voo taxiando (diferente de 'cancelado' ou 'Aterrissado')
     Voo.objects.create(companhia_aerea='American',horario_partida_previsto=(agora + timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
     voo = Voo.objects.get(companhia_aerea='American')
     status4 = Status.objects.get(status_nome='Taxiando')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
-    # voo pronto (diferente de 'cancelado' ou 'aterrisado')
+    # voo pronto (diferente de 'cancelado' ou 'Aterrissado')
     Voo.objects.create(companhia_aerea='A',horario_partida_previsto=(agora),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
     voo = Voo.objects.get(companhia_aerea='A')
     status4 = Status.objects.get(status_nome='Pronto')
     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
-    # voo autorizado (diferente de 'cancelado' ou 'aterrisado')
+    # voo autorizado (diferente de 'cancelado' ou 'Aterrissado')
     Voo.objects.create(companhia_aerea='B',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
     voo = Voo.objects.get(companhia_aerea='B')
     status4 = Status.objects.get(status_nome='Autorizado')
@@ -206,6 +207,9 @@ class PainelDeMonitoracao():
     def apresentaVoo(self, vooid):
         return self.controlador.apresentaVoo(vooid)
 
+    def statusPossiveis(self, vooid):
+        return self.controlador.statusPossiveis(vooid)
+
     def atualizaStatusDeVoo(self, vooid):
         return self.controlador.atualizaStatusDeVoo(vooid)
 
@@ -217,7 +221,7 @@ class ControladorAtualizarStatusDeVoo():
         voosfiltrados = []
         for voo in voos:
             hcr = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc) if voo.horario_chegada_real==None else voo.horario_chegada_real
-            if ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrisado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
+            if ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrissado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
                voosfiltrados.append(voo)
         
         voosformatados = []
@@ -253,6 +257,38 @@ class ControladorAtualizarStatusDeVoo():
             }
         
         return vooformatado
+
+    def statusPossiveis(self, vooid):
+        voo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+        todos_status = Status.objects.all()
+        embarque = todos_status.get(status_nome='Embarque')
+        cancelado = todos_status.get(status_nome='Cancelado')
+        em_voo = todos_status.get(status_nome='Em voo')
+        programado = todos_status.get(status_nome='Programado')
+        taxiando = todos_status.get(status_nome='Taxiando')
+        pronto = todos_status.get(status_nome='Pronto')
+        autorizado = todos_status.get(status_nome='Autorizado')
+        aterrissado = todos_status.get(status_nome='Aterrissado')
+
+        status = voo.status_voo.status_nome
+        if status == None:
+            status_possiveis = [embarque, cancelado, em_voo]
+        elif status == 'Embarque':
+            status_possiveis = [programado, cancelado]
+        elif status == 'Programado':
+            status_possiveis = [taxiando, cancelado]
+        elif status == 'Taxiando':
+            status_possiveis = [pronto, cancelado]
+        elif status == 'Pronto':
+            status_possiveis = [autorizado, cancelado]
+        elif status == 'Autorizado':
+            status_possiveis = [em_voo]
+        elif status == 'Em voo':
+            status_possiveis = [aterrissado]
+        else:
+            status_possiveis = []
+            
+        return status_possiveis
 
     def atualizaStatusDeVoo(self, vooid):
         return vooid

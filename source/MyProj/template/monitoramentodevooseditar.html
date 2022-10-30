@@ -50,6 +50,11 @@
 
     <p>Estado atual: {{voo.status}}</p>
     <p>Selecione o próximo estado:</p>
+    <select>
+      {% for status in status_possiveis %}
+      <option value="{{status.status_id}}">{{status.status_nome}}</option>
+      {% endfor %}
+    </select>
     <button>Pronto</button>
 
   </body>
