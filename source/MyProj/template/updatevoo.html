@@ -1,0 +1,65 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+    </style>
+  </head>
+
+  <body>
+
+    <p>Voo atual:</p>
+
+    <table>
+        <tr>
+            <th>id do voo</th>
+            <th>companhia aérea</th>
+            <th>rota</th>
+            <th>horário de partida previsto</th>
+            <th>horário de chegada previsto</th>
+        </tr>
+        <tr>
+            <td>{{voo.voo_id}}</td>
+            <td>{{voo.companhia_aerea}}</td>
+            <td>{{voo.rota_voo}}</td>
+            <td>{{voo.horario_partida_previsto|date:"Y-m-d"}} {{voo.horario_partida_previsto|time:"H:i"}}</td>
+            <td>{{voo.horario_chegada_previsto|date:"Y-m-d"}} {{voo.horario_chegada_previsto|time:"H:i"}}</td>
+        </tr>
+
+      </table>
+
+    <p>Novos valores para o voo:</p>
+    
+    <form action="." method="POST">{% csrf_token %}
+      
+      <table>
+        <tr>
+            <th>atributo</th>
+            <th>novo valor</th>
+        </tr>
+        {{formulario.as_table}}
+      </table>
+
+      <button>Confirmar</button>
+
+    </form>
+
+  </body>
+</html>
+
+

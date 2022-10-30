@@ -118,6 +118,25 @@ def crudDelete(request, vooid):
     fronteiraCrud.removePorId(vooid)
     return render(request, "deletarvoosucesso.html")
 
+def crudUpdate(request, vooid):
+    fronteiraCrud = FronteiraCrud()
+    form = formularioCadastroVoo(request.POST)
+
+    if request.method == "POST":
+        companhia = form.data['companhia']
+        horario_partida = form.data['horario_partida']
+        horario_chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+        chegada = True if 'chegada' in form.data else False
+        fronteiraCrud.atualizaPorId(vooid, companhia, horario_partida, horario_chegada, rota, chegada)
+
+    template = loader.get_template('updatevoo.html')
+    context = {
+        "voo": Voo.objects.get(voo_id=vooid),
+        'formulario': form
+    }
+    return HttpResponse(template.render(context, request))
+
 def criarTabelasProducao():
     agora = datetime.now(tz=timezone.utc)
 
@@ -230,12 +249,18 @@ class ControladorCrud():
     def deleteVoosPorId(self, vooid):
         Voo.objects.all().filter(voo_id=vooid).delete()
 
+    def updateVoosPorId(self, vooid, companhia, horario_partida, horario_chegada, rota, chegada):
+        rota = Rota.objects.get(outro_aeroporto=rota, chegada=chegada)
+        Voo.objects.all().filter(voo_id=vooid).update(companhia_aerea=companhia, horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo=rota)
+
 class FronteiraCrud():
     controladorCrud = ControladorCrud()
     def apresentaVoosFiltrados(self, companhia, horario_partida, horario_chegada, rota, chegada):
         return self.controladorCrud.readVoos(companhia, horario_partida, horario_chegada, rota, chegada)
     def removePorId(self, vooid):
         return self.controladorCrud.deleteVoosPorId(vooid)
+    def atualizaPorId(self, vooid, companhia, horario_partida, horario_chegada, rota, chegada):
+        return self.controladorCrud.updateVoosPorId(vooid, companhia, horario_partida, horario_chegada, rota, chegada)
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####

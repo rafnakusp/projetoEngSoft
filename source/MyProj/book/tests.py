@@ -222,10 +222,25 @@ class ControladorCrudTest(TestCase):
   def test_delete(self):
     vooid = 3
     
-    Voo.objects.all().filter(voo_id=vooid).delete()
+    self.controladorCrud.deleteVoosPorId(vooid)
     queryset_vooid = Voo.objects.all().filter(voo_id=vooid)
 
     self.assertEqual(0, queryset_vooid.count())
+
+  def test_update(self):
+    dados_voo = {
+      "voo_id": 1,
+      "companhia_aerea": "Airlines", 
+      "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
+      "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
+      "rota_voo": "Santos Dumont",
+      "chegada": True,
+    }
+    
+    self.controladorCrud.updateVoosPorId(dados_voo['voo_id'], dados_voo['companhia_aerea'], dados_voo['horario_partida_previsto'], dados_voo['horario_chegada_previsto'], dados_voo['rota_voo'], dados_voo['chegada'])
+    companhia = Voo.objects.get(voo_id=dados_voo['voo_id']).companhia_aerea
+
+    self.assertEqual(dados_voo['companhia_aerea'], companhia)
 
 
 ################################################################################
