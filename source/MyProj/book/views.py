@@ -219,7 +219,12 @@ def criarTabelasProducao():
     Voo.objects.create(companhia_aerea='B',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
     voo = Voo.objects.get(companhia_aerea='B')
     status4 = Status.objects.get(status_nome='Autorizado')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=agora,horario_chegada_real=None)
+
+    # voo sem status que terminará a mais de 2 dias de agora
+    Voo.objects.create(companhia_aerea='D',horario_partida_previsto=(agora+timedelta(days = 1, hours=22)),horario_chegada_previsto=(agora + timedelta(days = 2, hours=1)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='D')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
     # voo sem status
     Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
@@ -364,8 +369,9 @@ class ControladorAtualizarStatusDeVoo():
 
     def atualizaStatusDeVoo(self, vooid, novo_status_id):
         voo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+        status_antigo = voo.status_voo
         voo.status_voo = Status.objects.get(status_id=novo_status_id)
-        if voo.status_voo.status_nome == "Autorizado":
+        if ((voo.status_voo.status_nome == "Autorizado") | ((status_antigo == None) & (voo.status_voo.status_nome == "Em voo"))):
             voo.horario_partida_real = datetime.now(tz=timezone.utc)
         elif voo.status_voo.status_nome == "Aterrissado":
             voo.horario_chegada_real = datetime.now(tz=timezone.utc)
