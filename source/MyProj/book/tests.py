@@ -219,6 +219,15 @@ class ControladorCrudTest(TestCase):
 
     self.assertEqual(12, len(voos))
 
+  def test_delete(self):
+    vooid = 3
+    
+    Voo.objects.all().filter(voo_id=vooid).delete()
+    queryset_vooid = Voo.objects.all().filter(voo_id=vooid)
+
+    self.assertEqual(0, queryset_vooid.count())
+
+
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####
 ################################################################################

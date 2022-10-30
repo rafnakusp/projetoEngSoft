@@ -113,6 +113,11 @@ def crud(request):
             return HttpResponse(template.render(context, request))
 
 
+def crudDelete(request, vooid):
+    fronteiraCrud = FronteiraCrud()
+    fronteiraCrud.removePorId(vooid)
+    return render(request, "deletarvoosucesso.html")
+
 def criarTabelasProducao():
     agora = datetime.now(tz=timezone.utc)
 
@@ -222,11 +227,15 @@ class ControladorCrud():
         else:
             return Voo.objects.all()
 
+    def deleteVoosPorId(self, vooid):
+        Voo.objects.all().filter(voo_id=vooid).delete()
+
 class FronteiraCrud():
     controladorCrud = ControladorCrud()
     def apresentaVoosFiltrados(self, companhia, horario_partida, horario_chegada, rota, chegada):
         return self.controladorCrud.readVoos(companhia, horario_partida, horario_chegada, rota, chegada)
-
+    def removePorId(self, vooid):
+        return self.controladorCrud.deleteVoosPorId(vooid)
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####

@@ -26,4 +26,5 @@ urlpatterns = [
     path('monitoramentodevooseditar/<int:vooid>/', views.monitoramentodevooseditar),
     path('geracaoderelatorios/', views.geracaoderelatorios),
     path('criartabelasproducao/', views.criarTabelasProducaoComRequest),
+    path('crud/delete/<int:vooid>/', views.crudDelete),
 ]

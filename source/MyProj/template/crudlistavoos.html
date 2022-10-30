@@ -34,7 +34,11 @@
         </tr>
         {% for voo in voo_list %}
           <tr>
-            <td>{{voo.voo_id}}</td>
+            <td>{{voo.voo_id}}
+              <form action="./delete/{{voo.voo_id}}/">
+                <button>Deletar</button>
+              </form>
+            </td>
             <td>{{voo.companhia_aerea}}</td>
             <td>{{voo.rota_voo}}</td>
             <td>{{voo.horario_partida_previsto}}</td>
