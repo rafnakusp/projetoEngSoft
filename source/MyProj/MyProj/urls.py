@@ -19,7 +19,7 @@ from book import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', views.bookview),
+    path('login/', views.telaLogin),
     path('telainicial/', views.telainicial),
     path('crud/', views.crud, name="crud"),
     path('monitoramentodevoos/', views.monitoramentodevoos),

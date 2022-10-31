@@ -16,7 +16,7 @@ USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
 
 @csrf_exempt
-def bookview(request):
+def telaLogin(request):
     global CONTAGEM_DE_FALHAS_NO_LOGIN
     print("====================Debug======================")
     print(f"{request.method=}")
@@ -52,106 +52,6 @@ def telainicial(request):
     template = loader.get_template('telainicial.html')
     context = {
         'username': USUARIO_LOGADO,
-    }
-    return HttpResponse(template.render(context, request))
-
-
-@csrf_exempt
-def monitoramentodevoos(request):
-    if request.method == "GET":
-        template = loader.get_template('monitoramentodevoos.html')
-        painel = PainelDeMonitoracao()
-        context = {
-            "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
-        }
-        return HttpResponse(template.render(context, request))
-    
-
-def monitoramentodevooseditar(request, vooid):
-    painel = PainelDeMonitoracao()
-    template = loader.get_template('monitoramentodevooseditar.html')  
-
-    if request.method == "POST" and 'status' in request.POST:
-        painel.atualizaStatusDeVoo(vooid, request.POST['status'])
-
-    context = {
-            "voo": painel.apresentaVoo(vooid), # context é a lista de voos já convertida
-            "status_possiveis": painel.statusPossiveis(vooid)
-    }
-    return HttpResponse(template.render(context, request))
-
-def geracaoderelatorios(request):
-    return render(request, "geracaoderelatorios.html")
-
-def geracaoDeRelatoriosVoosRealizados(request):
-    controleGeracaoRelatorios = ControleGeracaoRelatorios()
-
-    if request.method == "POST":
-        form = FormularioFiltroRelatorio(request.POST)
-
-        timestamp_min = form.data['timestamp_min']
-        timestamp_max = form.data['timestamp_max']
-
-        context = {
-            "progressovoo_list": controleGeracaoRelatorios.filtrarVoos(timestamp_min, timestamp_max)
-        }
-        return render(request, "relatoriovoosrealizados.html", context)
-
-    form = FormularioFiltroRelatorio()
-    return render(request, "geracaoderelatoriovoosrealizados.html", {'formulario': form})
-
-def crud(request):
-    controladorCrud = ControladorCrud()
-
-    if request.method == "GET":
-        form = formularioCadastroVoo()
-        return render(request, "crud.html", {'formulario': form})
-    elif request.method == "POST":
-        print(request.POST)
-
-        form = formularioCadastroVoo(request.POST)
-
-        companhia = form.data['companhia']
-        horario_partida = form.data['horario_partida']
-        horario_chegada = form.data['horario_chegada']
-        rota = form.data['rota']
-        chegada = True if 'chegada' in form.data else False
-
-        if request.POST["tipo"] == "cadastrar":
-            if form.is_valid():
-                controladorCrud.createVoo(companhia=companhia, horario_partida=horario_partida, horario_chegada=horario_chegada, rota=rota)
-                return render(request, "cadastrarvoosucesso.html")
-
-        elif request.POST["tipo"] == "filtrar":
-            template = loader.get_template('crudlistavoos.html')
-            fronteira = FronteiraCrud()
-            context = {
-                "voo_list": fronteira.apresentaVoosFiltrados(companhia, horario_partida, horario_chegada, rota, chegada) # context é a lista de voos já convertida
-            }
-            return HttpResponse(template.render(context, request))
-
-
-def crudDelete(request, vooid):
-    fronteiraCrud = FronteiraCrud()
-    fronteiraCrud.removePorId(vooid)
-    return render(request, "deletarvoosucesso.html")
-
-def crudUpdate(request, vooid):
-    fronteiraCrud = FronteiraCrud()
-    form = formularioCadastroVoo(request.POST)
-
-    if request.method == "POST":
-        companhia = form.data['companhia']
-        horario_partida = form.data['horario_partida']
-        horario_chegada = form.data['horario_chegada']
-        rota = form.data['rota']
-        chegada = True if 'chegada' in form.data else False
-        fronteiraCrud.atualizaPorId(vooid, companhia, horario_partida, horario_chegada, rota, chegada)
-
-    template = loader.get_template('updatevoo.html')
-    context = {
-        "voo": Voo.objects.get(voo_id=vooid),
-        'formulario': form
     }
     return HttpResponse(template.render(context, request))
 
@@ -260,6 +160,60 @@ def criarTabelasProducaoComRequest(request):
 ####                               CRUD de voos                             ####
 ################################################################################
 
+def crud(request):
+    controladorCrud = ControladorCrud()
+
+    if request.method == "GET":
+        form = formularioCadastroVoo()
+        return render(request, "crud.html", {'formulario': form})
+    elif request.method == "POST":
+        print(request.POST)
+
+        form = formularioCadastroVoo(request.POST)
+
+        companhia = form.data['companhia']
+        horario_partida = form.data['horario_partida']
+        horario_chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+        chegada = True if 'chegada' in form.data else False
+
+        if request.POST["tipo"] == "cadastrar":
+            if form.is_valid():
+                controladorCrud.createVoo(companhia=companhia, horario_partida=horario_partida, horario_chegada=horario_chegada, rota=rota)
+                return render(request, "cadastrarvoosucesso.html")
+
+        elif request.POST["tipo"] == "filtrar":
+            template = loader.get_template('crudlistavoos.html')
+            fronteira = FronteiraCrud()
+            context = {
+                "voo_list": fronteira.apresentaVoosFiltrados(companhia, horario_partida, horario_chegada, rota, chegada) # context é a lista de voos já convertida
+            }
+            return HttpResponse(template.render(context, request))
+
+def crudDelete(request, vooid):
+    fronteiraCrud = FronteiraCrud()
+    fronteiraCrud.removePorId(vooid)
+    return render(request, "deletarvoosucesso.html")
+
+def crudUpdate(request, vooid):
+    fronteiraCrud = FronteiraCrud()
+    form = formularioCadastroVoo(request.POST)
+
+    if request.method == "POST":
+        companhia = form.data['companhia']
+        horario_partida = form.data['horario_partida']
+        horario_chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+        chegada = True if 'chegada' in form.data else False
+        fronteiraCrud.atualizaPorId(vooid, companhia, horario_partida, horario_chegada, rota, chegada)
+
+    template = loader.get_template('updatevoo.html')
+    context = {
+        "voo": Voo.objects.get(voo_id=vooid),
+        'formulario': form
+    }
+    return HttpResponse(template.render(context, request))
+
 class ControladorCrud():
     def createVoo(self, companhia, horario_partida, horario_chegada, rota):
         rota = Rota.objects.get(outro_aeroporto=rota)
@@ -291,6 +245,30 @@ class FronteiraCrud():
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####
 ################################################################################
+
+@csrf_exempt
+def monitoramentodevoos(request):
+    if request.method == "GET":
+        template = loader.get_template('monitoramentodevoos.html')
+        painel = PainelDeMonitoracao()
+        context = {
+            "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
+        }
+        return HttpResponse(template.render(context, request))
+    
+
+def monitoramentodevooseditar(request, vooid):
+    painel = PainelDeMonitoracao()
+    template = loader.get_template('monitoramentodevooseditar.html')  
+
+    if request.method == "POST" and 'status' in request.POST:
+        painel.atualizaStatusDeVoo(vooid, request.POST['status'])
+
+    context = {
+            "voo": painel.apresentaVoo(vooid), # context é a lista de voos já convertida
+            "status_possiveis": painel.statusPossiveis(vooid)
+    }
+    return HttpResponse(template.render(context, request))
 
 class PainelDeMonitoracao():
     def __init__(self):
@@ -401,6 +379,26 @@ class ControladorAtualizarStatusDeVoo():
 ################################################################################
 ####                            Geração de relatório                        ####
 ################################################################################
+
+def geracaoderelatorios(request):
+    return render(request, "geracaoderelatorios.html")
+
+def geracaoDeRelatoriosVoosRealizados(request):
+    controleGeracaoRelatorios = ControleGeracaoRelatorios()
+
+    if request.method == "POST":
+        form = FormularioFiltroRelatorio(request.POST)
+
+        timestamp_min = form.data['timestamp_min']
+        timestamp_max = form.data['timestamp_max']
+
+        context = {
+            "progressovoo_list": controleGeracaoRelatorios.filtrarVoos(timestamp_min, timestamp_max)
+        }
+        return render(request, "relatoriovoosrealizados.html", context)
+
+    form = FormularioFiltroRelatorio()
+    return render(request, "geracaoderelatoriovoosrealizados.html", {'formulario': form})
 
 class ControleGeracaoRelatorios():
     def filtrarVoos(self, timestamp_min, timestamp_max):
