@@ -8,3 +8,6 @@ class formularioCadastroVoo(forms.Form):
     rota = forms.CharField(max_length=50, required=False)
     chegada = forms.BooleanField(label="O destino é este aeroporto?", required=False)
 
+class FormularioFiltroRelatorio(forms.Form):
+    timestamp_min = forms.DateTimeField(label="O voo terminou depois de:", required=False)
+    timestamp_max = forms.DateTimeField(label="O voo terminou antes de:", required=False)

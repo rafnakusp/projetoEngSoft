@@ -10,7 +10,7 @@ from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
 from django.db.models import Q
 
-from .forms import formularioCadastroVoo
+from .forms import formularioCadastroVoo, FormularioFiltroRelatorio
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
@@ -83,6 +83,23 @@ def monitoramentodevooseditar(request, vooid):
 def geracaoderelatorios(request):
     return render(request, "geracaoderelatorios.html")
 
+def geracaoDeRelatoriosVoosRealizados(request):
+    controleGeracaoRelatorios = ControleGeracaoRelatorios()
+
+    if request.method == "POST":
+        form = FormularioFiltroRelatorio(request.POST)
+
+        timestamp_min = form.data['timestamp_min']
+        timestamp_max = form.data['timestamp_max']
+
+        context = {
+            "progressovoo_list": controleGeracaoRelatorios.filtrarVoos(timestamp_min, timestamp_max)
+        }
+        return render(request, "relatoriovoosrealizados.html", context)
+
+    form = FormularioFiltroRelatorio()
+    return render(request, "geracaoderelatoriovoosrealizados.html", {'formulario': form})
+
 def crud(request):
     controladorCrud = ControladorCrud()
 
@@ -137,6 +154,10 @@ def crudUpdate(request, vooid):
         'formulario': form
     }
     return HttpResponse(template.render(context, request))
+
+################################################################################
+####                         Criador de tabelas                             ####
+################################################################################
 
 def criarTabelasProducao():
     agora = datetime.now(tz=timezone.utc)
@@ -374,3 +395,12 @@ class ControladorAtualizarStatusDeVoo():
 ################################################################################
 ####                            Geração de relatório                        ####
 ################################################################################
+
+class ControleGeracaoRelatorios():
+    def filtrarVoos(self, timestamp_min, timestamp_max):
+        voosQuerySet = ProgressoVoo.objects.select_related("voo")
+        if timestamp_min != "":
+            voosQuerySet = voosQuerySet.filter(horario_chegada_real__gt=timestamp_min)
+        if timestamp_max != "":
+            voosQuerySet = voosQuerySet.filter(horario_chegada_real__lt=timestamp_max)
+        return voosQuerySet
