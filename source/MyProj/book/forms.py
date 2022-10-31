@@ -13,6 +13,7 @@ class formularioCadastroVoo(Form):
     horario_chegada = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}), error_messages={'required': 'A data de chegada é obrigatório'}, label="Data e horário da chegada")
     rota = CharField(max_length=50, required=True, error_messages={'required': 'O nome da rota (ou seja, aeroporto de origem/destino) é obrigatório'}, label="Aeroporto de origem/destino")
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
+
 class FormularioFiltroRelatorio(Form):
-    timestamp_min = DateTimeField(label="O voo terminou depois de:", required=False)
-    timestamp_max = DateTimeField(label="O voo terminou antes de:", required=False)
+    timestamp_min = DateTimeField(label="O voo terminou depois de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    timestamp_max = DateTimeField(label="O voo terminou antes de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))

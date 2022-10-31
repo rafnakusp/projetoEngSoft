@@ -262,23 +262,6 @@ class ProgressoVooModelTest(TestCase):
 ####          Atualizar o status de voos/ Painel de Monitoração             ####
 ################################################################################
 
-# class PainelDeMonitoracaoTest():
-  
-#   @classmethod
-#   def setUpTestData(cls):
-#     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
-#     rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
-#     Rota.objects.create(outro_aeroporto='GRU',chegada=False)
-#     Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=timezone.utc), rota_voo = rota_1)
-#     voo = Voo.objects.get(companhia_aerea='American Airlines')
-#     Status.objects.create(status_nome='Em voo')
-#     status = Status.objects.get(status_nome='Em voo')
-#     ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=datetime(2022, 8, 11, 12, 40, tzinfo=timezone.utc))
-  
-#   def test_atualizar_voo(self):
-#     progresso_1 = ProgressoVoo.objects.get(voo_id=1)
-#     self.assertEqual(progresso_1.voo.voo_id, 1)
-
 class ControladorAtualizarStatusDeVooTest(TestCase):
   def __init__(self, methodName: str = ...) -> None:
     self.controlador = ControladorAtualizarStatusDeVoo()
