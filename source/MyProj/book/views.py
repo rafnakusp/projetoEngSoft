@@ -119,12 +119,19 @@ class ControladorCrud():
         rota = Rota.objects.get(outro_aeroporto=rota)
         Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo = rota)
 
-    def readVoos(self, companhia, horario_partida, horario_chegada, rota, chegada):
+    def readVoos(self, companhia: str, horario_partida: str, horario_chegada: str, rota: str, chegada: bool):
+        voosFiltrados = Voo.objects.all()
         if companhia != "":
+            voosFiltrados = voosFiltrados.filter(companhia_aerea=companhia)
+        if horario_partida != "":
+            voosFiltrados = voosFiltrados.filter(horario_partida_previsto=horario_partida)
+        if horario_chegada != "":
+            voosFiltrados = voosFiltrados.filter(horario_chegada_previsto=horario_chegada)
+        if rota != "":
             rota = Rota.objects.get(outro_aeroporto=rota, chegada=chegada)
-            return Voo.objects.all().filter(companhia_aerea=companhia, horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo=rota)
-        else:
-            return Voo.objects.all()
+            voosFiltrados = voosFiltrados.filter(rota_voo=rota)
+
+        return voosFiltrados
 
     def deleteVoosPorId(self, vooid):
         Voo.objects.all().filter(voo_id=vooid).delete()

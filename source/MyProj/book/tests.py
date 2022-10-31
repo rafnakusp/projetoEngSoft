@@ -218,6 +218,20 @@ class ControladorCrudTest(TestCase):
 
     self.assertEqual(13, len(voos))
 
+  def test_read_voos_campos_em_branco(self):
+    
+    dados_voo = {
+      "companhia_aerea": "American Airlines", 
+      "horario_partida_previsto": "", 
+      "horario_chegada_previsto": "", 
+      "rota_voo": "",
+      "chegada": True,
+    }
+    
+    voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+
+    self.assertEqual(2, len(voos))
+
   def test_delete(self):
     vooid = 3
     
