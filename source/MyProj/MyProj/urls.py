@@ -25,6 +25,7 @@ urlpatterns = [
     path('monitoramentodevoos/', views.monitoramentodevoos),
     path('monitoramentodevooseditar/<int:vooid>/', views.monitoramentodevooseditar),
     path('geracaoderelatorios/voosrealizados/', views.geracaoDeRelatoriosVoosRealizados),
+    path('geracaoderelatorios/voosatrasados/', views.geracaoDeRelatoriosVoosAtrasados),
     path('geracaoderelatorios/', views.geracaoderelatorios),
     path('criartabelasproducao/', views.criarTabelasProducaoComRequest),
     path('crud/delete/<int:vooid>/', views.crudDelete),

@@ -8,7 +8,8 @@ from django.template import loader
 from datetime import datetime, timedelta, tzinfo
 from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
-from django.db.models import Q
+from django.db.models import Q, F
+
 
 from .forms import formularioCadastroVoo, FormularioFiltroRelatorio
 
@@ -400,6 +401,24 @@ def geracaoDeRelatoriosVoosRealizados(request):
     form = FormularioFiltroRelatorio()
     return render(request, "geracaoderelatoriovoosrealizados.html", {'formulario': form})
 
+def geracaoDeRelatoriosVoosAtrasados(request):
+    controleGeracaoRelatorios = ControleGeracaoRelatorios()
+
+    if request.method == "POST":
+        form = FormularioFiltroRelatorio(request.POST)
+
+        timestamp_min = form.data['timestamp_min']
+        timestamp_max = form.data['timestamp_max']
+
+        context = {
+            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosAtrasados(timestamp_min, timestamp_max)
+        }
+        return render(request, "relatoriovoosatrasados.html", context)
+
+    form = FormularioFiltroRelatorio()
+    return render(request, "geracaoderelatoriovoosatrasados.html", {'formulario': form})
+
+
 class ControleGeracaoRelatorios():
     def filtrarVoos(self, timestamp_min, timestamp_max):
         voosQuerySet = ProgressoVoo.objects.select_related("voo")
@@ -408,3 +427,6 @@ class ControleGeracaoRelatorios():
         if timestamp_max != "":
             voosQuerySet = voosQuerySet.filter(horario_chegada_real__lt=timestamp_max)
         return voosQuerySet
+    
+    def filtrarVoosAtrasados(self, timestamp_min, timestamp_max):
+        return self.filtrarVoos(timestamp_min, timestamp_max).filter(horario_chegada_real__gt=F('voo__horario_chegada_previsto'))

@@ -466,7 +466,7 @@ class ControleGeracaoRelatoriosTest(TestCase):
   def setUpTestData(cls):
     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
     rota = Rota.objects.get(rota_id=1)
-    Voo.objects.create(companhia_aerea="A", horario_partida_previsto="2022-08-01 10:30:00+00:00", horario_chegada_previsto="2022-08-20 10:30:00+00:00", rota_voo=rota)
+    Voo.objects.create(companhia_aerea="A", horario_partida_previsto="2022-08-01 10:30:00+00:00", horario_chegada_previsto="2022-08-08 10:30:00+00:00", rota_voo=rota)
     voo = Voo.objects.get(voo_id=1)
     ProgressoVoo.objects.create(voo=voo, horario_chegada_real="2022-08-04 10:30:00+00:00")
     ProgressoVoo.objects.create(voo=voo, horario_chegada_real="2022-08-06 10:30:00+00:00")
@@ -491,3 +491,13 @@ class ControleGeracaoRelatoriosTest(TestCase):
     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
 
     self.assertEqual(2, lista_voos_resultado.count())
+
+  def test_filtrar_voos_atrasados(self):
+    filtro_teste = {
+      "timestamp_min": "2022-08-05 10:30:00+00:00",
+      "timestamp_max": "2022-08-20 10:30:00+00:00"
+    }
+
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
+
+    self.assertEqual(1, lista_voos_resultado.count())
