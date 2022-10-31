@@ -1,0 +1,38 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+  </head>
+
+  <body>
+
+    <!doctype html>
+    <html lang="en">
+      <head>
+      </head>
+    
+      <body>
+        <p>Tela de geração de relatório de voos realizados</p>
+        <p>filtrar por:</p>
+    
+        <form action="." method="POST">{% csrf_token %}
+          
+          <table>
+            {{formulario.as_table}}
+          </table>
+
+          <br>
+          <button name="tipo" value="filtrar">Gerar relatório</button>
+    
+        </form>
+    
+      </body>
+    </html>
+    
+    
+    
+
+  </body>
+</html>
+
+
