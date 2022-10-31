@@ -216,7 +216,7 @@ class ControladorCrudTest(TestCase):
     
     voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
 
-    self.assertEqual(12, len(voos))
+    self.assertEqual(13, len(voos))
 
   def test_delete(self):
     vooid = 3
@@ -344,7 +344,7 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
     Voo.objects.create(companhia_aerea='B',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
     voo = Voo.objects.get(companhia_aerea='B')
     status4 = Status.objects.get(status_nome='Autorizado')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=agora,horario_chegada_real=None)
 
     # voo sem status que terminará a menos de 2 dias de agora
     Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
@@ -374,7 +374,7 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
       self.assertFalse((voo.get('status') == 'Cancelado') & (agora - timedelta(hours=1) >= hpp)) #testa se não existem voos cancelados a mais de 1 hora (não devem haver)
       self.assertFalse((voo.get('status') == '-') & (agora + timedelta(days=2) <= hcp)) #testa se não existem voos cadastrados que ocorrerão somente em dois dias ou mais (não devem ser monitorados)
       self.assertNotIn(voo.get('voo_id'), [3, 5, 12])
-      self.assertTrue((voo.get('status') not in ['Em voo', 'Aterrissado']) & (voo.get('horario_partida_real') == voo.get('horario_chegada_real') == '-') | ((voo.get('status') == 'Em voo') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') == '-')) | ((voo.get('status') == 'Aterrissado') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') != '-')))
+      self.assertTrue((voo.get('status') not in ['Em voo', 'Autorizado', 'Aterrissado']) & (voo.get('horario_partida_real') == voo.get('horario_chegada_real') == '-') | ((voo.get('status') in ['Em voo', 'Autorizado']) & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') == '-')) | ((voo.get('status') == 'Aterrissado') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') != '-')))
 
   def test_status_possiveis(self):
     # status vazio
