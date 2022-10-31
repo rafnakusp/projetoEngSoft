@@ -4,7 +4,7 @@ import datetime
 # Create your models here.
 
 class Rota(models.Model):
-  rota_id = models.IntegerField(primary_key=True)
+  rota_id = models.AutoField(primary_key=True)
   outro_aeroporto = models.CharField(max_length=50, null=False)
   chegada = models.BooleanField(null=False)
   def __str__(self):
@@ -17,7 +17,7 @@ class Rota(models.Model):
     db_table = 'rota'
 
 class Voo(models.Model):
-    voo_id = models.IntegerField(primary_key=True)
+    voo_id = models.AutoField(primary_key=True)
     companhia_aerea = models.CharField(max_length=255, null=False)
     horario_partida_previsto = models.DateTimeField(null=False)
     horario_chegada_previsto = models.DateTimeField(null=False)
@@ -28,13 +28,13 @@ class Voo(models.Model):
       db_table = 'voo'
 
 class Status(models.Model):
-    status_id = models.IntegerField(primary_key=True)
+    status_id = models.AutoField(primary_key=True)
     status_nome = models.CharField(max_length=255, null=False)
     class Meta:
         db_table = 'status'
 
 class ProgressoVoo(models.Model):
- progresso_id = models.IntegerField(primary_key=True)
+ progresso_id = models.AutoField(primary_key=True)
  status_voo = models.ForeignKey(Status, on_delete=models.CASCADE, null=True)
  voo = models.ForeignKey(Voo, on_delete=models.CASCADE, null=False)
  horario_partida_real = models.DateTimeField(null=True)

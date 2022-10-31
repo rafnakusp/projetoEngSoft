@@ -1,0 +1,24 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+  </head>
+
+  <body>
+    <p>Cadastro de voo</p>
+    <p>voo a ser cadastrado:</p>
+
+    <form action="/crud/create/" method="POST">{% csrf_token %}
+      
+      <table>
+        {{novo_voo.as_table}}
+      </table>
+
+      <button name="tipo" value="cadastrar">Confirmar cadastro</button>
+
+    </form>
+
+    <a href="/crud/"><button>Cancelar</button></a>
+
+  </body>
+</html>

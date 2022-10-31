@@ -1,16 +1,13 @@
-from asyncio.windows_events import NULL
-from django.db import connection
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.template import loader
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
-from django.db.models import Q
 
-from .forms import formularioCadastroVoo
+from .forms import formularioFiltroVoo, formularioCadastroVoo
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
@@ -84,15 +81,16 @@ def geracaoderelatorios(request):
     return render(request, "geracaoderelatorios.html")
 
 def crud(request):
-    controladorCrud = ControladorCrud()
+    fronteira = FronteiraCrud()
 
     if request.method == "GET":
-        form = formularioCadastroVoo()
-        return render(request, "crud.html", {'formulario': form})
+        form = formularioFiltroVoo()
+        print(form)
+        return render(request, "crud.html", {'formulario_voos': form})
     elif request.method == "POST":
         print(request.POST)
-
-        form = formularioCadastroVoo(request.POST)
+        
+        form = formularioFiltroVoo(request.POST)
 
         companhia = form.data['companhia']
         horario_partida = form.data['horario_partida']
@@ -102,16 +100,66 @@ def crud(request):
 
         if request.POST["tipo"] == "cadastrar":
             if form.is_valid():
-                controladorCrud.createVoo(companhia=companhia, horario_partida=horario_partida, horario_chegada=horario_chegada, rota=rota)
-                return render(request, "cadastrarvoosucesso.html")
+                template = loader.get_template('crudcadastrovoo.html')
+                context = {
+                    "novo_voo": formularioCadastroVoo(request.POST)
+                }
+                return HttpResponse(template.render(context, request))
 
         elif request.POST["tipo"] == "filtrar":
             template = loader.get_template('crudlistavoos.html')
-            fronteira = FronteiraCrud()
             context = {
                 "voo_list": fronteira.apresentaVoosFiltrados(companhia, horario_partida, horario_chegada, rota, chegada) # context é a lista de voos já convertida
             }
             return HttpResponse(template.render(context, request))
+
+def crudCreate(request):
+    fronteira = FronteiraCrud()
+    form = formularioCadastroVoo(request.POST)
+    if request.method == "POST":
+        if form.is_valid():
+            voo_criado = fronteira.criarVoo(form)
+            if voo_criado == "rota_errada":
+                template = loader.get_template('errodecadastro.html')
+                context = {
+                    "rota_errada": {
+                        'aeroporto': form.data['rota'],
+                        'aeroporto_origem': 'origem' if 'chegada' else 'destino'
+                    }
+                }
+                return HttpResponse(template.render(context, request))
+            elif voo_criado == "chegada antes da partida":
+                template = loader.get_template('errodecadastro.html')
+                context = {
+                    "chegada_antes": {
+                        'horario_chegada': form.data['horario_chegada'],
+                        'horario_partida': form.data['horario_partida']
+                    }
+                }
+                return HttpResponse(template.render(context, request))
+            elif voo_criado in ["horario chegada no passado", "horario partida no passado"]:
+                template = loader.get_template('errodecadastro.html')
+                context = {
+                    "horario_passado": form.data['horario_chegada'] if voo_criado == "horario chegada no passado" else form.data['horario_partida'],
+                    "chegada": "horário de chegada" if voo_criado == "horario chegada no passado" else "horário de partida"
+                }
+                return HttpResponse(template.render(context, request))
+            elif voo_criado == "voo muito longo":
+                template = loader.get_template('errodecadastro.html')
+                context = {
+                    "voo_longo": {
+                        'horario_chegada': form.data['horario_chegada'],
+                        'horario_partida': form.data['horario_partida']
+                    }
+                }
+                return HttpResponse(template.render(context, request))
+            else:
+                template = loader.get_template('cadastrarvoosucesso.html')
+                context = {
+                    "novo_voo": voo_criado
+                }
+                return HttpResponse(template.render(context, request))
+               
 
 
 def crudDelete(request, vooid):
@@ -238,11 +286,45 @@ def criarTabelasProducaoComRequest(request):
 ################################################################################
 ####                               CRUD de voos                             ####
 ################################################################################
+class FronteiraCrud():
+    def __init__(self):
+        self.controladorCrud = ControladorCrud()
+    def apresentaVoosFiltrados(self, companhia, horario_partida, horario_chegada, rota, chegada):
+        return self.controladorCrud.readVoos(companhia, horario_partida, horario_chegada, rota, chegada)
+    def removePorId(self, vooid):
+        return self.controladorCrud.deleteVoosPorId(vooid)
+    def atualizaPorId(self, vooid, companhia, horario_partida, horario_chegada, rota, chegada):
+        return self.controladorCrud.updateVoosPorId(vooid, companhia, horario_partida, horario_chegada, rota, chegada)
+    def criarVoo(self, form):
+        return self.controladorCrud.createVoo(form)
 
 class ControladorCrud():
-    def createVoo(self, companhia, horario_partida, horario_chegada, rota):
-        rota = Rota.objects.get(outro_aeroporto=rota)
-        Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo = rota)
+    def createVoo(self, form):
+        agora = datetime.now()
+
+        companhia = form.data['companhia']
+        horario_partida = form.data['horario_partida']
+        horario_chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+        chegada = True if 'chegada' in form.data else False
+
+        if datetime.strptime(horario_chegada, "%Y-%m-%dT%H:%M") < datetime.strptime(horario_partida, "%Y-%m-%dT%H:%M"):
+            return "chegada antes da partida"
+        elif datetime.strptime(horario_chegada, "%Y-%m-%dT%H:%M") < agora:
+            return "horario chegada no passado"
+        elif datetime.strptime(horario_partida, "%Y-%m-%dT%H:%M") < agora:
+            return "horario partida no passado"
+        elif datetime.strptime(horario_chegada, "%Y-%m-%dT%H:%M") - timedelta(hours=20) > datetime.strptime(horario_partida, "%Y-%m-%dT%H:%M"):
+            return "voo muito longo" #https://valor.globo.com/empresas/noticia/2022/06/02/voo-mais-longo-do-mundo-contara-com-suites-de-luxo-e-area-para-alongamento-veja-fotos.ghtml
+
+        try:
+           rota = Rota.objects.get(outro_aeroporto=rota, chegada=chegada)
+        except:
+            return "rota_errada"
+        voo = Voo.objects.create(companhia_aerea=companhia,horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo = rota)
+        ProgressoVoo.objects.create(status_voo=None, voo = voo, horario_partida_real=None, horario_chegada_real=None)
+
+        return Voo.objects.select_related('rota_voo').get(voo_id=voo.pk)
 
     def readVoos(self, companhia, horario_partida, horario_chegada, rota, chegada):
         if companhia != "":
@@ -258,14 +340,6 @@ class ControladorCrud():
         rota = Rota.objects.get(outro_aeroporto=rota, chegada=chegada)
         Voo.objects.all().filter(voo_id=vooid).update(companhia_aerea=companhia, horario_partida_previsto=horario_partida,horario_chegada_previsto=horario_chegada, rota_voo=rota)
 
-class FronteiraCrud():
-    controladorCrud = ControladorCrud()
-    def apresentaVoosFiltrados(self, companhia, horario_partida, horario_chegada, rota, chegada):
-        return self.controladorCrud.readVoos(companhia, horario_partida, horario_chegada, rota, chegada)
-    def removePorId(self, vooid):
-        return self.controladorCrud.deleteVoosPorId(vooid)
-    def atualizaPorId(self, vooid, companhia, horario_partida, horario_chegada, rota, chegada):
-        return self.controladorCrud.updateVoosPorId(vooid, companhia, horario_partida, horario_chegada, rota, chegada)
 
 ################################################################################
 ####          Atualizar o status de voos/ Painel de Monitoração             ####

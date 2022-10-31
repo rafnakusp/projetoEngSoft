@@ -28,4 +28,5 @@ urlpatterns = [
     path('criartabelasproducao/', views.criarTabelasProducaoComRequest),
     path('crud/delete/<int:vooid>/', views.crudDelete),
     path('crud/update/<int:vooid>/', views.crudUpdate),
+    path('crud/create/', views.crudCreate),
 ]

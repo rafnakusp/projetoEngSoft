@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+  </head>
+
+  <body>
+    {% if rota_errada  %}
+    <p>ERRO: Rota informada não existente</p>
+    <p>A rota em que o aeroporto {{rota_errada.aeroporto}} é {{rota_errada.aeroporto_origem}} não existe!</p>
+
+    {% elif chegada_antes  %}
+    <p>ERRO: Inconsitência de datas</p>
+    <p>A data/horário de chegada {{chegada_antes.horario_chegada}} vem antes da data/horário de partida {{chegada_antes.horario_partida}}!</p>
+
+    {% elif horario_passado  %}
+    <p>ERRO: Pelo menos uma das datas está no passado</p>
+    <p>O {{chegada}}, {{horario_passado}}, está no passado!</p>
+
+    {% elif voo_longo  %}
+    <p>ERRO: Voo está muito longo</p>
+    <p>A diferença entre a data/horário de chegada {{voo_longo.horario_chegada}} e a data/horário de partida {{voo_longo.horario_partida}} está acima de 20 horas!</p>
+    
+    {%endif%}
+    <a href="/crud/"><button>Voltar</button></a>
+
+  </body>
+</html>

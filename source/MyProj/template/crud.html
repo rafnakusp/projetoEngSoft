@@ -11,11 +11,11 @@
     <form action="{% url 'crud' %}" method="POST">{% csrf_token %}
       
       <table>
-        {{formulario.as_table}}
+        {{formulario_voos.as_table}}
       </table>
       
       <button name="tipo" value="filtrar">Filtrar</button>
-      <button name="tipo" value="cadastrar">Cadastrar Voo</button>
+      <button name="tipo" value="cadastrar">Cadastrar Novo Voo</button>
 
     </form>
 

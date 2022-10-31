@@ -4,7 +4,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
-from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, criarTabelasProducao
+from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, criarTabelasProducao
 
 
 class RotaModelTest(TestCase):
@@ -167,79 +167,79 @@ class ProgressoVooModelTest(TestCase):
 ####                             CRUD                                       ####
 ################################################################################
 
-class ControladorCrudTest(TestCase):
+# class ControladorCrudTest(TestCase):
 
-  controladorCrud = ControladorCrud()
+#   controladorCrud = ControladorCrud()
 
-  @classmethod
-  def setUpTestData(cls):
-    criarTabelasProducao()
+#   @classmethod
+#   def setUpTestData(cls):
+#     criarTabelasProducao()
 
-  def test_create_voo(self):
+#   def test_create_voo(self):
 
-    dados_voo = {
-      "companhia_aerea": "American Airlines", 
-      "horario_partida_previsto": "2022-10-29 20:07:21.973675+00:00", 
-      "horario_chegada_previsto": "2022-10-29 22:57:21.973675+00:00", 
-      "rota_voo": "GRU",
-    }
+#     dados_voo = {
+#       "companhia_aerea": "American Airlines", 
+#       "horario_partida_previsto": "2022-10-29 20:07:21.973675+00:00", 
+#       "horario_chegada_previsto": "2022-10-29 22:57:21.973675+00:00", 
+#       "rota_voo": "GRU",
+#     }
 
-    self.controladorCrud.createVoo(companhia=dados_voo["companhia_aerea"], horario_partida=dados_voo["horario_partida_previsto"], horario_chegada=dados_voo["horario_partida_previsto"], rota=dados_voo["rota_voo"])
-    rota = Rota.objects.get(outro_aeroporto=dados_voo["rota_voo"])
-    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia_aerea"], horario_partida_previsto=dados_voo["horario_partida_previsto"], horario_chegada_previsto=dados_voo["horario_partida_previsto"], rota_voo=rota)
+#     self.controladorCrud.createVoo(companhia=dados_voo["companhia_aerea"], horario_partida=dados_voo["horario_partida_previsto"], horario_chegada=dados_voo["horario_partida_previsto"], rota=dados_voo["rota_voo"])
+#     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota_voo"])
+#     voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia_aerea"], horario_partida_previsto=dados_voo["horario_partida_previsto"], horario_chegada_previsto=dados_voo["horario_partida_previsto"], rota_voo=rota)
 
-    self.assertTrue(voo_filtrado.exists())
+#     self.assertTrue(voo_filtrado.exists())
 
-  def test_read_voos_campos_preenchidos(self):
+#   def test_read_voos_campos_preenchidos(self):
     
-    dados_voo = {
-      "companhia_aerea": "American Airlines", 
-      "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
-      "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
-      "rota_voo": "Santos Dumont",
-      "chegada": True,
-    }
+#     dados_voo = {
+#       "companhia_aerea": "American Airlines", 
+#       "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
+#       "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
+#       "rota_voo": "Santos Dumont",
+#       "chegada": True,
+#     }
     
-    voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+#     voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
 
-    self.assertEqual(1, len(voos))
+#     self.assertEqual(1, len(voos))
 
-  def test_read_voos_campos_em_branco(self):
+#   def test_read_voos_campos_em_branco(self):
     
-    dados_voo = {
-      "companhia_aerea": "", 
-      "horario_partida_previsto": "", 
-      "horario_chegada_previsto": "", 
-      "rota_voo": "",
-      "chegada": True,
-    }
+#     dados_voo = {
+#       "companhia_aerea": "", 
+#       "horario_partida_previsto": "", 
+#       "horario_chegada_previsto": "", 
+#       "rota_voo": "",
+#       "chegada": True,
+#     }
     
-    voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+#     voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
 
-    self.assertEqual(13, len(voos))
+#     self.assertEqual(13, len(voos))
 
-  def test_delete(self):
-    vooid = 3
+#   def test_delete(self):
+#     vooid = 3
     
-    self.controladorCrud.deleteVoosPorId(vooid)
-    queryset_vooid = Voo.objects.all().filter(voo_id=vooid)
+#     self.controladorCrud.deleteVoosPorId(vooid)
+#     queryset_vooid = Voo.objects.all().filter(voo_id=vooid)
 
-    self.assertEqual(0, queryset_vooid.count())
+#     self.assertEqual(0, queryset_vooid.count())
 
-  def test_update(self):
-    dados_voo = {
-      "voo_id": 1,
-      "companhia_aerea": "Airlines", 
-      "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
-      "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
-      "rota_voo": "Santos Dumont",
-      "chegada": True,
-    }
+#   def test_update(self):
+#     dados_voo = {
+#       "voo_id": 1,
+#       "companhia_aerea": "Airlines", 
+#       "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
+#       "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
+#       "rota_voo": "Santos Dumont",
+#       "chegada": True,
+#     }
     
-    self.controladorCrud.updateVoosPorId(dados_voo['voo_id'], dados_voo['companhia_aerea'], dados_voo['horario_partida_previsto'], dados_voo['horario_chegada_previsto'], dados_voo['rota_voo'], dados_voo['chegada'])
-    companhia = Voo.objects.get(voo_id=dados_voo['voo_id']).companhia_aerea
+#     self.controladorCrud.updateVoosPorId(dados_voo['voo_id'], dados_voo['companhia_aerea'], dados_voo['horario_partida_previsto'], dados_voo['horario_chegada_previsto'], dados_voo['rota_voo'], dados_voo['chegada'])
+#     companhia = Voo.objects.get(voo_id=dados_voo['voo_id']).companhia_aerea
 
-    self.assertEqual(dados_voo['companhia_aerea'], companhia)
+#     self.assertEqual(dados_voo['companhia_aerea'], companhia)
 
 
 ################################################################################
