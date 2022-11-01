@@ -94,6 +94,7 @@ def crud(request):
             return HttpResponse(template.render(context, request))
 
 def crudCreate(request):
+    print(request.POST)
     fronteira = FronteiraCrud()
     form = formularioCadastroVoo(request.POST)
     if request.method == "POST":
@@ -180,21 +181,23 @@ class FronteiraCrud():
 
 class ControladorCrud():
     def createVoo(self, form):
-        agora = datetime.now()
+        agora = datetime.now(timezone.utc)
 
         companhia = form.data['companhia']
-        horario_partida = form.data['horario_partida']
-        horario_chegada = form.data['horario_chegada']
+        horario_partida = datetime.strptime(form.data['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+        horario_chegada = datetime.strptime(form.data['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
         rota = form.data['rota']
         chegada = True if 'chegada' in form.data else False
 
-        if datetime.strptime(horario_chegada, "%Y-%m-%dT%H:%M") < datetime.strptime(horario_partida, "%Y-%m-%dT%H:%M"):
+        print(type(horario_partida))
+
+        if horario_chegada < horario_partida:
             return "chegada antes da partida"
-        elif datetime.strptime(horario_chegada, "%Y-%m-%dT%H:%M") < agora:
+        elif horario_chegada < agora:
             return "horario chegada no passado"
-        elif datetime.strptime(horario_partida, "%Y-%m-%dT%H:%M") < agora:
+        elif horario_partida < agora:
             return "horario partida no passado"
-        elif datetime.strptime(horario_chegada, "%Y-%m-%dT%H:%M") - timedelta(hours=20) > datetime.strptime(horario_partida, "%Y-%m-%dT%H:%M"):
+        elif horario_chegada - timedelta(hours=20) > horario_partida:
             return "voo muito longo" #https://valor.globo.com/empresas/noticia/2022/06/02/voo-mais-longo-do-mundo-contara-com-suites-de-luxo-e-area-para-alongamento-veja-fotos.ghtml
 
         try:

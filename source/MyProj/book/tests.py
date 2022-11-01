@@ -4,7 +4,8 @@ from django.test import TestCase
 
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
-from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, criarTabelasProducao, ControleGeracaoRelatorios
+from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, ControleGeracaoRelatorios
+from book.forms import formularioCadastroVoo
 
 
 class RotaModelTest(TestCase):
@@ -167,28 +168,116 @@ class ProgressoVooModelTest(TestCase):
 ####                             CRUD                                       ####
 ################################################################################
 
-# class ControladorCrudTest(TestCase):
+class ControladorCrudTest(TestCase):
 
-#   controladorCrud = ControladorCrud()
+  controladorCrud = ControladorCrud()
 
-#   @classmethod
-#   def setUpTestData(cls):
-#     criarTabelasProducao()
+  @classmethod
+  def setUpTestData(cls):
+    criarTabelasTestes()
 
-#   def test_create_voo(self):
+  def test_create_voo(self):
+    agora = datetime.now(tz=timezone.utc)
+    
+    # Voo sem erros
+    dados_voo = {
+      "companhia": "American Airlines", 
+      "horario_partida": (agora+timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_chegada": (agora+timedelta(hours=28)).strftime('%Y-%m-%dT%H:%M'), 
+      "rota": "GRU",
+    }
+    form = formularioCadastroVoo(dados_voo)
+    voo_criado = self.controladorCrud.createVoo(form)
+    rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    self.assertTrue(voo_filtrado.exists())
+    self.assertIsInstance(voo_criado, Voo)
+    print(voo_criado)
+    self.assertSequenceEqual([voo_criado.companhia_aerea, voo_criado.rota_voo.outro_aeroporto, voo_criado.rota_voo.chegada],\
+      ["American Airlines", "GRU", False])
+    self.assertTrue(abs(voo_criado.horario_partida_previsto - (agora+timedelta(days=1))) < timedelta(minutes=1))
+    self.assertTrue(abs(voo_criado.horario_chegada_previsto - (agora+timedelta(hours=28))) < timedelta(minutes=1))
 
-#     dados_voo = {
-#       "companhia_aerea": "American Airlines", 
-#       "horario_partida_previsto": "2022-10-29 20:07:21.973675+00:00", 
-#       "horario_chegada_previsto": "2022-10-29 22:57:21.973675+00:00", 
-#       "rota_voo": "GRU",
-#     }
+    # Voo com rota errada
+    dados_voo = {
+      "companhia": "American Airlines", 
+      "horario_partida": (agora+timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_chegada": (agora+timedelta(hours=28)).strftime('%Y-%m-%dT%H:%M'), 
+      "rota": "GRU",
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    voo_criado = self.controladorCrud.createVoo(form)
+    rota = Rota.objects.filter(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota if rota.exists() else None)
+    self.assertFalse(rota.exists())
+    self.assertFalse(voo_filtrado.exists())
+    self.assertIsInstance(voo_criado, str)
+    self.assertEqual(voo_criado, "rota_errada")
 
-#     self.controladorCrud.createVoo(companhia=dados_voo["companhia_aerea"], horario_partida=dados_voo["horario_partida_previsto"], horario_chegada=dados_voo["horario_partida_previsto"], rota=dados_voo["rota_voo"])
-#     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota_voo"])
-#     voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia_aerea"], horario_partida_previsto=dados_voo["horario_partida_previsto"], horario_chegada_previsto=dados_voo["horario_partida_previsto"], rota_voo=rota)
+    # Voo data de chegada antes da de partida
+    dados_voo = {
+      "companhia": "American Airlines", 
+      "horario_partida": (agora+timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_chegada": (agora+timedelta(hours=23)).strftime('%Y-%m-%dT%H:%M'), 
+      "rota": "Santos Dumont",
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    voo_criado = self.controladorCrud.createVoo(form)
+    rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    self.assertFalse(voo_filtrado.exists())
+    self.assertIsInstance(voo_criado, str)
+    self.assertEqual(voo_criado, "chegada antes da partida")
 
-#     self.assertTrue(voo_filtrado.exists())
+    # Voo data de chegada no passado
+    dados_voo = {
+      "companhia": "American Airlines", 
+      "horario_partida": (agora-timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_chegada": (agora-timedelta(hours=23)).strftime('%Y-%m-%dT%H:%M'), 
+      "rota": "Santos Dumont",
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    voo_criado = self.controladorCrud.createVoo(form)
+    rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    self.assertFalse(voo_filtrado.exists())
+    self.assertIsInstance(voo_criado, str)
+    self.assertEqual(voo_criado, "horario chegada no passado")
+
+    # Voo data de partida no passado
+    dados_voo = {
+      "companhia": "American Airlines", 
+      "horario_partida": (agora-timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_chegada": (agora+timedelta(hours=17)).strftime('%Y-%m-%dT%H:%M'), 
+      "rota": "Santos Dumont",
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    voo_criado = self.controladorCrud.createVoo(form)
+    rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    self.assertFalse(voo_filtrado.exists())
+    self.assertIsInstance(voo_criado, str)
+    self.assertEqual(voo_criado, "horario partida no passado")
+
+    # Voo duração maior que 20 horas
+    dados_voo = {
+      "companhia": "American Airlines", 
+      "horario_partida": (agora+timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_chegada": (agora+timedelta(hours=22)).strftime('%Y-%m-%dT%H:%M'), 
+      "rota": "Santos Dumont",
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    voo_criado = self.controladorCrud.createVoo(form)
+    rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    self.assertFalse(voo_filtrado.exists())
+    self.assertIsInstance(voo_criado, str)
+    self.assertEqual(voo_criado, "voo muito longo")
 
 #   def test_read_voos_campos_preenchidos(self):
     
@@ -269,91 +358,7 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
 
   @classmethod
   def setUpTestData(cls):
-    agora = datetime.now(tz=timezone.utc)
-    print(agora)
-    # rotas
-    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
-    Rota.objects.create(outro_aeroporto='GRU',chegada=False)
-
-    # status
-    Status.objects.create(status_nome='Em voo')
-    Status.objects.create(status_nome='Cancelado')
-    Status.objects.create(status_nome='Aterrissado')
-    Status.objects.create(status_nome='Embarque')
-    Status.objects.create(status_nome='Programado')
-    Status.objects.create(status_nome='Taxiando')
-    Status.objects.create(status_nome='Pronto')
-    Status.objects.create(status_nome='Autorizado')
-
-    # voo em progresso (diferente de 'cancelado' ou 'Aterrissado')
-    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
-    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=timezone.utc), rota_voo = rota_1)
-    voo = Voo.objects.get(companhia_aerea='American Airlines')
-    status = Status.objects.get(status_nome='Em voo')
-    ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=None)
-
-    # voo cancelado a menos de 1 hora
-    rota_2 = Rota.objects.get(outro_aeroporto='GRU')
-    Voo.objects.create(companhia_aerea='Azul',horario_partida_previsto=(agora - timedelta(minutes = 50)),horario_chegada_previsto=(agora + timedelta(hours = 2)), rota_voo = rota_2)
-    voo2 = Voo.objects.get(companhia_aerea='Azul')
-    status2 = Status.objects.get(status_nome='Cancelado')
-    ProgressoVoo.objects.create(status_voo = status2, voo = voo2, horario_partida_real=None, horario_chegada_real=None)
-
-    # voo cancelado a mais de 1 hora
-    Voo.objects.create(companhia_aerea='GOL',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora + timedelta(hours = 1)), rota_voo = rota_2)
-    voo2 = Voo.objects.get(companhia_aerea='GOL')
-    ProgressoVoo.objects.create(status_voo = status2, voo = voo2, horario_partida_real=None, horario_chegada_real=None)
-
-    # voo Aterrissado a menos de 1 hora
-    Voo.objects.create(companhia_aerea='LATAM',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora - timedelta(hours = 1)), rota_voo = rota_1)
-    voo2 = Voo.objects.get(companhia_aerea='LATAM')
-    status3 = Status.objects.get(status_nome='Aterrissado')
-    ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 118)), horario_chegada_real=(agora - timedelta(minutes = 50)))
-
-    # voo Aterrissado a mais de 1 hora
-    Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto=(agora - timedelta(hours = 3)),horario_chegada_previsto=(agora - timedelta(minutes = 2)), rota_voo = rota_1)
-    voo2 = Voo.objects.get(companhia_aerea='TAM')
-    ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 179)), horario_chegada_real=(agora - timedelta(minutes = 65)))
-
-    # voo em Embarque (diferente de 'cancelado' ou 'Aterrissado')
-    Voo.objects.create(companhia_aerea='American Air',horario_partida_previsto=(agora + timedelta(minutes = 20)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
-    voo = Voo.objects.get(companhia_aerea='American Air')
-    status4 = Status.objects.get(status_nome='Embarque')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-    # voo programado (diferente de 'cancelado' ou 'Aterrissado')
-    Voo.objects.create(companhia_aerea='Amer',horario_partida_previsto=(agora + timedelta(minutes = 15)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
-    voo = Voo.objects.get(companhia_aerea='Amer')
-    status4 = Status.objects.get(status_nome='Programado')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-    # voo taxiando (diferente de 'cancelado' ou 'Aterrissado')
-    Voo.objects.create(companhia_aerea='American',horario_partida_previsto=(agora + timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
-    voo = Voo.objects.get(companhia_aerea='American')
-    status4 = Status.objects.get(status_nome='Taxiando')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-    # voo pronto (diferente de 'cancelado' ou 'Aterrissado')
-    Voo.objects.create(companhia_aerea='A',horario_partida_previsto=(agora),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
-    voo = Voo.objects.get(companhia_aerea='A')
-    status4 = Status.objects.get(status_nome='Pronto')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-    # voo autorizado (diferente de 'cancelado' ou 'Aterrissado')
-    Voo.objects.create(companhia_aerea='B',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
-    voo = Voo.objects.get(companhia_aerea='B')
-    status4 = Status.objects.get(status_nome='Autorizado')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=agora,horario_chegada_real=None)
-
-    # voo sem status que terminará a menos de 2 dias de agora
-    Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
-    voo = Voo.objects.get(companhia_aerea='C')
-    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-    # voo sem status que terminará a mais de 2 dias de agora
-    Voo.objects.create(companhia_aerea='D',horario_partida_previsto=(agora+timedelta(days = 1, hours=22)),horario_chegada_previsto=(agora + timedelta(days = 2, hours=1)), rota_voo = rota_2)
-    voo = Voo.objects.get(companhia_aerea='D')
-    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+    criarTabelasTestes()
 
   def test_apresentacao_voos(self):
     agora = datetime.now(tz=timezone.utc)
@@ -500,3 +505,96 @@ class ControleGeracaoRelatoriosTest(TestCase):
     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
 
     self.assertEqual(1, lista_voos_resultado.count())
+
+
+
+
+################################################################################
+####                         Criador de tabelas                             ####
+################################################################################          
+def criarTabelasTestes():
+    agora = datetime.now(tz=timezone.utc)
+    print(agora)
+    # rotas
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    Rota.objects.create(outro_aeroporto='GRU',chegada=False)
+
+    # status
+    Status.objects.create(status_nome='Em voo')
+    Status.objects.create(status_nome='Cancelado')
+    Status.objects.create(status_nome='Aterrissado')
+    Status.objects.create(status_nome='Embarque')
+    Status.objects.create(status_nome='Programado')
+    Status.objects.create(status_nome='Taxiando')
+    Status.objects.create(status_nome='Pronto')
+    Status.objects.create(status_nome='Autorizado')
+
+    # voo em progresso (diferente de 'cancelado' ou 'Aterrissado')
+    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=timezone.utc), rota_voo = rota_1)
+    voo = Voo.objects.get(companhia_aerea='American Airlines')
+    status = Status.objects.get(status_nome='Em voo')
+    ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=None)
+
+    # voo cancelado a menos de 1 hora
+    rota_2 = Rota.objects.get(outro_aeroporto='GRU')
+    Voo.objects.create(companhia_aerea='Azul',horario_partida_previsto=(agora - timedelta(minutes = 50)),horario_chegada_previsto=(agora + timedelta(hours = 2)), rota_voo = rota_2)
+    voo2 = Voo.objects.get(companhia_aerea='Azul')
+    status2 = Status.objects.get(status_nome='Cancelado')
+    ProgressoVoo.objects.create(status_voo = status2, voo = voo2, horario_partida_real=None, horario_chegada_real=None)
+
+    # voo cancelado a mais de 1 hora
+    Voo.objects.create(companhia_aerea='GOL',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora + timedelta(hours = 1)), rota_voo = rota_2)
+    voo2 = Voo.objects.get(companhia_aerea='GOL')
+    ProgressoVoo.objects.create(status_voo = status2, voo = voo2, horario_partida_real=None, horario_chegada_real=None)
+
+    # voo Aterrissado a menos de 1 hora
+    Voo.objects.create(companhia_aerea='LATAM',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora - timedelta(hours = 1)), rota_voo = rota_1)
+    voo2 = Voo.objects.get(companhia_aerea='LATAM')
+    status3 = Status.objects.get(status_nome='Aterrissado')
+    ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 118)), horario_chegada_real=(agora - timedelta(minutes = 50)))
+
+    # voo Aterrissado a mais de 1 hora
+    Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto=(agora - timedelta(hours = 3)),horario_chegada_previsto=(agora - timedelta(minutes = 2)), rota_voo = rota_1)
+    voo2 = Voo.objects.get(companhia_aerea='TAM')
+    ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 179)), horario_chegada_real=(agora - timedelta(minutes = 65)))
+
+    # voo em Embarque (diferente de 'cancelado' ou 'Aterrissado')
+    Voo.objects.create(companhia_aerea='American Air',horario_partida_previsto=(agora + timedelta(minutes = 20)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
+    voo = Voo.objects.get(companhia_aerea='American Air')
+    status4 = Status.objects.get(status_nome='Embarque')
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
+    # voo programado (diferente de 'cancelado' ou 'Aterrissado')
+    Voo.objects.create(companhia_aerea='Amer',horario_partida_previsto=(agora + timedelta(minutes = 15)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
+    voo = Voo.objects.get(companhia_aerea='Amer')
+    status4 = Status.objects.get(status_nome='Programado')
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
+    # voo taxiando (diferente de 'cancelado' ou 'Aterrissado')
+    Voo.objects.create(companhia_aerea='American',horario_partida_previsto=(agora + timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='American')
+    status4 = Status.objects.get(status_nome='Taxiando')
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
+    # voo pronto (diferente de 'cancelado' ou 'Aterrissado')
+    Voo.objects.create(companhia_aerea='A',horario_partida_previsto=(agora),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
+    voo = Voo.objects.get(companhia_aerea='A')
+    status4 = Status.objects.get(status_nome='Pronto')
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
+    # voo autorizado (diferente de 'cancelado' ou 'Aterrissado')
+    Voo.objects.create(companhia_aerea='B',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='B')
+    status4 = Status.objects.get(status_nome='Autorizado')
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=agora,horario_chegada_real=None)
+
+    # voo sem status que terminará a menos de 2 dias de agora
+    Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='C')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
+
+    # voo sem status que terminará a mais de 2 dias de agora
+    Voo.objects.create(companhia_aerea='D',horario_partida_previsto=(agora+timedelta(days = 1, hours=22)),horario_chegada_previsto=(agora + timedelta(days = 2, hours=1)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='D')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
