@@ -785,7 +785,7 @@ class ControleGeracaoRelatoriosTest(TestCase):
 
     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
 
-    self.assertEqual(1, lista_voos_resultado.count())
+    self.assertEqual(2, lista_voos_resultado.count())
 
 
 

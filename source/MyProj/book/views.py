@@ -492,7 +492,11 @@ class ControleGeracaoRelatorios():
         return voosQuerySet
     
     def filtrarVoosAtrasados(self, timestamp_min, timestamp_max):
-        return self.filtrarVoos(timestamp_min, timestamp_max).filter(horario_chegada_real__gt=F('voo__horario_chegada_previsto'))
+        agora = datetime.now(timezone.utc)
+        print(agora)
+        return self.filtrarVoos(timestamp_min, timestamp_max).filter(Q(horario_chegada_real__gt=F('voo__horario_chegada_previsto')) | Q(horario_chegada_real__isnull=True, \
+            horario_partida_real__gt=F('voo__horario_partida_previsto')) | Q(horario_partida_real__isnull=True, voo__horario_partida_previsto__lt=agora) | \
+            Q(horario_chegada_real__isnull=True, voo__horario_chegada_previsto__lt=agora)).order_by('voo_id').distinct()
 
 ################################################################################
 ####                         Criador de tabelas                             ####
