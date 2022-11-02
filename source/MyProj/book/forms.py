@@ -3,6 +3,8 @@ from django.forms.utils import from_current_timezone
 from django.utils.dateparse import parse_datetime
 from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanField, MultiWidget, ValidationError
 
+formatoData = "%Y-%m-%dT%H:%M"
+
 class formularioFiltroVoo(Form):
     class IntervaloDatas(MultiWidget):
         def decompress(self, value):
@@ -41,15 +43,15 @@ class formularioFiltroVoo(Form):
             return end
 
     companhia = CharField(max_length=50, required=False, label="Companhia aérea")
-    intervalo_partida = IntervaloDatasField(required=False, widget=IntervaloDatas(widgets=[DateTimeInput(attrs={'type': 'datetime-local'}), DateTimeInput(attrs={'type': 'datetime-local'})]), label="Intervalo de busca da data e horário da partida")
-    intervalo_chegada = IntervaloDatasField(required=False, widget=IntervaloDatas(widgets=[DateTimeInput(attrs={'type': 'datetime-local'}), DateTimeInput(attrs={'type': 'datetime-local'})]), label="Intervalo de busca da data e horário da chegada")
+    intervalo_partida = IntervaloDatasField(required=False, widget=IntervaloDatas(widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), label="Intervalo de busca da data e horário da partida")
+    intervalo_chegada = IntervaloDatasField(required=False, widget=IntervaloDatas(widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), label="Intervalo de busca da data e horário da chegada")
     rota = CharField(max_length=50, required=False)
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
 
 class formularioCadastroVoo(Form):
     companhia = CharField(max_length=50, required=True, error_messages={'required': 'O nome da companhia aérea é obrigatório'}, label="Companhia aérea")
-    horario_partida = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}), error_messages={'required': 'A data de partida é obrigatória'}, label="Data e horário da partida")
-    horario_chegada = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}), error_messages={'required': 'A data de chegada é obrigatório'}, label="Data e horário da chegada")
+    horario_partida = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), error_messages={'required': 'A data de partida é obrigatória'}, label="Data e horário da partida")
+    horario_chegada = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), error_messages={'required': 'A data de chegada é obrigatório'}, label="Data e horário da chegada")
     rota = CharField(max_length=50, required=True, error_messages={'required': 'O nome da rota (ou seja, aeroporto de origem/destino) é obrigatório'}, label="Aeroporto de origem/destino")
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
 

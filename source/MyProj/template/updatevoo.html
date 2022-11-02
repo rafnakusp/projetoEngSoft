@@ -3,19 +3,19 @@
 <html lang="en">
   <head>
     <style>
-        table {
+        .apresentaVoo {
           font-family: arial, sans-serif;
           border-collapse: collapse;
           width: 100%;
         }
         
-        td, th {
+        .apresentaVoo td, .apresentaVoo th {
           border: 1px solid #dddddd;
           text-align: left;
           padding: 8px;
         }
         
-        tr:nth-child(even) {
+        .apresentaVoo tr:nth-child(even) {
           background-color: #dddddd;
         }
     </style>
@@ -25,7 +25,7 @@
 
     <p>Voo atual:</p>
 
-    <table>
+    <table class="apresentaVoo">
         <tr>
             <th>id do voo</th>
             <th>companhia aérea</th>
@@ -37,8 +37,8 @@
             <td>{{voo.voo_id}}</td>
             <td>{{voo.companhia_aerea}}</td>
             <td>{{voo.rota_voo}}</td>
-            <td>{{voo.horario_partida_previsto|date:"Y-m-d"}} {{voo.horario_partida_previsto|time:"H:i"}}</td>
-            <td>{{voo.horario_chegada_previsto|date:"Y-m-d"}} {{voo.horario_chegada_previsto|time:"H:i"}}</td>
+            <td>{{voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
+            <td>{{voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
         </tr>
 
       </table>
@@ -50,7 +50,7 @@
       <table>
         <tr>
             <th>atributo</th>
-            <th>novo valor</th>
+            <th>mudar valor aqui</th>
         </tr>
         {{formulario.as_table}}
       </table>
@@ -58,6 +58,8 @@
       <button>Confirmar</button>
 
     </form>
+
+    <a href="/crud/"><button>Cancelar</button></a>
 
   </body>
 </html>
