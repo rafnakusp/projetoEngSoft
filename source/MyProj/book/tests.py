@@ -5,7 +5,7 @@ from django.test import TestCase
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
 from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, ControleGeracaoRelatorios
-from book.forms import formularioCadastroVoo
+from book.forms import formularioCadastroVoo, formularioFiltroVoo
 
 
 class RotaModelTest(TestCase):
@@ -169,12 +169,19 @@ class ProgressoVooModelTest(TestCase):
 ################################################################################
 
 class ControladorCrudTest(TestCase):
+  formatodata = "%Y-%m-%dT%H:%M"
 
   controladorCrud = ControladorCrud()
 
   @classmethod
   def setUpTestData(cls):
     criarTabelasTestes()
+    agora = datetime.now(tz=timezone.utc)
+    rota = Rota.objects.get(outro_aeroporto='GRU')
+    Voo.objects.create(companhia_aerea='Azul',horario_partida_previsto=(agora + timedelta(days = 2)),horario_chegada_previsto=(agora + timedelta(days = 2, hours=5)), rota_voo = rota)
+
+    rota = Rota.objects.create(outro_aeroporto='Congonhas',chegada=False)
+    Voo.objects.create(companhia_aerea='Avianca',horario_partida_previsto=(agora + timedelta(days = 4)),horario_chegada_previsto=(agora + timedelta(days = 4, hours=6)), rota_voo = rota)
 
   def test_create_voo(self):
     agora = datetime.now(tz=timezone.utc)
@@ -182,17 +189,16 @@ class ControladorCrudTest(TestCase):
     # Voo sem erros
     dados_voo = {
       "companhia": "American Airlines", 
-      "horario_partida": (agora+timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
-      "horario_chegada": (agora+timedelta(hours=28)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_partida": (agora+timedelta(days=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=28)).strftime(self.formatodata), 
       "rota": "GRU",
     }
     form = formularioCadastroVoo(dados_voo)
     voo_criado = self.controladorCrud.createVoo(form)
     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
-    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], self.formatodata).replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], self.formatodata).replace(tzinfo=timezone.utc), rota_voo=rota)
     self.assertTrue(voo_filtrado.exists())
     self.assertIsInstance(voo_criado, Voo)
-    print(voo_criado)
     self.assertSequenceEqual([voo_criado.companhia_aerea, voo_criado.rota_voo.outro_aeroporto, voo_criado.rota_voo.chegada],\
       ["American Airlines", "GRU", False])
     self.assertTrue(abs(voo_criado.horario_partida_previsto - (agora+timedelta(days=1))) < timedelta(minutes=1))
@@ -201,15 +207,15 @@ class ControladorCrudTest(TestCase):
     # Voo com rota errada
     dados_voo = {
       "companhia": "American Airlines", 
-      "horario_partida": (agora+timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
-      "horario_chegada": (agora+timedelta(hours=28)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_partida": (agora+timedelta(days=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=28)).strftime(self.formatodata), 
       "rota": "GRU",
       "chegada": True
     }
     form = formularioCadastroVoo(dados_voo)
     voo_criado = self.controladorCrud.createVoo(form)
     rota = Rota.objects.filter(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
-    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota if rota.exists() else None)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], self.formatodata).replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], self.formatodata).replace(tzinfo=timezone.utc), rota_voo=rota if rota.exists() else None)
     self.assertFalse(rota.exists())
     self.assertFalse(voo_filtrado.exists())
     self.assertIsInstance(voo_criado, str)
@@ -218,15 +224,15 @@ class ControladorCrudTest(TestCase):
     # Voo data de chegada antes da de partida
     dados_voo = {
       "companhia": "American Airlines", 
-      "horario_partida": (agora+timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
-      "horario_chegada": (agora+timedelta(hours=23)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_partida": (agora+timedelta(days=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=23)).strftime(self.formatodata), 
       "rota": "Santos Dumont",
       "chegada": True
     }
     form = formularioCadastroVoo(dados_voo)
     voo_criado = self.controladorCrud.createVoo(form)
     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
-    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], self.formatodata).replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], self.formatodata).replace(tzinfo=timezone.utc), rota_voo=rota)
     self.assertFalse(voo_filtrado.exists())
     self.assertIsInstance(voo_criado, str)
     self.assertEqual(voo_criado, "chegada antes da partida")
@@ -234,15 +240,15 @@ class ControladorCrudTest(TestCase):
     # Voo data de chegada no passado
     dados_voo = {
       "companhia": "American Airlines", 
-      "horario_partida": (agora-timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'), 
-      "horario_chegada": (agora-timedelta(hours=23)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_partida": (agora-timedelta(days=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora-timedelta(hours=23)).strftime(self.formatodata), 
       "rota": "Santos Dumont",
       "chegada": True
     }
     form = formularioCadastroVoo(dados_voo)
     voo_criado = self.controladorCrud.createVoo(form)
     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
-    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], self.formatodata).replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], self.formatodata).replace(tzinfo=timezone.utc), rota_voo=rota)
     self.assertFalse(voo_filtrado.exists())
     self.assertIsInstance(voo_criado, str)
     self.assertEqual(voo_criado, "horario chegada no passado")
@@ -250,15 +256,15 @@ class ControladorCrudTest(TestCase):
     # Voo data de partida no passado
     dados_voo = {
       "companhia": "American Airlines", 
-      "horario_partida": (agora-timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M'), 
-      "horario_chegada": (agora+timedelta(hours=17)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_partida": (agora-timedelta(hours=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=17)).strftime(self.formatodata), 
       "rota": "Santos Dumont",
       "chegada": True
     }
     form = formularioCadastroVoo(dados_voo)
     voo_criado = self.controladorCrud.createVoo(form)
     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
-    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], self.formatodata).replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], self.formatodata).replace(tzinfo=timezone.utc), rota_voo=rota)
     self.assertFalse(voo_filtrado.exists())
     self.assertIsInstance(voo_criado, str)
     self.assertEqual(voo_criado, "horario partida no passado")
@@ -266,46 +272,199 @@ class ControladorCrudTest(TestCase):
     # Voo duração maior que 20 horas
     dados_voo = {
       "companhia": "American Airlines", 
-      "horario_partida": (agora+timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M'), 
-      "horario_chegada": (agora+timedelta(hours=22)).strftime('%Y-%m-%dT%H:%M'), 
+      "horario_partida": (agora+timedelta(hours=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=22)).strftime(self.formatodata), 
       "rota": "Santos Dumont",
       "chegada": True
     }
     form = formularioCadastroVoo(dados_voo)
     voo_criado = self.controladorCrud.createVoo(form)
     rota = Rota.objects.get(outro_aeroporto=dados_voo["rota"], chegada = True if 'chegada' in form.data else False)
-    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc), rota_voo=rota)
+    voo_filtrado = Voo.objects.filter(companhia_aerea=dados_voo["companhia"], horario_partida_previsto=datetime.strptime(dados_voo['horario_partida'], self.formatodata).replace(tzinfo=timezone.utc), horario_chegada_previsto=datetime.strptime(dados_voo['horario_chegada'], self.formatodata).replace(tzinfo=timezone.utc), rota_voo=rota)
     self.assertFalse(voo_filtrado.exists())
     self.assertIsInstance(voo_criado, str)
     self.assertEqual(voo_criado, "voo muito longo")
 
-#   def test_read_voos_campos_preenchidos(self):
+  def test_read_voos_campos_preenchidos(self):
     
-#     dados_voo = {
-#       "companhia_aerea": "American Airlines", 
-#       "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
-#       "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
-#       "rota_voo": "Santos Dumont",
-#       "chegada": True,
-#     }
-    
-#     voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+    dados_voo = {
+      "companhia": "American Airlines",
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "2022-08-11T10:30",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "2022-08-11T12:15", 
+      "rota": "Santos Dumont",
+      "chegada": True,
+    }
 
-#     self.assertEqual(1, len(voos))
-
-#   def test_read_voos_campos_em_branco(self):
+    form = formularioFiltroVoo(dados_voo)
     
-#     dados_voo = {
-#       "companhia_aerea": "", 
-#       "horario_partida_previsto": "", 
-#       "horario_chegada_previsto": "", 
-#       "rota_voo": "",
-#       "chegada": True,
-#     }
-    
-#     voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+    voos = self.controladorCrud.readVoos(form)
 
-#     self.assertEqual(13, len(voos))
+    self.assertEqual(1, len(voos))
+
+  def test_read_voos_campos_em_branco(self):
+    
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "", 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(14, len(voos))
+
+  def test_read_voos_alguns_em_branco(self):
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "", 
+      "rota": "GRU",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(7, len(voos))
+
+    dados_voo = {
+      "companhia": "Azul", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "", 
+      "rota": "GRU",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(2, len(voos))
+
+  def test_read_rota_inexistente(self):
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "", 
+      "rota": "GRU",
+      "chegada": True
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+  
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertIsNone(voos)
+
+  def test_read_intervalos(self):
+    agora = datetime.now(tz=timezone.utc)
+    #Teste inicio intervalo partida
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": datetime.strftime(agora, self.formatodata),
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "", 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(7, len(voos))
+
+    #Teste intervalo partida
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": datetime.strftime((agora+timedelta(minutes=18)), self.formatodata),
+      "intervalo_partida_1": datetime.strftime((agora+timedelta(days=3)), self.formatodata),
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "", 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(3, len(voos))
+
+    #Teste inicio intervalo chegada
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": datetime.strftime(agora, self.formatodata),
+      "intervalo_chegada_1": "", 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(11, len(voos))
+
+    #Teste intervalo chegada
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": datetime.strftime(agora+timedelta(hours=3, minutes=50), self.formatodata),
+      "intervalo_chegada_1": datetime.strftime((agora+timedelta(days=3)), self.formatodata), 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(2, len(voos))
+
+    #Teste fim intervalos partida e chegada
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": datetime.strftime((agora+timedelta(hours=20)), self.formatodata),
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": datetime.strftime((agora+timedelta(days=1)), self.formatodata), 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(11, len(voos))
+
+    #Teste intervalos partida e chegada
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": datetime.strftime(agora-timedelta(minutes=10), self.formatodata),
+      "intervalo_partida_1": datetime.strftime((agora+timedelta(hours=20)), self.formatodata),
+      "intervalo_chegada_0": datetime.strftime(agora+timedelta(hours=3), self.formatodata),
+      "intervalo_chegada_1": datetime.strftime((agora+timedelta(days=1)), self.formatodata), 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    
+    voos = self.controladorCrud.readVoos(form)
+
+    self.assertEqual(6, len(voos))
 
 #   def test_delete(self):
 # #     vooid = 3
