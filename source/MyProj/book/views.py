@@ -70,11 +70,7 @@ def crud(request):
         print(form)
         return render(request, "crud.html", {'formulario_voos': form})
     elif request.method == "POST":
-        print(request.POST)
-        
-        form = formularioFiltroVoo(request.POST)
-
-        
+        form = formularioFiltroVoo(request.POST) 
 
         if request.POST["tipo"] == "cadastrar":
             if form.is_valid():
@@ -85,10 +81,21 @@ def crud(request):
                 return HttpResponse(template.render(context, request))
 
         elif request.POST["tipo"] == "filtrar":
+            voos = fronteira.apresentaVoosFiltrados(form)
+            if voos == None:
+                template = loader.get_template('errodeconsulta.html')
+                context = {
+                    "rota_errada": {
+                        'aeroporto': form.data['rota'],
+                        'aeroporto_origem': 'origem' if 'chegada' else 'destino'
+                    }
+                }
+                return HttpResponse(template.render(context, request))
+
             template = loader.get_template('crud.html')
             context = {
                 "formulario_voos": form,
-                "voo_list": fronteira.apresentaVoosFiltrados(form) # context é a lista de voos já convertida
+                "voo_list": voos # context é a lista de voos já convertida
             }
             return HttpResponse(template.render(context, request))
 
@@ -216,15 +223,20 @@ class ControladorCrud():
         chegada = True if 'chegada' in form.data else False
         
         voosFiltrados = Voo.objects.all()
+        if rota != "":
+            try:
+                rota = Rota.objects.get(outro_aeroporto=rota, chegada=chegada)
+            except:
+                return None
+            voosFiltrados = voosFiltrados.filter(rota_voo=rota)
         if companhia != "":
             voosFiltrados = voosFiltrados.filter(companhia_aerea=companhia)
         if horario_partida != "":
             voosFiltrados = voosFiltrados.filter(horario_partida_previsto=horario_partida)
         if horario_chegada != "":
             voosFiltrados = voosFiltrados.filter(horario_chegada_previsto=horario_chegada)
-        if rota != "":
-            rota = Rota.objects.get(outro_aeroporto=rota, chegada=chegada)
-            voosFiltrados = voosFiltrados.filter(rota_voo=rota)
+
+        print(voosFiltrados)
 
         return voosFiltrados
 
