@@ -317,10 +317,6 @@ class ControladorCrud():
         chegada = True if 'chegada' in form.data else False
 
         voo_antigo = Voo.objects.get(voo_id=vooid)
-        print(voo_antigo.horario_partida_previsto)
-        print(voo_antigo.horario_chegada_previsto)
-        print(agora)
-        print(voo_antigo.horario_partida_previsto >= agora)
 
         if horario_chegada < horario_partida:
             return "chegada antes da partida"

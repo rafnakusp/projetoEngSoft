@@ -4,7 +4,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
-from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, ControleGeracaoRelatorios
+from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, ControleGeracaoRelatorios, FronteiraCrud
 from book.forms import formularioCadastroVoo, formularioFiltroVoo
 
 
@@ -172,6 +172,7 @@ class ControladorCrudTest(TestCase):
   formatodata = "%Y-%m-%dT%H:%M"
 
   controladorCrud = ControladorCrud()
+  fronteiraCrud = FronteiraCrud()
 
   @classmethod
   def setUpTestData(cls):
@@ -476,19 +477,160 @@ class ControladorCrudTest(TestCase):
     self.assertEqual(0, queryset_vooid.count())
 
   def test_update(self):
-    dados_voo = {
-      "voo_id": 1,
-      "companhia_aerea": "New Airlines", 
-      "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
-      "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
-      "rota_voo": "Santos Dumont",
-      "chegada": True,
-    }
-    
-    self.controladorCrud.updateVoosPorId(dados_voo['voo_id'], dados_voo['companhia_aerea'], dados_voo['horario_partida_previsto'], dados_voo['horario_chegada_previsto'], dados_voo['rota_voo'], dados_voo['chegada'])
-    companhia = Voo.objects.get(voo_id=dados_voo['voo_id']).companhia_aerea
+    agora = datetime.now(tz=timezone.utc)
+    voo = Voo.objects.select_related("rota_voo").get(voo_id='1')
 
-    self.assertEqual(dados_voo['companhia_aerea'], companhia)
+    # Formulario sem erros
+    dados_voo = {
+      "companhia": "New Airlines", 
+      "horario_partida": datetime.strftime(voo.horario_partida_previsto, self.formatodata), 
+      "horario_chegada": datetime.strftime(voo.horario_chegada_previsto, self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": voo.rota_voo.chegada,
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['companhia'], voo.companhia_aerea)
+    voo = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertEqual(dados_voo['companhia'], voo.companhia_aerea)
+    self.assertIsInstance(voo, Voo)
+
+    # rota inexistente
+    dados_voo = {
+      "companhia": voo.companhia_aerea, 
+      "horario_partida": datetime.strftime(voo.horario_partida_previsto, self.formatodata), 
+      "horario_chegada": datetime.strftime(voo.horario_chegada_previsto, self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(True if 'chegada' in form.data else False, voo.rota_voo.chegada)
+    voo_atualizado = self.controladorCrud.updateVoo(voo.voo_id, form)
+    rota = Rota.objects.filter(outro_aeroporto=dados_voo["rota"], chegada= True if 'chegada' in form.data else False)
+    self.assertFalse(rota.exists())
+    self.assertEqual(voo_atualizado, "rota_errada")
+    voo = Voo.objects.select_related("rota_voo").get(voo_id='1')
+    self.assertNotEqual(True if 'chegada' in form.data else False, voo.rota_voo.chegada)
+    self.assertIsInstance(voo_atualizado, str)
+
+    # Voo data de chegada antes da de partida
+    dados_voo = {
+      "companhia": voo.companhia_aerea, 
+      "horario_partida": (agora+timedelta(days=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=23)).strftime(self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto)
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto)
+    voo_atualizado = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertIsInstance(voo_atualizado, str)
+    self.assertEqual(voo_atualizado, "chegada antes da partida")
+    voo = Voo.objects.select_related("rota_voo").get(voo_id='1')
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto)
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto)
+
+    # Voo data de chegada e de partida no passado e datas antigas também no passado - deve mudar ambas as datas
+    dados_voo = {
+      "companhia": voo.companhia_aerea, 
+      "horario_partida": (agora-timedelta(days=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora-timedelta(hours=23)).strftime(self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+    voo = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertIsInstance(voo, Voo)
+    self.assertEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+
+    # Mudar chegada para futuro
+    dados_voo = {
+      "companhia": voo.companhia_aerea, 
+      "horario_partida": (agora-timedelta(hours=1)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=12)).strftime(self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+    voo = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertIsInstance(voo, Voo)
+    self.assertEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+
+    # Voo data de chegada no passado, antes no futuro, não faz update
+    dados_voo = {
+      "companhia": voo.companhia_aerea, 
+      "horario_partida": (agora-timedelta(minutes=50)).strftime(self.formatodata), 
+      "horario_chegada": (agora-timedelta(minutes=23)).strftime(self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+    voo = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertIsInstance(voo, str)
+    self.assertEqual(voo, "horario chegada no passado")
+    voo = Voo.objects.select_related("rota_voo").get(voo_id='1')
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+
+    # Mudar chegada para futuro
+    dados_voo = {
+      "companhia": "Nova Companhia", 
+      "horario_partida": (agora+timedelta(hours=1)).strftime(self.formatodata), 
+      "horario_chegada": datetime.strftime(voo.horario_chegada_previsto, self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['companhia'], voo.companhia_aerea)
+    voo = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertIsInstance(voo, Voo)
+    self.assertEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertEqual(dados_voo['companhia'], voo.companhia_aerea)
+
+    # Voo data de partida no passado, sendo que estava no futuro
+    dados_voo = {
+      "companhia": voo.companhia_aerea, 
+      "horario_partida": (agora-timedelta(minutes=50)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(minutes=23)).strftime(self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+    voo = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertIsInstance(voo, str)
+    self.assertEqual(voo, "horario partida no passado")
+    voo = Voo.objects.select_related("rota_voo").get(voo_id='1')
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+
+    # Voo duração maior que 20 horas
+    dados_voo = {
+      "companhia": voo.companhia_aerea, 
+      "horario_partida": (agora+timedelta(minutes=5)).strftime(self.formatodata), 
+      "horario_chegada": (agora+timedelta(hours=22)).strftime(self.formatodata), 
+      "rota": voo.rota_voo.outro_aeroporto,
+      "chegada": True
+    }
+    form = formularioCadastroVoo(dados_voo)
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+    voo = self.controladorCrud.updateVoo(voo.voo_id, form)
+    self.assertIsInstance(voo, str)
+    self.assertEqual(voo, "voo muito longo")
+    voo = Voo.objects.select_related("rota_voo").get(voo_id='1')
+    self.assertNotEqual(dados_voo['horario_partida'], voo.horario_partida_previsto.strftime(self.formatodata))
+    self.assertNotEqual(dados_voo['horario_chegada'], voo.horario_chegada_previsto.strftime(self.formatodata))
+
 
 
 ################################################################################
