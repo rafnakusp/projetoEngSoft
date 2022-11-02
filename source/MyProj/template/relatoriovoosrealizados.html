@@ -39,10 +39,18 @@
             <td>{{progressovoo.voo_id}}</td>
             <td>{{progressovoo.voo.companhia_aerea}}</td>
             <td>{{progressovoo.voo.rota_voo}}</td>
-            <td>{{progressovoo.voo.horario_partida_previsto}}</td>
-            <td>{{progressovoo.horario_partida_real}}</td>
-            <td>{{progressovoo.voo.horario_chegada_previsto}}</td>
-            <td>{{progressovoo.horario_chegada_real}}</td>
+            <td>{{progressovoo.voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
+            {% if progressovoo.horario_partida_real %}
+            <td>{{progressovoo.horario_partida_real|date:"d-m-Y H:i"}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+            <td>{{progressovoo.voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
+            {% if progressovoo.horario_chegada_real %}
+            <td>{{progressovoo.horario_chegada_real|date:"d-m-Y H:i"}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
           </tr>
         {% endfor %}
 
