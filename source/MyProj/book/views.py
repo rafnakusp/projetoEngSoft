@@ -6,6 +6,7 @@ from django.template import loader
 from datetime import datetime, timedelta
 from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
+from django.db import connection, transaction
 
 from .forms import formularioFiltroVoo, formularioCadastroVoo
 from django.db.models import Q, F
@@ -49,6 +50,7 @@ def telaLogin(request):
         return redirect("/telainicial/")
 
 def telainicial(request):
+    # reseta_id_voos() - descomentar quando quiser resetar a contagem das primary keys
     criarTabelasProducao()
     template = loader.get_template('telainicial.html')
     context = {
@@ -72,11 +74,7 @@ def crud(request):
         
         form = formularioFiltroVoo(request.POST)
 
-        companhia = form.data['companhia']
-        horario_partida = form.data['horario_partida']
-        horario_chegada = form.data['horario_chegada']
-        rota = form.data['rota']
-        chegada = True if 'chegada' in form.data else False
+        
 
         if request.POST["tipo"] == "cadastrar":
             if form.is_valid():
@@ -90,7 +88,7 @@ def crud(request):
             template = loader.get_template('crud.html')
             context = {
                 "formulario_voos": form,
-                "voo_list": fronteira.apresentaVoosFiltrados(companhia, horario_partida, horario_chegada, rota, chegada) # context é a lista de voos já convertida
+                "voo_list": fronteira.apresentaVoosFiltrados(form) # context é a lista de voos já convertida
             }
             return HttpResponse(template.render(context, request))
 
@@ -171,8 +169,8 @@ def crudUpdate(request, vooid):
 class FronteiraCrud():
     def __init__(self):
         self.controladorCrud = ControladorCrud()
-    def apresentaVoosFiltrados(self, companhia, horario_partida, horario_chegada, rota, chegada):
-        return self.controladorCrud.readVoos(companhia, horario_partida, horario_chegada, rota, chegada)
+    def apresentaVoosFiltrados(self, formulario):
+        return self.controladorCrud.readVoos(formulario)
     def removePorId(self, vooid):
         return self.controladorCrud.deleteVoosPorId(vooid)
     def atualizaPorId(self, vooid, companhia, horario_partida, horario_chegada, rota, chegada):
@@ -210,7 +208,13 @@ class ControladorCrud():
 
         return Voo.objects.select_related('rota_voo').get(voo_id=voo.pk)
 
-    def readVoos(self, companhia: str, horario_partida: str, horario_chegada: str, rota: str, chegada: bool):
+    def readVoos(self, form):
+        companhia = form.data['companhia']
+        horario_partida = form.data['horario_partida']
+        horario_chegada = form.data['horario_chegada']
+        rota = form.data['rota']
+        chegada = True if 'chegada' in form.data else False
+        
         voosFiltrados = Voo.objects.all()
         if companhia != "":
             voosFiltrados = voosFiltrados.filter(companhia_aerea=companhia)
@@ -518,5 +522,13 @@ def criarTabelasProducao():
     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
 
 def criarTabelasProducaoComRequest(request):
+    # reseta_id_voos()
     criarTabelasProducao()
     return render(request, "telainicial.html")
+
+def reseta_id_voos():
+    cursor = connection.cursor()
+
+    # Operação de modificação de dado - commit obrigatório
+    cursor.execute("UPDATE SQLITE_SEQUENCE SET seq = 0;")
+    transaction.commit()

@@ -60,8 +60,8 @@
             </td>
             <td>{{voo.companhia_aerea}}</td>
             <td>{{voo.rota_voo}}</td>
-            <td>{{voo.horario_partida_previsto}}</td>
-            <td>{{voo.horario_chegada_previsto}}</td>
+            <td>{{voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
+            <td>{{voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
           </tr>
         {% endfor %}
 
