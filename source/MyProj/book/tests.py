@@ -362,23 +362,18 @@ class ControladorAtualizarStatusDeVooTest(TestCase):
 
   def test_apresentacao_voos(self):
     agora = datetime.now(tz=timezone.utc)
-    voo_D_chegada = agora + timedelta(days = 2, hours=1)
     #controlador
     voos = self.controlador.apresentaVoosNaoFinalizados()
     
     #verifica se os voos cancelado(id=3) e Aterrissado(id=5) a mais de 1 hora não estão na lista
     for voo in voos:
-      hcr = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc) if voo.get('horario_chegada_real')=='-' else datetime.strptime(voo.get('horario_chegada_real'), '%H:%M')
-      hcr = hcr if voo.get('horario_chegada_real')=='-' else datetime(agora.year, agora.month, agora.day, hcr.hour, hcr.minute, tzinfo=timezone.utc)
-      hpp = datetime.strptime(voo.get('horario_partida_previsto'), '%H:%M')
-      hpp = datetime(agora.year, agora.month, agora.day, hpp.hour, hpp.minute, tzinfo=timezone.utc)
-      hcp = datetime.strptime(voo.get('horario_chegada_previsto'), '%H:%M')
-      hcp = datetime(voo_D_chegada.year, voo_D_chegada.month, voo_D_chegada.day, hcp.hour, hcp.minute, tzinfo=timezone.utc) if voo.get('companhia_aerea') == 'D' else datetime(agora.year, agora.month, agora.day, hcp.hour, hcp.minute, tzinfo=timezone.utc)
-      self.assertFalse((voo.get('status') == 'Aterrissado') & (agora - timedelta(hours=1) >= hcr)) #testa se não existem voos Aterrissados a mais de 1 hora (não devem haver)
-      self.assertFalse((voo.get('status') == 'Cancelado') & (agora - timedelta(hours=1) >= hpp)) #testa se não existem voos cancelados a mais de 1 hora (não devem haver)
-      self.assertFalse((voo.get('status') == '-') & (agora + timedelta(days=2) <= hcp)) #testa se não existem voos cadastrados que ocorrerão somente em dois dias ou mais (não devem ser monitorados)
-      self.assertNotIn(voo.get('voo_id'), [3, 5, 12])
-      self.assertTrue((voo.get('status') not in ['Em voo', 'Autorizado', 'Aterrissado']) & (voo.get('horario_partida_real') == voo.get('horario_chegada_real') == '-') | ((voo.get('status') in ['Em voo', 'Autorizado']) & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') == '-')) | ((voo.get('status') == 'Aterrissado') & (voo.get('horario_partida_real') != voo.get('horario_chegada_real') != '-')))
+      hcr = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc) if voo.horario_chegada_real == None else voo.horario_chegada_real
+      status = None if  voo.status_voo == None else voo.status_voo.status_nome
+      self.assertFalse((status == 'Aterrissado') & (agora - timedelta(hours=1) >= hcr)) #testa se não existem voos Aterrissados a mais de 1 hora (não devem haver)
+      self.assertFalse((status == 'Cancelado') & (agora - timedelta(hours=1) >= voo.voo.horario_partida_previsto)) #testa se não existem voos cancelados a mais de 1 hora (não devem haver)
+      self.assertFalse((status == None) & (agora + timedelta(days=2) <= voo.voo.horario_chegada_previsto)) #testa se não existem voos cadastrados que ocorrerão somente em dois dias ou mais (não devem ser monitorados)
+      self.assertNotIn(voo.voo_id, [3, 5, 12])
+      self.assertTrue((status not in ['Em voo', 'Autorizado', 'Aterrissado']) & (voo.horario_partida_real == voo.horario_chegada_real == None) | ((status in ['Em voo', 'Autorizado']) & (voo.horario_partida_real != voo.horario_chegada_real == None)) | ((status == 'Aterrissado') & (voo.horario_partida_real != voo.horario_chegada_real != '-')))
 
   def test_status_possiveis(self):
     # status vazio

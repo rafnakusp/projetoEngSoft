@@ -50,7 +50,7 @@ def telaLogin(request):
         return redirect("/telainicial/")
 
 def telainicial(request):
-    # reseta_id_voos() - descomentar quando quiser resetar a contagem das primary keys
+    reseta_id_voos() #- descomentar quando quiser resetar a contagem das primary keys
     criarTabelasProducao()
     template = loader.get_template('telainicial.html')
     context = {
@@ -293,40 +293,12 @@ class ControladorAtualizarStatusDeVoo():
                    voosfiltrados.append(voo)
             elif ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrissado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
                voosfiltrados.append(voo)
-        
-        voosformatados = []
-        for voofiltrado in voosfiltrados:
-            vooformatado = {
-                "voo_id": voofiltrado.voo.voo_id,
-                "companhia_aerea": voofiltrado.voo.companhia_aerea,
-                "aeroporto_origem": voofiltrado.voo.rota_voo.outro_aeroporto if voofiltrado.voo.rota_voo.chegada else "Este aeroporto",
-                "aeroporto_destino": "Este aeroporto" if voofiltrado.voo.rota_voo.chegada else voofiltrado.voo.rota_voo.outro_aeroporto,
-                "status": "-" if voofiltrado.status_voo == None else voofiltrado.status_voo.status_nome,
-                "horario_partida_previsto": voofiltrado.voo.horario_partida_previsto.strftime('%H:%M'),
-                "horario_chegada_previsto": voofiltrado.voo.horario_chegada_previsto.strftime('%H:%M'),
-                "horario_partida_real": "-" if voofiltrado.horario_partida_real == None else voofiltrado.horario_partida_real.strftime('%H:%M'),
-                "horario_chegada_real": "-" if voofiltrado.horario_chegada_real == None else voofiltrado.horario_chegada_real.strftime('%H:%M')
-            }
-            voosformatados.append(vooformatado)
 
-        return voosformatados
+        return voosfiltrados
 
     def apresentaVoo(self, vooid):
         voo = ProgressoVoo.objects.select_related('status_voo', 'voo').extra(select={'val': "select chegada from Rota r, ProgressoVoo pv, Voo v on r.rota_id=v.rota_voo_id and v.voo_id = pv.voo_id"}).get(voo_id=vooid)
-
-        vooformatado = {
-                "voo_id": voo.voo.voo_id,
-                "companhia_aerea": voo.voo.companhia_aerea,
-                "aeroporto_origem": voo.voo.rota_voo.outro_aeroporto if voo.voo.rota_voo.chegada else "Este aeroporto",
-                "aeroporto_destino": "Este aeroporto" if voo.voo.rota_voo.chegada else voo.voo.rota_voo.outro_aeroporto,
-                "status": "-" if voo.status_voo == None else voo.status_voo.status_nome,
-                "horario_partida_previsto": voo.voo.horario_partida_previsto.strftime('%H:%M'),
-                "horario_chegada_previsto": voo.voo.horario_chegada_previsto.strftime('%H:%M'),
-                "horario_partida_real": "-" if voo.horario_partida_real == None else voo.horario_partida_real.strftime('%H:%M'),
-                "horario_chegada_real": "-" if voo.horario_chegada_real == None else voo.horario_chegada_real.strftime('%H:%M')
-            }
-        
-        return vooformatado
+        return voo
 
     def statusPossiveis(self, vooid):
         voo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
