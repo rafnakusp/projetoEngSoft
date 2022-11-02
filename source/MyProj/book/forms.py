@@ -5,12 +5,7 @@ from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanF
 
 class formularioFiltroVoo(Form):
     class IntervaloDatas(MultiWidget):
-        def __str__(self) -> str:
-            print("tos")
-            return super().__str__()
         def decompress(self, value):
-            print("JNFBRBI")
-            print(value)
             if value == None:
                 return [None, None]
             elif len(value) == 0:

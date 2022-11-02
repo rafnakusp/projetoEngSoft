@@ -216,9 +216,14 @@ class ControladorCrud():
         return Voo.objects.select_related('rota_voo').get(voo_id=voo.pk)
 
     def readVoos(self, form):
+        earliest_date = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc)
+        latest_date = datetime(9999, 12, 31, 23, 59, 59, 999999, tzinfo=timezone.utc)
+
         companhia = form.data['companhia']
-        horario_partida = form.data['horario_partida']
-        horario_chegada = form.data['horario_chegada']
+        inicio_periodo_pesquisa_partida = form.data['intervalo_partida_0']
+        fim_periodo_pesquisa_partida = form.data['intervalo_partida_1']
+        inicio_periodo_pesquisa_chegada = form.data['intervalo_chegada_0']
+        fim_periodo_pesquisa_chegada = form.data['intervalo_chegada_1']
         rota = form.data['rota']
         chegada = True if 'chegada' in form.data else False
         
@@ -231,10 +236,28 @@ class ControladorCrud():
             voosFiltrados = voosFiltrados.filter(rota_voo=rota)
         if companhia != "":
             voosFiltrados = voosFiltrados.filter(companhia_aerea=companhia)
-        if horario_partida != "":
-            voosFiltrados = voosFiltrados.filter(horario_partida_previsto=horario_partida)
-        if horario_chegada != "":
-            voosFiltrados = voosFiltrados.filter(horario_chegada_previsto=horario_chegada)
+        if inicio_periodo_pesquisa_partida != "" or fim_periodo_pesquisa_partida != "":
+            if inicio_periodo_pesquisa_partida == "":
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[earliest_date, fppp])
+            elif fim_periodo_pesquisa_partida == "":
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[ippp, latest_date])
+            else:
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[ippp, fppp])
+        if inicio_periodo_pesquisa_chegada != "" or fim_periodo_pesquisa_chegada != "":
+            if inicio_periodo_pesquisa_chegada == "":
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[earliest_date, fppc])
+            elif fim_periodo_pesquisa_chegada == "":
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[ippc, latest_date])
+            else:
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[ippc, fppc])
 
         print(voosFiltrados)
 
