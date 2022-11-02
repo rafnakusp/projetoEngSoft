@@ -297,8 +297,7 @@ class ControladorAtualizarStatusDeVoo():
         return voosfiltrados
 
     def apresentaVoo(self, vooid):
-        voo = ProgressoVoo.objects.select_related('status_voo', 'voo').extra(select={'val': "select chegada from Rota r, ProgressoVoo pv, Voo v on r.rota_id=v.rota_voo_id and v.voo_id = pv.voo_id"}).get(voo_id=vooid)
-        return voo
+        return ProgressoVoo.objects.select_related('status_voo', 'voo').extra(select={'val': "select chegada from Rota r, ProgressoVoo pv, Voo v on r.rota_id=v.rota_voo_id and v.voo_id = pv.voo_id"}).get(voo_id=vooid)
 
     def statusPossiveis(self, vooid):
         voo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
