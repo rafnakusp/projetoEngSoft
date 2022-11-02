@@ -87,8 +87,9 @@ def crud(request):
                 return HttpResponse(template.render(context, request))
 
         elif request.POST["tipo"] == "filtrar":
-            template = loader.get_template('crudlistavoos.html')
+            template = loader.get_template('crud.html')
             context = {
+                "formulario_voos": form,
                 "voo_list": fronteira.apresentaVoosFiltrados(companhia, horario_partida, horario_chegada, rota, chegada) # context é a lista de voos já convertida
             }
             return HttpResponse(template.render(context, request))

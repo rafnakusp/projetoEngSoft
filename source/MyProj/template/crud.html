@@ -2,13 +2,30 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <style>
+      .lista {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      
+      .lista  th, .lista  td  {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      
+      .lista tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+      </style>
   </head>
 
   <body>
     <p>Tela de CRUD de voos</p>
     <p>filtrar por:</p>
 
-    <form action="{% url 'crud' %}" method="POST">{% csrf_token %}
+    <form action="{% url 'crud' %}" method="POST" id="filtro">{% csrf_token %}
       
       <table>
         {{formulario_voos.as_table}}
@@ -16,9 +33,41 @@
       
       <button name="tipo" value="filtrar">Filtrar</button>
       <button name="tipo" value="cadastrar">Cadastrar Novo Voo</button>
-
+      
     </form>
+    <a href="../telainicial/"><button>Voltar</button></a>
 
+    
+    {%if voo_list %}
+    <p>Menu de consulta, alteração e remoção de voos</p>
+    <table class="lista">
+        <tr>
+          <th>id do voo</th>
+          <th>companhia aérea</th>
+          <th>rota</th>
+          <th>horário de partida previsto</th>
+          <th>horário de chegada previsto</th>
+        </tr>
+        {% for voo in voo_list %}
+          <tr>
+            <td>{{voo.voo_id}}
+              <form action="./delete/{{voo.voo_id}}/">
+                <button>Deletar</button>
+              </form>
+              <form action="./update/{{voo.voo_id}}/">
+                <button>Atualizar</button>
+              </form>
+            </td>
+            <td>{{voo.companhia_aerea}}</td>
+            <td>{{voo.rota_voo}}</td>
+            <td>{{voo.horario_partida_previsto}}</td>
+            <td>{{voo.horario_chegada_previsto}}</td>
+          </tr>
+        {% endfor %}
+
+      </table>
+      {%endif%}
+    
   </body>
 </html>
 
