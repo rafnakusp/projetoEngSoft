@@ -466,44 +466,29 @@ class ControladorCrudTest(TestCase):
 
     self.assertEqual(6, len(voos))
 
-#   def test_delete(self):
-# #     vooid = 3
-#   def test_read_voos_campos_em_branco(self):
+
+  def test_delete(self):
+    vooid = 3
     
-#     dados_voo = {
-#       "companhia_aerea": "American Airlines", 
-#       "horario_partida_previsto": "", 
-#       "horario_chegada_previsto": "", 
-#       "rota_voo": "",
-#       "chegada": True,
-#     }
+    self.controladorCrud.deleteVoosPorId(vooid)
+    queryset_vooid = Voo.objects.all().filter(voo_id=vooid)
+
+    self.assertEqual(0, queryset_vooid.count())
+
+  def test_update(self):
+    dados_voo = {
+      "voo_id": 1,
+      "companhia_aerea": "New Airlines", 
+      "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
+      "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
+      "rota_voo": "Santos Dumont",
+      "chegada": True,
+    }
     
-#     voos = self.controladorCrud.readVoos(companhia=dados_voo['companhia_aerea'], horario_partida=dados_voo['horario_partida_previsto'], horario_chegada=dados_voo['horario_chegada_previsto'], rota=dados_voo['rota_voo'], chegada=dados_voo['chegada'])
+    self.controladorCrud.updateVoosPorId(dados_voo['voo_id'], dados_voo['companhia_aerea'], dados_voo['horario_partida_previsto'], dados_voo['horario_chegada_previsto'], dados_voo['rota_voo'], dados_voo['chegada'])
+    companhia = Voo.objects.get(voo_id=dados_voo['voo_id']).companhia_aerea
 
-#     self.assertEqual(2, len(voos))
-
-#   def test_delete(self):
-#     vooid = 3
-    
-#     self.controladorCrud.deleteVoosPorId(vooid)
-#     queryset_vooid = Voo.objects.all().filter(voo_id=vooid)
-
-#     self.assertEqual(0, queryset_vooid.count())
-
-#   def test_update(self):
-#     dados_voo = {
-#       "voo_id": 1,
-#       "companhia_aerea": "Airlines", 
-#       "horario_partida_previsto": "2022-08-11 10:30:00+00:00", 
-#       "horario_chegada_previsto": "2022-08-11 12:15:00+00:00", 
-#       "rota_voo": "Santos Dumont",
-#       "chegada": True,
-#     }
-    
-#     self.controladorCrud.updateVoosPorId(dados_voo['voo_id'], dados_voo['companhia_aerea'], dados_voo['horario_partida_previsto'], dados_voo['horario_chegada_previsto'], dados_voo['rota_voo'], dados_voo['chegada'])
-#     companhia = Voo.objects.get(voo_id=dados_voo['voo_id']).companhia_aerea
-
-#     self.assertEqual(dados_voo['companhia_aerea'], companhia)
+    self.assertEqual(dados_voo['companhia_aerea'], companhia)
 
 
 ################################################################################
