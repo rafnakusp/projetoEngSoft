@@ -458,7 +458,7 @@ def geracaoDeRelatoriosVoosRealizados(request):
         timestamp_max = form.data['timestamp_max']
 
         context = {
-            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(timestamp_min, timestamp_max)
+            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(timestamp_min, timestamp_max, companhia)
         }
         return render(request, "relatoriovoosrealizados.html", context)
 
