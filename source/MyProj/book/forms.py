@@ -56,6 +56,7 @@ class formularioCadastroVoo(Form):
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
 
 class FormularioFiltroRelatorio(Form):
+    companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
     timestamp_min = DateTimeField(label="O voo terminou depois de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))
     timestamp_max = DateTimeField(label="O voo terminou antes de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))
 

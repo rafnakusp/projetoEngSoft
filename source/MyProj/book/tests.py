@@ -787,6 +787,16 @@ class ControleGeracaoRelatoriosTest(TestCase):
 
     self.assertEqual(2, lista_voos_resultado.count())
 
+  def test_filtrar_voos_realizados(self):
+    filtro_teste = {
+      "timestamp_min": "",
+      "timestamp_max": ""
+    }
+
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
+
+    self.assertEqual(3, lista_voos_resultado.count())
+
 
 
 

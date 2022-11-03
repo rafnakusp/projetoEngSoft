@@ -2,6 +2,9 @@
 <!doctype html>
 <html lang="en">
   <head>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  
   </head>
 
   <body>
@@ -12,22 +15,32 @@
       </head>
     
       <body>
-        <p>Tela de geração de  relatório de voos atrasados</p>
-        <p>filtrar por:</p>
-    
-        <form action="." method="POST" target="_blank">{% csrf_token %} 
+        <div class="mr-2 ml-2">
+          <p>Tela de geração de  relatório de voos atrasados</p>
+          <p>filtrar por:</p>
           
-          <table>
-            {{formulario.as_table}}
-          </table>
+          <form action="." method="POST">{% csrf_token %}
+            <table class="text-left">
+              {{formulario.as_table}}
+            </table>
+            <br>
+            <button class="btn btn-primary rounded" name="tipo" value="filtrar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-bar-graph" viewBox="0 0 16 16">
+                <path d="M4.5 12a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-1zm3 0a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1zm3 0a.5.5 0 0 1-.5-.5v-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-1z"/>
+                <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+              </svg>
+              Gerar relatório
+            </button>
+          </form>
 
-          <br>
-          <button name="tipo" value="filtrar">Gerar relatório</button>
-    
-        </form>
+          <a href="/geracaoderelatorios/"><button class="btn btn-light">Voltar</button></a>
+        
+        </div>
 
-        <a href="/geracaoderelatorios/"><button>Voltar</button></a>
-    
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+      
       </body>
     </html>
     
