@@ -504,7 +504,7 @@ class ControleGeracaoRelatorios():
             Q(horario_chegada_real__isnull=True, voo__horario_chegada_previsto__lt=agora)).order_by('voo_id').distinct()
 
     def filtrarVoosRealizados(self, timestamp_min, timestamp_max):
-        return self.filtrarVoos(timestamp_min, timestamp_max).filter(horario_chegada_real__isnull=False).order_by('voo_id').distinct()
+        return self.filtrarVoos(timestamp_min, timestamp_max,"").filter(horario_chegada_real__isnull=False).order_by('voo_id').distinct()
 
 ################################################################################
 ####                         Criador de tabelas                             ####

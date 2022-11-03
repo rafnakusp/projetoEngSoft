@@ -759,31 +759,34 @@ class ControleGeracaoRelatoriosTest(TestCase):
 
   def test_filtrar_voos(self):
     filtro_teste = {
+      "companhia": "",
       "timestamp_min": "2022-08-03 10:30:00+00:00",
       "timestamp_max": "2022-08-11 10:30:00+00:00"
     }
 
-    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
 
     self.assertEqual(2, lista_voos_resultado.count())
   
   def test_filtrar_voos_min_null(self):
     filtro_teste = {
+      "companhia": "",
       "timestamp_min": "",
       "timestamp_max": "2022-08-11 10:30:00+00:00"
     }
 
-    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
 
     self.assertEqual(2, lista_voos_resultado.count())
 
   def test_filtrar_voos_atrasados(self):
     filtro_teste = {
+      "companhia": "",
       "timestamp_min": "2022-08-05 10:30:00+00:00",
       "timestamp_max": "2022-08-20 10:30:00+00:00"
     }
 
-    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'])
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
 
     self.assertEqual(2, lista_voos_resultado.count())
 
