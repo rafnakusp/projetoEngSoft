@@ -453,11 +453,12 @@ def geracaoDeRelatoriosVoosRealizados(request):
     if request.method == "POST":
         form = FormularioFiltroRelatorio(request.POST)
 
+        companhia = form.data['companhia']
         timestamp_min = form.data['timestamp_min']
         timestamp_max = form.data['timestamp_max']
 
         context = {
-            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(timestamp_min, timestamp_max)
+            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(timestamp_min, timestamp_max, companhia)
         }
         return render(request, "relatoriovoosrealizados.html", context)
 
@@ -470,11 +471,12 @@ def geracaoDeRelatoriosVoosAtrasados(request):
     if request.method == "POST":
         form = FormularioFiltroRelatorio(request.POST)
 
+        companhia = form.data['companhia']
         timestamp_min = form.data['timestamp_min']
         timestamp_max = form.data['timestamp_max']
 
         context = {
-            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosAtrasados(timestamp_min, timestamp_max)
+            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosAtrasados(timestamp_min, timestamp_max, companhia)
         }
         return render(request, "relatoriovoosatrasados.html", context)
 
@@ -483,18 +485,21 @@ def geracaoDeRelatoriosVoosAtrasados(request):
 
 
 class ControleGeracaoRelatorios():
-    def filtrarVoos(self, timestamp_min, timestamp_max):
-        voosQuerySet = ProgressoVoo.objects.select_related("voo")
+    def filtrarVoos(self, timestamp_min, timestamp_max, companhia):
+        voosQuerySet = ProgressoVoo.objects.select_related("voo", "status_voo")
+        str(voosQuerySet.query)
+        if companhia != "":
+            voosQuerySet = voosQuerySet.filter(voo__companhia_aerea__exact=companhia)
         if timestamp_min != "":
             voosQuerySet = voosQuerySet.filter(horario_chegada_real__gt=timestamp_min)
         if timestamp_max != "":
             voosQuerySet = voosQuerySet.filter(horario_chegada_real__lt=timestamp_max)
         return voosQuerySet
     
-    def filtrarVoosAtrasados(self, timestamp_min, timestamp_max):
+    def filtrarVoosAtrasados(self, timestamp_min, timestamp_max, companhia):
         agora = datetime.now(timezone.utc)
         print(agora)
-        return self.filtrarVoos(timestamp_min, timestamp_max).filter(Q(horario_chegada_real__gt=F('voo__horario_chegada_previsto')) | Q(horario_chegada_real__isnull=True, \
+        return self.filtrarVoos(timestamp_min, timestamp_max, companhia).filter(Q(horario_chegada_real__gt=F('voo__horario_chegada_previsto')) | Q(horario_chegada_real__isnull=True, \
             horario_partida_real__gt=F('voo__horario_partida_previsto')) | Q(horario_partida_real__isnull=True, voo__horario_partida_previsto__lt=agora) | \
             Q(horario_chegada_real__isnull=True, voo__horario_chegada_previsto__lt=agora)).order_by('voo_id').distinct()
 
