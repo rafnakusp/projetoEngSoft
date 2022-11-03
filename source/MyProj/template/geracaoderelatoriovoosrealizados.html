@@ -15,7 +15,7 @@
         <p>Tela de geração de relatório de voos realizados</p>
         <p>filtrar por:</p>
     
-        <form action="." method="POST">{% csrf_token %}
+        <form action="." method="POST" target="_blank">{% csrf_token %}
           
           <table>
             {{formulario.as_table}}
@@ -25,6 +25,8 @@
           <button name="tipo" value="filtrar">Gerar relatório</button>
     
         </form>
+
+        <a href="/geracaoderelatorios/"><button>Voltar</button></a>
     
       </body>
     </html>
