@@ -382,18 +382,13 @@ class PainelDeMonitoracao():
 class ControladorAtualizarStatusDeVoo():
 
     def apresentaVoosNaoFinalizados(self):
-        voos = ProgressoVoo.objects.select_related('status_voo', 'voo').extra(select={'val': "select chegada from Rota r, ProgressoVoo pv, Voo v on r.rota_id=v.rota_voo_id and v.voo_id = pv.voo_id"})
+        voos = ProgressoVoo.objects.all()#.select_related('status_voo', 'voo').extra(select={'val': "select chegada from Rota r, ProgressoVoo pv, Voo v on r.rota_id=v.rota_voo_id and v.voo_id = pv.voo_id"})
         
-        voosfiltrados = []
-        for voo in voos:
-            hcr = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc) if voo.horario_chegada_real==None else voo.horario_chegada_real
-            if voo.status_voo == None:
-                if datetime.now(tz=timezone.utc) + timedelta(days=2) > voo.voo.horario_chegada_previsto:
-                   voosfiltrados.append(voo)
-            elif ((voo.status_voo.status_nome not in ['Cancelado', 'Aterrissado']) | (datetime.now(tz=timezone.utc) - timedelta(hours=1) < hcr) | (datetime.now(tz=timezone.utc) - timedelta(hours = 1) < voo.voo.horario_partida_previsto)):
-               voosfiltrados.append(voo)
+        timeoutVooSemstatus = datetime.now(tz=timezone.utc) + timedelta(days=2)
+        timeout1hora = datetime.now(tz=timezone.utc) - timedelta(hours=1)# Timeout se cancelado ou atrasado há mais de 1 hora
 
-        return voosfiltrados
+        return voos.filter(~Q(status_voo__status_nome__in=['Cancelado', 'Aterrissado']) | Q(horario_chegada_real__gt=timeout1hora) | Q(voo__horario_partida_previsto__gt=timeout1hora))\
+                   .exclude(status_voo__isnull=True, voo__horario_chegada_previsto__gte=timeoutVooSemstatus)
 
     def apresentaVoo(self, vooid):
         return ProgressoVoo.objects.select_related('status_voo', 'voo').extra(select={'val': "select chegada from Rota r, ProgressoVoo pv, Voo v on r.rota_id=v.rota_voo_id and v.voo_id = pv.voo_id"}).get(voo_id=vooid)
@@ -486,7 +481,7 @@ def geracaoDeRelatoriosVoosAtrasados(request):
 
 class ControleGeracaoRelatorios():
     def filtrarVoos(self, timestamp_min, timestamp_max, companhia):
-        voosQuerySet = ProgressoVoo.objects.select_related("voo", "status_voo")
+        voosQuerySet = ProgressoVoo.objects.all()
         str(voosQuerySet.query)
         if companhia != "":
             voosQuerySet = voosQuerySet.filter(voo__companhia_aerea__exact=companhia)
