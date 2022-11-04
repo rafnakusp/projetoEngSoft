@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+
+{% block title %}Aeroporto - Deleção de Voo{% endblock title %}
+
+{% block content %}
+<div class="p-3">
+    <p>Tem certeza que deseja deletar o voo {{vooid}}?</p>
+    <form action="../../../delete/{{vooid}}/">
+        <button class="btn btn-success btn-sm mb-1">Sim</button>
+    </form>
+
+    <a href="/crud/"><button class="btn btn-lighter mt-2">Voltar</button></a>
+    
+</div>
+{% endblock content %}

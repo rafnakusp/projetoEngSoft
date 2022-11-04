@@ -147,6 +147,9 @@ def crudCreate(request):
                 }
                 return render(request, template, context)
                
+def crudConfirmarDelecao(request, vooid):
+    context = {'vooid': vooid}
+    return render(request, "deletarvooconfirmacao.html", context)
 
 
 def crudDelete(request, vooid):
