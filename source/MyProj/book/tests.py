@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.test import TestCase
+from django.test import TestCase, Client
 
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
@@ -836,6 +836,26 @@ class ControleGeracaoRelatoriosTest(TestCase):
 
     self.assertEqual(2, lista_voos_resultado.count())
     
+################################################################################
+################################################################################
+####                    Testes da interface http (requests)                 ####
+################################################################################          
+################################################################################          
+
+class TesteRequestLogin(TestCase):
+  def teste_login_correto(self):
+    cliente = Client()
+
+    resposta = cliente.post('/login/', {'username': 'operadordevoos', 'password': 'senha'})
+
+    self.assertEqual(resposta.status_code, 302)
+
+  def teste_login_incorreto(self):
+    cliente = Client()
+
+    resposta = cliente.post('/login/', {'username': 'operadodevoos', 'password': 'senha'})
+
+    self.assertEqual(resposta.status_code, 200)
 
 
 ################################################################################
