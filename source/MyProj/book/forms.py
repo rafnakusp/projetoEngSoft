@@ -1,16 +1,22 @@
 import datetime
+from typing import Any, Optional, Sequence, Type, Union
 from django.forms.utils import from_current_timezone
 from django.utils.dateparse import parse_datetime
-from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanField, MultiWidget, ValidationError, ChoiceField
+from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanField, MultiWidget, ValidationError, ChoiceField, Widget
 
 formatoData = "%Y-%m-%dT%H:%M"
 
 class IntervaloDatasField(DateTimeField):
+        # def __init__(self, input_formats: Optional[Any] = ..., required: bool = ..., widget: Optional[Union[Widget, Type[Widget]]] = ..., label: Optional[Any] = ..., initial: Optional[Any] = ..., help_text: str = ..., error_messages: Optional[Any] = ..., show_hidden_initial: bool = ..., validators: Sequence[Any] = ..., localize: bool = ..., disabled: bool = ..., label_suffix: Optional[Any] = ...) -> None:
+        #     self.empty_values.append([None, None])
+        #     super().__init__()
         def to_python(self, value):
             """
             Validate that the input can be converted to a datetime. Return a
             Python datetime.datetime object.
             """
+            print(value)
+            print(self.empty_values)
             if value in self.empty_values:
                 return None
             end = []

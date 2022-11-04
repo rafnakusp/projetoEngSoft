@@ -871,6 +871,41 @@ class TesteRequestLogin(TestCase):
 
     self.assertEqual(resposta.status_code, 200)
 
+################################################################################
+################################################################################
+####                         Testes de forms                                ####
+################################################################################          
+################################################################################
+
+class TestesForms(TestCase):
+  def teste_validade_forms_filtro_voo(self):
+    dados_voo = {
+        "companhia": "American Airlines", 
+        "horario_partida": "", 
+        "horario_chegada": "2022-11-03T11:10", 
+        "rota": "Santos Dumont",
+        "chegada": True
+      }
+
+    form = formularioCadastroVoo(dados_voo)
+    self.assertFalse(form.is_valid())
+
+    dados_voo = {
+        "companhia": "American Airlines",
+        "horario_partida": "2022-11-03T11:10", 
+        "horario_chegada": "2022-11-03T11:10", 
+        "rota": "Santos Dumont",
+        "chegada": True
+      }
+
+    form = formularioCadastroVoo(dados_voo)
+    self.assertTrue(form.is_valid())
+
+  def teste_labels_forms_filtro_voos(self):
+    form = formularioFiltroVoo()
+
+    self.assertEqual(form.fields['companhia'].label, "Companhia aérea")
+    self.assertEqual(form.fields['intervalo_partida'].label, "Intervalo de busca da data e horário da partida")
 
 ################################################################################
 ################################################################################
