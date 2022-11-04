@@ -5,17 +5,7 @@ from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanF
 
 formatoData = "%Y-%m-%dT%H:%M"
 
-class formularioFiltroVoo(Form):
-    class IntervaloDatas(MultiWidget):
-        def decompress(self, value):
-            if value == None:
-                return [None, None]
-            elif len(value) == 0:
-                return [None, None]
-            elif len(value) == 1:
-                return [value[0], None]
-            return [value[0], value[1]]
-    class IntervaloDatasField(DateTimeField):
+class IntervaloDatasField(DateTimeField):
         def to_python(self, value):
             """
             Validate that the input can be converted to a datetime. Return a
@@ -42,9 +32,26 @@ class formularioFiltroVoo(Form):
                 end.append(from_current_timezone(result))
             return end
 
+class IntervaloDatas(MultiWidget):
+        def decompress(self, value):
+            if value == None:
+                return [None, None]
+            elif len(value) == 0:
+                return [None, None]
+            elif len(value) == 1:
+                return [value[0], None]
+            return [value[0], value[1]]
+
+class formularioFiltroVoo(Form):
     companhia = CharField(max_length=50, required=False, label="Companhia aérea")
-    intervalo_partida = IntervaloDatasField(required=False, widget=IntervaloDatas(widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), label="Intervalo de busca da data e horário da partida")
-    intervalo_chegada = IntervaloDatasField(required=False, widget=IntervaloDatas(widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), label="Intervalo de busca da data e horário da chegada")
+    intervalo_partida = IntervaloDatasField(required=False, widget=IntervaloDatas(\
+        widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
+        DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
+        label="Intervalo de busca da data e horário da partida")
+    intervalo_chegada = IntervaloDatasField(required=False, widget=IntervaloDatas(\
+        widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
+        DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
+        label="Intervalo de busca da data e horário da chegada")
     rota = CharField(max_length=50, required=False)
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
 
@@ -55,10 +62,16 @@ class formularioCadastroVoo(Form):
     rota = CharField(max_length=50, required=True, error_messages={'required': 'O nome da rota (ou seja, aeroporto de origem/destino) é obrigatório'}, label="Aeroporto de origem/destino")
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
 
-class FormularioFiltroRelatorio(Form):
+class FormularioFiltroRelatorioVoosRealizados(Form):
     companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
-    timestamp_min = DateTimeField(label="O voo terminou depois de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))
-    timestamp_max = DateTimeField(label="O voo terminou antes de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+    intervalo_partida = IntervaloDatasField(required=False, widget=IntervaloDatas(\
+        widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
+        DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
+        label="Intervalo de busca da data e horário da partida")
+    intervalo_chegada = IntervaloDatasField(required=False, widget=IntervaloDatas(\
+        widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
+        DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
+        label="Intervalo de busca da data e horário da chegada")
 
 class FormularioFiltroRelatorioVoosAtrasados(Form):
     opcoes_status = [

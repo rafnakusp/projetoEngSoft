@@ -12,7 +12,7 @@ from .forms import formularioFiltroVoo, formularioCadastroVoo
 from django.db.models import Q, F
 
 
-from .forms import formularioCadastroVoo, FormularioFiltroRelatorio, FormularioFiltroRelatorioVoosAtrasados
+from .forms import formularioCadastroVoo, FormularioFiltroRelatorioVoosRealizados, FormularioFiltroRelatorioVoosAtrasados
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
@@ -444,18 +444,14 @@ def geracaoDeRelatoriosVoosRealizados(request):
     controleGeracaoRelatorios = ControleGeracaoRelatorios()
 
     if request.method == "POST":
-        form = FormularioFiltroRelatorio(request.POST)
-
-        companhia = form.data['companhia']
-        timestamp_min = form.data['timestamp_min']
-        timestamp_max = form.data['timestamp_max']
+        form = FormularioFiltroRelatorioVoosRealizados(request.POST)
 
         context = {
-            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(timestamp_min, timestamp_max, companhia)
+            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(form)
         }
         return render(request, "relatoriovoosrealizados.html", context)
 
-    form = FormularioFiltroRelatorio()
+    form = FormularioFiltroRelatorioVoosRealizados()
     return render(request, "geracaoderelatoriovoosrealizados.html", {'formulario': form})
 
 def geracaoDeRelatoriosVoosAtrasados(request):
@@ -477,13 +473,42 @@ def geracaoDeRelatoriosVoosAtrasados(request):
 
 
 class ControleGeracaoRelatorios():
-    def filtrarVoos(self, timestamp_min, timestamp_max, companhia):
+    formatoData = "%Y-%m-%dT%H:%M"
+
+    def filtrarVoos(self, form):
+        companhia = form.data['companhia']
+        inicio_periodo_pesquisa_partida = form.data['intervalo_partida_0']
+        fim_periodo_pesquisa_partida = form.data['intervalo_partida_1']
+        inicio_periodo_pesquisa_chegada = form.data['intervalo_chegada_0']
+        fim_periodo_pesquisa_chegada = form.data['intervalo_chegada_1']
+        print(inicio_periodo_pesquisa_partida)
+
         voosQuerySet = ProgressoVoo.objects.all()
-        str(voosQuerySet.query)
-        if timestamp_min != "":
-            voosQuerySet = voosQuerySet.filter(horario_chegada_real__gt=timestamp_min)
-        if timestamp_max != "":
-            voosQuerySet = voosQuerySet.filter(horario_chegada_real__lt=timestamp_max)
+        if companhia != "":
+            voosQuerySet = voosQuerySet.filter(voo__companhia_aerea=companhia)
+        if inicio_periodo_pesquisa_partida != "" or fim_periodo_pesquisa_partida != "":
+            if inicio_periodo_pesquisa_partida == "":
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
+                voosQuerySet = voosQuerySet.filter(horario_partida_real__lte=fppp)
+            elif fim_periodo_pesquisa_partida == "":
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
+                voosQuerySet = voosQuerySet.filter(horario_partida_real__gte=ippp)
+            else:
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                voosQuerySet = voosQuerySet.filter(horario_partida_real__range=[ippp, fppp])
+        if inicio_periodo_pesquisa_chegada != "" or fim_periodo_pesquisa_chegada != "":
+            if inicio_periodo_pesquisa_chegada == "":
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                voosQuerySet = voosQuerySet.filter(horario_chegada_real__lte=fppc)
+            elif fim_periodo_pesquisa_chegada == "":
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                voosQuerySet = voosQuerySet.filter(horario_chegada_real__gte=ippc)
+            else:
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                voosQuerySet = voosQuerySet.filter(horario_chegada_real__range=[ippc, fppc])
+
         return voosQuerySet
     
     def filtrarVoosAtrasados(self, status, companhia):
@@ -502,8 +527,8 @@ class ControleGeracaoRelatorios():
             Q(horario_chegada_real__isnull=True, voo__horario_chegada_previsto__lt=agora))\
             .exclude(status_voo__status_nome="Cancelado").order_by('voo_id').distinct() # Voos cancelados nao estao atrasados
 
-    def filtrarVoosRealizados(self, timestamp_min, timestamp_max, companhia):
-        return self.filtrarVoos(timestamp_min, timestamp_max,companhia).filter(horario_chegada_real__isnull=False).order_by('voo_id').distinct()
+    def filtrarVoosRealizados(self, form):
+        return self.filtrarVoos(form).filter(horario_chegada_real__isnull=False).order_by('voo_id').distinct()
 
 ################################################################################
 ####                         Criador de tabelas                             ####
