@@ -5,7 +5,7 @@ from django.test import TestCase, Client
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
 from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, ControleGeracaoRelatorios, FronteiraCrud, tz
-from book.forms import formularioCadastroVoo, formularioFiltroVoo
+from book.forms import formularioCadastroVoo, formularioFiltroVoo, FormularioFiltroRelatorioVoosRealizados
 
 
 class RotaModelTest(TestCase):
@@ -775,38 +775,52 @@ class ControleGeracaoRelatoriosTest(TestCase):
     voo = Voo.objects.create(companhia_aerea="B", horario_partida_previsto="2022-08-13 07:53:00+00:00", horario_chegada_previsto="2022-08-13 10:45:00+00:00", rota_voo=rota)
     ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-13 07:50:00+00:00", horario_chegada_real=None, status_voo=status)
 
-  # def test_filtrar_voos(self):
-  #   filtro_teste = {
-  #     "companhia": "",
-  #     "timestamp_min": "2022-08-03 10:30:00+00:00",
-  #     "timestamp_max": "2022-08-11 10:35:00+00:00"
-  #   }
+  def test_filtrar_voos(self):
+    agora = datetime.now(tz=tz)
 
-  #   lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
+    filtro_teste = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "2022-08-11T10:30",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": ""
+    }
 
-  #   self.assertEqual(2, lista_voos_resultado.count())
+    form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
+
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(form)
+
+    self.assertEqual(2, lista_voos_resultado.count())
   
-  # def test_filtrar_voos_min_null(self):
-  #   filtro_teste = {
-  #     "companhia": "",
-  #     "timestamp_min": "",
-  #     "timestamp_max": "2022-08-11 10:30:00+00:00"
-  #   }
+  def test_filtrar_voos_realizados_min_null(self):
+    filtro_teste = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": ""
+    }
 
-  #   lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
+    form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
 
-  #   self.assertEqual(2, lista_voos_resultado.count())
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(form)
 
-  # def test_filtrar_voos_realizados(self):
-  #   filtro_teste = {
-  #     "companhia": "",
-  #     "timestamp_min": "",
-  #     "timestamp_max": ""
-  #   }
+    self.assertEqual(5, lista_voos_resultado.count())
 
-  #   lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
+  def test_filtrar_voos_realizados(self):
+    filtro_teste = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "2022-09-11T10:30",
+      "intervalo_chegada_1": ""
+    }
 
-  #   self.assertEqual(5, lista_voos_resultado.count())
+    form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
+
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(form)
+
+    self.assertEqual(2, lista_voos_resultado.count())
 
   def test_filtrar_voos_atrasados(self):
     filtro_teste = {
