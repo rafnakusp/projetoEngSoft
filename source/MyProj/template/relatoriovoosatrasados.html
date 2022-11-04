@@ -1,62 +1,39 @@
+{% extends "main.html" %}
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-        table {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-        
-        td, th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #dddddd;
-        }
-        </style>
-  </head>
+{% block title %}Aeroporto - Voos Atrasados{% endblock %}
 
-  <body>
-    <p>Relatório de voos atrasados: todos os voos que chegaram atrasado ao seu destino figuram aqui.</p>
-
-    <table>
+{% block content %}
+<div class="p-3">
+  <h3>Relatório - Voos Atrasados</h3>
+  <table class="table table-striped">
+      <tr>
+        <th>id do voo</th>
+        <th>companhia aérea</th>
+        <th>rota</th>
+        <th>horário de partida previsto</th>
+        <th>horário de partida real</th>
+        <th>horário de chegada previsto</th>
+        <th>horário de chegada real</th>
+      </tr>
+      {% for progressovoo in progressovoo_list %}
         <tr>
-          <th>id do voo</th>
-          <th>companhia aérea</th>
-          <th>rota</th>
-          <th>horário de partida previsto</th>
-          <th>horário de partida real</th>
-          <th>horário de chegada previsto</th>
-          <th>horário de chegada real</th>
+          <td>{{progressovoo.voo_id}}</td>
+          <td>{{progressovoo.voo.companhia_aerea}}</td>
+          <td>{{progressovoo.voo.rota_voo}}</td>
+          <td>{{progressovoo.voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
+          {% if progressovoo.horario_partida_real %}
+          <td>{{progressovoo.horario_partida_real|date:"d-m-Y H:i"}}</td>
+          {% else %}
+          <td>-</td>
+          {% endif %}
+          <td>{{progressovoo.voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
+          {% if progressovoo.horario_chegada_real %}
+          <td>{{progressovoo.horario_chegada_real|date:"d-m-Y H:i"}}</td>
+          {% else %}
+          <td>-</td>
+          {% endif %}
         </tr>
-        {% for progressovoo in progressovoo_list %}
-          <tr>
-            <td>{{progressovoo.voo_id}}</td>
-            <td>{{progressovoo.voo.companhia_aerea}}</td>
-            <td>{{progressovoo.voo.rota_voo}}</td>
-            <td>{{progressovoo.voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
-            {% if progressovoo.horario_partida_real %}
-            <td>{{progressovoo.horario_partida_real|date:"d-m-Y H:i"}}</td>
-            {% else %}
-            <td>-</td>
-            {% endif %}
-            <td>{{progressovoo.voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
-            {% if progressovoo.horario_chegada_real %}
-            <td>{{progressovoo.horario_chegada_real|date:"d-m-Y H:i"}}</td>
-            {% else %}
-            <td>-</td>
-            {% endif %}
-          </tr>
-        {% endfor %}
-
-      </table>
-
-  </body>
-</html>
-
-
+      {% endfor %}
+  </table>
+</div>
+{% endblock content %}
