@@ -284,7 +284,7 @@ class ControladorCrud():
                 voosFiltrados = voosFiltrados.filter(horario_partida_previsto__gte=ippp)
             else:
                 fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
-                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=tz)
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
                 voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[ippp, fppp])
         if inicio_periodo_pesquisa_chegada != "" or fim_periodo_pesquisa_chegada != "":
             if inicio_periodo_pesquisa_chegada == "":
