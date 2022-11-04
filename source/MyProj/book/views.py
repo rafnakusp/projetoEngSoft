@@ -16,6 +16,7 @@ from .forms import formularioCadastroVoo, FormularioFiltroRelatorioVoosRealizado
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
+tz = timezone.get_fixed_timezone(timedelta(hours=-3))
 
 @csrf_exempt
 def telaLogin(request):
@@ -229,11 +230,11 @@ class ControladorCrud():
     formatoData = "%Y-%m-%dT%H:%M"
 
     def createVoo(self, form):
-        agora = datetime.now(timezone.utc)
+        agora = datetime.now(tz)
 
         companhia = form.data['companhia']
-        horario_partida = datetime.strptime(form.data['horario_partida'], self.formatoData).replace(tzinfo=timezone.utc)
-        horario_chegada = datetime.strptime(form.data['horario_chegada'], self.formatoData).replace(tzinfo=timezone.utc)
+        horario_partida = datetime.strptime(form.data['horario_partida'], self.formatoData).replace(tzinfo=tz)
+        horario_chegada = datetime.strptime(form.data['horario_chegada'], self.formatoData).replace(tzinfo=tz)
         rota = form.data['rota']
         chegada = True if 'chegada' in form.data else False
 
@@ -276,25 +277,25 @@ class ControladorCrud():
             voosFiltrados = voosFiltrados.filter(companhia_aerea=companhia)
         if inicio_periodo_pesquisa_partida != "" or fim_periodo_pesquisa_partida != "":
             if inicio_periodo_pesquisa_partida == "":
-                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
                 voosFiltrados = voosFiltrados.filter(horario_partida_previsto__lte=fppp)
             elif fim_periodo_pesquisa_partida == "":
-                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
                 voosFiltrados = voosFiltrados.filter(horario_partida_previsto__gte=ippp)
             else:
-                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
-                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=tz)
                 voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[ippp, fppp])
         if inicio_periodo_pesquisa_chegada != "" or fim_periodo_pesquisa_chegada != "":
             if inicio_periodo_pesquisa_chegada == "":
-                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
                 voosFiltrados = voosFiltrados.filter(horario_chegada_previsto__lte=fppc)
             elif fim_periodo_pesquisa_chegada == "":
-                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
                 voosFiltrados = voosFiltrados.filter(horario_chegada_previsto__gte=ippc)
             else:
-                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
-                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
                 voosFiltrados = voosFiltrados.filter(horario_chegada_previsto__range=[ippc, fppc])
 
         # for voo in voosFiltrados:
@@ -306,11 +307,11 @@ class ControladorCrud():
         Voo.objects.all().filter(voo_id=vooid).delete()
 
     def updateVoo(self, vooid, form):
-        agora = datetime.now(timezone.utc)
+        agora = datetime.now(tz)
 
         companhia = form.data['companhia']
-        horario_partida = datetime.strptime(form.data['horario_partida'], self.formatoData).replace(tzinfo=timezone.utc)
-        horario_chegada = datetime.strptime(form.data['horario_chegada'], self.formatoData).replace(tzinfo=timezone.utc)
+        horario_partida = datetime.strptime(form.data['horario_partida'], self.formatoData).replace(tzinfo=tz)
+        horario_chegada = datetime.strptime(form.data['horario_chegada'], self.formatoData).replace(tzinfo=tz)
         rota = form.data['rota']
         chegada = True if 'chegada' in form.data else False
 
@@ -382,8 +383,8 @@ class ControladorAtualizarStatusDeVoo():
     def apresentaVoosNaoFinalizados(self):
         voos = ProgressoVoo.objects.all()#.select_related('status_voo', 'voo').extra(select={'val': "select chegada from Rota r, ProgressoVoo pv, Voo v on r.rota_id=v.rota_voo_id and v.voo_id = pv.voo_id"})
         
-        timeoutVooSemstatus = datetime.now(tz=timezone.utc) + timedelta(days=2)
-        timeout1hora = datetime.now(tz=timezone.utc) - timedelta(hours=1)# Timeout se cancelado ou atrasado há mais de 1 hora
+        timeoutVooSemstatus = datetime.now(tz=tz) + timedelta(days=2)
+        timeout1hora = datetime.now(tz=tz) - timedelta(hours=1)# Timeout se cancelado ou atrasado há mais de 1 hora
 
         return voos.filter(~Q(status_voo__status_nome__in=['Cancelado', 'Aterrissado']) | Q(horario_chegada_real__gt=timeout1hora) | Q(voo__horario_partida_previsto__gt=timeout1hora))\
                    .exclude(status_voo__isnull=True, voo__horario_chegada_previsto__gte=timeoutVooSemstatus)
@@ -428,9 +429,9 @@ class ControladorAtualizarStatusDeVoo():
         status_antigo = voo.status_voo
         voo.status_voo = Status.objects.get(status_id=novo_status_id)
         if ((voo.status_voo.status_nome == "Autorizado") | ((status_antigo == None) & (voo.status_voo.status_nome == "Em voo"))):
-            voo.horario_partida_real = datetime.now(tz=timezone.utc)
+            voo.horario_partida_real = datetime.now(tz=tz)
         elif voo.status_voo.status_nome == "Aterrissado":
-            voo.horario_chegada_real = datetime.now(tz=timezone.utc)
+            voo.horario_chegada_real = datetime.now(tz=tz)
         voo.save()
         
 ################################################################################
@@ -488,31 +489,31 @@ class ControleGeracaoRelatorios():
             voosQuerySet = voosQuerySet.filter(voo__companhia_aerea=companhia)
         if inicio_periodo_pesquisa_partida != "" or fim_periodo_pesquisa_partida != "":
             if inicio_periodo_pesquisa_partida == "":
-                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
                 voosQuerySet = voosQuerySet.filter(horario_partida_real__lte=fppp)
             elif fim_periodo_pesquisa_partida == "":
-                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
                 voosQuerySet = voosQuerySet.filter(horario_partida_real__gte=ippp)
             else:
-                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
-                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
+                fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=tz)
+                ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=tz)
                 voosQuerySet = voosQuerySet.filter(horario_partida_real__range=[ippp, fppp])
         if inicio_periodo_pesquisa_chegada != "" or fim_periodo_pesquisa_chegada != "":
             if inicio_periodo_pesquisa_chegada == "":
-                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
                 voosQuerySet = voosQuerySet.filter(horario_chegada_real__lte=fppc)
             elif fim_periodo_pesquisa_chegada == "":
-                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
                 voosQuerySet = voosQuerySet.filter(horario_chegada_real__gte=ippc)
             else:
-                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
-                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
+                fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
+                ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=tz)
                 voosQuerySet = voosQuerySet.filter(horario_chegada_real__range=[ippc, fppc])
 
         return voosQuerySet
     
     def filtrarVoosAtrasados(self, status, companhia):
-        agora = datetime.now(timezone.utc)
+        agora = datetime.now(tz)
         print(agora)
         voosQuerySet = ProgressoVoo.objects.all()
         if status != "":
@@ -535,7 +536,7 @@ class ControleGeracaoRelatorios():
 ################################################################################
 
 def criarTabelasProducao():
-    agora = datetime.now(tz=timezone.utc)
+    agora = datetime.now(tz=tz)
 
     ProgressoVoo.objects.all().delete()
     Voo.objects.all().delete()
@@ -557,12 +558,12 @@ def criarTabelasProducao():
     Rota.objects.create(outro_aeroporto='Brasília',chegada=False)
 
     rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
-    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=timezone.utc), rota_voo = rota_1)
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=tz),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=tz), rota_voo = rota_1)
     voo = Voo.objects.get(companhia_aerea='American Airlines')
     status = Status.objects.get(status_nome='Em voo')
-    ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=timezone.utc),horario_chegada_real=None)
+    ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=tz),horario_chegada_real=None)
 
-    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=timezone.utc),horario_chegada_previsto=datetime(2022, 8, 11, 12, 16, tzinfo=timezone.utc), rota_voo = rota_1)
+    Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=tz),horario_chegada_previsto=datetime(2022, 8, 11, 12, 16, tzinfo=tz), rota_voo = rota_1)
 
     # voo cancelado a menos de 1 hora
     rota_2 = Rota.objects.get(outro_aeroporto='GRU')
