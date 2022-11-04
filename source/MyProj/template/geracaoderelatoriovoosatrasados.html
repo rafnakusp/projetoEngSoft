@@ -6,7 +6,7 @@
   <p>Tela de geração de  relatório de voos atrasados</p>
   <p>filtrar por:</p>
   
-  <form action="." method="POST">{% csrf_token %}
+  <form action="." method="POST" target="_blank">{% csrf_token %}
     <table class="text-left">
       {{formulario.as_table}}
     </table>

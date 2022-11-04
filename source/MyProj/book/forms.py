@@ -62,16 +62,16 @@ class FormularioFiltroRelatorio(Form):
 
 class FormularioFiltroRelatorioVoosAtrasados(Form):
     opcoes_status = [
-        ('0', ''),
-        ('1', '-'),
-        ('2', 'Cancelado'),
-        ('3', 'Embarque'),
-        ('4', 'Programdo'),
-        ('5', 'Taxiando'),
-        ('6', 'Pronto'),
-        ('7', 'Autorizado'),
-        ('8', 'Em voo'),
-        ('9', 'Aterrissado')
+        ('', ''),
+        ('-', '-'),
+        ('Cancelado', 'Cancelado'),
+        ('Embarque', 'Embarque'),
+        ('Programado', 'Programado'),
+        ('Taxiando', 'Taxiando'),
+        ('Pronto', 'Pronto'),
+        ('Autorizado', 'Autorizado'),
+        ('Em voo', 'Em voo'),
+        ('Aterrissado', 'Aterrissado')
     ]
     companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
     status = ChoiceField(choices=opcoes_status, required=False)

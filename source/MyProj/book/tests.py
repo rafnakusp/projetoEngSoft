@@ -749,13 +749,19 @@ class ControleGeracaoRelatoriosTest(TestCase):
   controleGeracaoRelatorios = ControleGeracaoRelatorios()
   @classmethod
   def setUpTestData(cls):
+    criarTabelasTestes()
+    status = Status.objects.get(status_nome="Aterrissado")
+
     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
     rota = Rota.objects.get(rota_id=1)
-    Voo.objects.create(companhia_aerea="A", horario_partida_previsto="2022-08-01 10:30:00+00:00", horario_chegada_previsto="2022-08-08 10:30:00+00:00", rota_voo=rota)
-    voo = Voo.objects.get(voo_id=1)
-    ProgressoVoo.objects.create(voo=voo, horario_chegada_real="2022-08-04 10:30:00+00:00")
-    ProgressoVoo.objects.create(voo=voo, horario_chegada_real="2022-08-06 10:30:00+00:00")
-    ProgressoVoo.objects.create(voo=voo, horario_chegada_real="2022-08-13 10:30:00+00:00")
+    voo = Voo.objects.create(companhia_aerea="A", horario_partida_previsto="2022-08-04 01:30:00+00:00", horario_chegada_previsto="2022-04-08 10:32:00+00:00", rota_voo=rota)
+    ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-04 01:50:00+00:00", horario_chegada_real="2022-08-04 10:30:00+00:00", status_voo=status)
+
+    voo = Voo.objects.create(companhia_aerea="B", horario_partida_previsto="2022-08-06 02:30:00+00:00", horario_chegada_previsto="2022-08-06 10:40:00+00:00", rota_voo=rota)
+    ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-06 02:37:00+00:00", horario_chegada_real="2022-08-06 10:30:00+00:00", status_voo=status)
+
+    voo = Voo.objects.create(companhia_aerea="B", horario_partida_previsto="2022-08-13 07:53:00+00:00", horario_chegada_previsto="2022-08-13 10:45:00+00:00", rota_voo=rota)
+    ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-13 07:50:00+00:00", horario_chegada_real="2022-08-13 10:30:00+00:00", status_voo=status)
 
   def test_filtrar_voos(self):
     filtro_teste = {
@@ -782,13 +788,12 @@ class ControleGeracaoRelatoriosTest(TestCase):
   def test_filtrar_voos_atrasados(self):
     filtro_teste = {
       "companhia": "",
-      "timestamp_min": "2022-08-05 10:30:00+00:00",
-      "timestamp_max": "2022-08-20 10:30:00+00:00"
+      "status": '-'
     }
 
-    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['status'], filtro_teste["companhia"])
 
-    self.assertEqual(2, lista_voos_resultado.count())
+    self.assertEqual(1, lista_voos_resultado.count())
 
   def test_filtrar_voos_realizados(self):
     filtro_teste = {
@@ -799,7 +804,7 @@ class ControleGeracaoRelatoriosTest(TestCase):
 
     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(filtro_teste['timestamp_min'], filtro_teste['timestamp_max'], filtro_teste["companhia"])
 
-    self.assertEqual(3, lista_voos_resultado.count())
+    self.assertEqual(5, lista_voos_resultado.count())
 
 
 
