@@ -57,7 +57,7 @@ def telainicial(request):
     context = {
         'username': USUARIO_LOGADO,
     }
-    return HttpResponse(template.render(context, request))
+    return render(request, template, context)
 
 ################################################################################
 ####                               CRUD de voos                             ####
@@ -78,7 +78,7 @@ def crud(request):
                 context = {
                     "novo_voo": formularioCadastroVoo(request.POST)
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
 
         elif request.POST["tipo"] == "filtrar":
             voos = fronteira.apresentaVoosFiltrados(form)
@@ -90,14 +90,14 @@ def crud(request):
                         'aeroporto_origem': 'origem' if 'chegada' else 'destino'
                     }
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
 
             template = loader.get_template('crud.html')
             context = {
                 "formulario_voos": form,
                 "voo_list": voos # context é a lista de voos já convertida
             }
-            return HttpResponse(template.render(context, request))
+            return render(request, template, context)
 
 def crudCreate(request):
     print(request.POST)
@@ -114,7 +114,7 @@ def crudCreate(request):
                         'aeroporto_origem': 'origem' if 'chegada' else 'destino'
                     }
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
             elif voo_criado == "chegada antes da partida":
                 template = loader.get_template('errodecadastro.html')
                 context = {
@@ -123,14 +123,14 @@ def crudCreate(request):
                         'horario_partida': form.data['horario_partida']
                     }
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
             elif voo_criado in ["horario chegada no passado", "horario partida no passado"]:
                 template = loader.get_template('errodecadastro.html')
                 context = {
                     "horario_passado": form.data['horario_chegada'] if voo_criado == "horario chegada no passado" else form.data['horario_partida'],
                     "chegada": "horário de chegada" if voo_criado == "horario chegada no passado" else "horário de partida"
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
             elif voo_criado == "voo muito longo":
                 template = loader.get_template('errodecadastro.html')
                 context = {
@@ -139,13 +139,13 @@ def crudCreate(request):
                         'horario_partida': form.data['horario_partida']
                     }
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
             else:
                 template = loader.get_template('cadastrarvoosucesso.html')
                 context = {
                     "novo_voo": voo_criado
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
                
 
 
@@ -170,7 +170,7 @@ def crudUpdate(request, vooid):
                         'aeroporto_origem': 'origem' if 'chegada' else 'destino'
                     }
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
         elif voo == "chegada antes da partida":
                 template = loader.get_template('errodecadastro.html')
                 context = {
@@ -179,14 +179,14 @@ def crudUpdate(request, vooid):
                         'horario_partida': form.data['horario_partida']
                     }
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
         elif voo in ["horario chegada no passado", "horario partida no passado"]:
                 template = loader.get_template('errodecadastro.html')
                 context = {
                     "horario_passado": form.data['horario_chegada'] if voo == "horario chegada no passado" else form.data['horario_partida'],
                     "chegada": "horário de chegada" if voo == "horario chegada no passado" else "horário de partida"
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
         elif voo == "voo muito longo":
                 template = loader.get_template('errodecadastro.html')
                 context = {
@@ -195,7 +195,7 @@ def crudUpdate(request, vooid):
                         'horario_partida': form.data['horario_partida']
                     }
                 }
-                return HttpResponse(template.render(context, request))
+                return render(request, template, context)
     
     form = fronteiraCrud.geraTelaUpdate(voo)
     template = loader.get_template('updatevoo.html')
@@ -203,7 +203,7 @@ def crudUpdate(request, vooid):
         "voo": voo,
         'formulario': form
     }
-    return HttpResponse(template.render(context, request))
+    return render(request, template, context)
 
 class FronteiraCrud():
     def __init__(self):
@@ -346,7 +346,7 @@ def monitoramentodevoos(request):
         context = {
             "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
         }
-        return HttpResponse(template.render(context, request))
+        return render(request, template, context)
     
 
 def monitoramentodevooseditar(request, vooid):
@@ -360,7 +360,7 @@ def monitoramentodevooseditar(request, vooid):
             "voo": painel.apresentaVoo(vooid), # context é a lista de voos já convertida
             "status_possiveis": painel.statusPossiveis(vooid)
     }
-    return HttpResponse(template.render(context, request))
+    return render(request, template, context)
 
 class PainelDeMonitoracao():
     def __init__(self):
