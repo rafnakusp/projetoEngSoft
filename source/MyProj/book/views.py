@@ -53,7 +53,7 @@ def telaLogin(request):
 def telainicial(request):
     reseta_id_voos() #- descomentar quando quiser resetar a contagem das primary keys
     criarTabelasProducao()
-    template = loader.get_template('telainicial.html')
+    template = 'telainicial.html'
     context = {
         'username': USUARIO_LOGADO,
     }
@@ -74,7 +74,7 @@ def crud(request):
 
         if request.POST["tipo"] == "cadastrar":
             if form.is_valid():
-                template = loader.get_template('crudcadastrovoo.html')
+                template = 'crudcadastrovoo.html'
                 context = {
                     "novo_voo": formularioCadastroVoo(request.POST)
                 }
@@ -83,7 +83,7 @@ def crud(request):
         elif request.POST["tipo"] == "filtrar":
             voos = fronteira.apresentaVoosFiltrados(form)
             if voos == None:
-                template = loader.get_template('errodeconsulta.html')
+                template = 'errodeconsulta.html'
                 context = {
                     "rota_errada": {
                         'aeroporto': form.data['rota'],
@@ -92,7 +92,7 @@ def crud(request):
                 }
                 return render(request, template, context)
 
-            template = loader.get_template('crud.html')
+            template = 'crud.html'
             context = {
                 "formulario_voos": form,
                 "voo_list": voos # context é a lista de voos já convertida
@@ -107,7 +107,7 @@ def crudCreate(request):
         if form.is_valid():
             voo_criado = fronteira.criarVoo(form)
             if voo_criado == "rota_errada":
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "rota_errada": {
                         'aeroporto': form.data['rota'],
@@ -116,7 +116,7 @@ def crudCreate(request):
                 }
                 return render(request, template, context)
             elif voo_criado == "chegada antes da partida":
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "chegada_antes": {
                         'horario_chegada': form.data['horario_chegada'],
@@ -125,14 +125,14 @@ def crudCreate(request):
                 }
                 return render(request, template, context)
             elif voo_criado in ["horario chegada no passado", "horario partida no passado"]:
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "horario_passado": form.data['horario_chegada'] if voo_criado == "horario chegada no passado" else form.data['horario_partida'],
                     "chegada": "horário de chegada" if voo_criado == "horario chegada no passado" else "horário de partida"
                 }
                 return render(request, template, context)
             elif voo_criado == "voo muito longo":
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "voo_longo": {
                         'horario_chegada': form.data['horario_chegada'],
@@ -141,7 +141,7 @@ def crudCreate(request):
                 }
                 return render(request, template, context)
             else:
-                template = loader.get_template('cadastrarvoosucesso.html')
+                template = 'cadastrarvoosucesso.html'
                 context = {
                     "novo_voo": voo_criado
                 }
@@ -163,7 +163,7 @@ def crudUpdate(request, vooid):
         voo = fronteiraCrud.atualizaVoo(vooid, form)
         print(voo)
         if voo == "rota_errada":
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "rota_errada": {
                         'aeroporto': form.data['rota'],
@@ -172,7 +172,7 @@ def crudUpdate(request, vooid):
                 }
                 return render(request, template, context)
         elif voo == "chegada antes da partida":
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "chegada_antes": {
                         'horario_chegada': form.data['horario_chegada'],
@@ -181,14 +181,14 @@ def crudUpdate(request, vooid):
                 }
                 return render(request, template, context)
         elif voo in ["horario chegada no passado", "horario partida no passado"]:
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "horario_passado": form.data['horario_chegada'] if voo == "horario chegada no passado" else form.data['horario_partida'],
                     "chegada": "horário de chegada" if voo == "horario chegada no passado" else "horário de partida"
                 }
                 return render(request, template, context)
         elif voo == "voo muito longo":
-                template = loader.get_template('errodecadastro.html')
+                template = 'errodecadastro.html'
                 context = {
                     "voo_longo": {
                         'horario_chegada': form.data['horario_chegada'],
@@ -198,7 +198,7 @@ def crudUpdate(request, vooid):
                 return render(request, template, context)
     
     form = fronteiraCrud.geraTelaUpdate(voo)
-    template = loader.get_template('updatevoo.html')
+    template = 'updatevoo.html'
     context = {
         "voo": voo,
         'formulario': form
@@ -341,7 +341,7 @@ class ControladorCrud():
 @csrf_exempt
 def monitoramentodevoos(request):
     if request.method == "GET":
-        template = loader.get_template('monitoramentodevoos.html')
+        template = 'monitoramentodevoos.html'
         painel = PainelDeMonitoracao()
         context = {
             "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
@@ -351,7 +351,7 @@ def monitoramentodevoos(request):
 
 def monitoramentodevooseditar(request, vooid):
     painel = PainelDeMonitoracao()
-    template = loader.get_template('monitoramentodevooseditar.html')  
+    template = 'monitoramentodevooseditar.html' 
 
     if request.method == "POST" and 'status' in request.POST:
         painel.atualizaStatusDeVoo(vooid, request.POST['status'])
