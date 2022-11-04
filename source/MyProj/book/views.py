@@ -256,8 +256,6 @@ class ControladorCrud():
         return Voo.objects.select_related('rota_voo').get(voo_id=voo.pk)
 
     def readVoos(self, form):
-        earliest_date = datetime(1, 1, 1, 0, 0, tzinfo=timezone.utc)
-        latest_date = datetime(9999, 12, 31, 23, 59, 59, 999999, tzinfo=timezone.utc)
 
         companhia = form.data['companhia']
         inicio_periodo_pesquisa_partida = form.data['intervalo_partida_0']
@@ -279,10 +277,10 @@ class ControladorCrud():
         if inicio_periodo_pesquisa_partida != "" or fim_periodo_pesquisa_partida != "":
             if inicio_periodo_pesquisa_partida == "":
                 fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
-                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[earliest_date, fppp])
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__lte=fppp)
             elif fim_periodo_pesquisa_partida == "":
                 ippp = datetime.strptime(inicio_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
-                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__range=[ippp, latest_date])
+                voosFiltrados = voosFiltrados.filter(horario_partida_previsto__gte=ippp)
             else:
                 fppp = datetime.strptime(fim_periodo_pesquisa_partida, self.formatoData).replace(tzinfo=timezone.utc)
                 ippp = datetime.strptime(inicio_periodo_pesquisa_partida, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc)
@@ -290,10 +288,10 @@ class ControladorCrud():
         if inicio_periodo_pesquisa_chegada != "" or fim_periodo_pesquisa_chegada != "":
             if inicio_periodo_pesquisa_chegada == "":
                 fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
-                voosFiltrados = voosFiltrados.filter(horario_chegada_previsto__range=[earliest_date, fppc])
+                voosFiltrados = voosFiltrados.filter(horario_chegada_previsto__lte=fppc)
             elif fim_periodo_pesquisa_chegada == "":
                 ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
-                voosFiltrados = voosFiltrados.filter(horario_chegada_previsto__range=[ippc, latest_date])
+                voosFiltrados = voosFiltrados.filter(horario_chegada_previsto__gte=ippc)
             else:
                 fppc = datetime.strptime(fim_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
                 ippc = datetime.strptime(inicio_periodo_pesquisa_chegada, self.formatoData).replace(tzinfo=timezone.utc)
