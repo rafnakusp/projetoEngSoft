@@ -64,7 +64,6 @@ class FormularioFiltroRelatorioVoosAtrasados(Form):
     opcoes_status = [
         ('', ''),
         ('-', '-'),
-        ('Cancelado', 'Cancelado'),
         ('Embarque', 'Embarque'),
         ('Programado', 'Programado'),
         ('Taxiando', 'Taxiando'),

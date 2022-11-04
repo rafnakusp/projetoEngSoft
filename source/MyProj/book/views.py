@@ -499,7 +499,8 @@ class ControleGeracaoRelatorios():
             voosQuerySet = voosQuerySet.filter(voo__companhia_aerea__exact=companhia)
         return voosQuerySet.filter(Q(horario_chegada_real__gt=F('voo__horario_chegada_previsto')) | Q(horario_chegada_real__isnull=True, \
             horario_partida_real__gt=F('voo__horario_partida_previsto')) | Q(horario_partida_real__isnull=True, voo__horario_partida_previsto__lt=agora) | \
-            Q(horario_chegada_real__isnull=True, voo__horario_chegada_previsto__lt=agora)).order_by('voo_id').distinct()
+            Q(horario_chegada_real__isnull=True, voo__horario_chegada_previsto__lt=agora))\
+            .exclude(status_voo__status_nome="Cancelado").order_by('voo_id').distinct() # Voos cancelados nao estao atrasados
 
     def filtrarVoosRealizados(self, timestamp_min, timestamp_max, companhia):
         return self.filtrarVoos(timestamp_min, timestamp_max,companhia).filter(horario_chegada_real__isnull=False).order_by('voo_id').distinct()
