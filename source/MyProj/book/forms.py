@@ -1,7 +1,7 @@
 import datetime
 from django.forms.utils import from_current_timezone
 from django.utils.dateparse import parse_datetime
-from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanField, MultiWidget, ValidationError
+from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanField, MultiWidget, ValidationError, ChoiceField
 
 formatoData = "%Y-%m-%dT%H:%M"
 
@@ -59,4 +59,20 @@ class FormularioFiltroRelatorio(Form):
     companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
     timestamp_min = DateTimeField(label="O voo terminou depois de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))
     timestamp_max = DateTimeField(label="O voo terminou antes de:", required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}))
+
+class FormularioFiltroRelatorioVoosAtrasados(Form):
+    opcoes_status = [
+        ('0', ''),
+        ('1', '-'),
+        ('2', 'Cancelado'),
+        ('3', 'Embarque'),
+        ('4', 'Programdo'),
+        ('5', 'Taxiando'),
+        ('6', 'Pronto'),
+        ('7', 'Autorizado'),
+        ('8', 'Em voo'),
+        ('9', 'Aterrissado')
+    ]
+    companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
+    status = ChoiceField(choices=opcoes_status, required=False)
 
