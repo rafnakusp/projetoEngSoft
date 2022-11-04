@@ -1,85 +1,62 @@
+{% extends "main.html" %}
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-        table {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-        
-        td, th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #dddddd;
-        }
-        </style>
-  </head>
+{% block title %}Aeroporto - Editar Voo{% endblock %}
 
-  <body>
-    <p>Tela de monitoramento de voos</p>
-
-    <table>
-        <tr>
-          <th>id do voo</th>
-          <th>companhia aérea</th>
-          <th>origem</th>
-          <th>destino</th>
-          <th>horário de partida previsto</th>
-          <th>horário de chegada previsto</th>
-          <th>horário de partida</th>
-          <th>horário de chegada</th>
-        </tr>
-
-        <tr>
-          <td>{{voo.voo_id}}</td>
-          <td>{{voo.voo.companhia_aerea}}</td>
-          {% if voo.voo.rota_voo.chegada %}
-          <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
-          <td>Este aeroporto</td>
-          {% else %}
-          <td>Este aeroporto</td>
-          <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
-          {% endif %}
-          <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
-          <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
-          {% if voo.horario_partida_real %}
-          <td>{{voo.horario_partida_real|date:"H:i"}}</td>
-          {% else %}
-          <td>-</td>
-          {% endif %}
-          {% if voo.horario_chegada_real %}
-          <td>{{voo.horario_chegada_real|date:"H:i"}}</td>
-          {% else %}
-          <td>-</td>
-          {% endif %}
-        </tr>
-    </table>
-
-    {% if voo.status_voo %}
-    <p>Status atual: {{voo.status_voo.status_nome}}</p>
-    {% else %}
-    <p>Status atual: -</p>
-    {% endif %}
-    <p>Selecione o próximo status:</p>
-    <form method="POST" action=".">
-      {% csrf_token %}
-      <select name="status">
-        {% for status in status_possiveis %}
-        <option value="{{status.status_id}}">{{status.status_nome}}</option>
-        {% endfor %}
-      </select>
-      <input type="submit" name="pronto" value="Pronto" />
-    </form>
-
-    <a href="/monitoramentodevoos/"><button>Cancelar</button></a>
-
-  </body>
-</html>
+{% block content %}
+<div class="p-3">
+  <p>Tela de monitoramento de voos</p>
+  <table class="table table-striped">
+      <tr>
+        <th>id do voo</th>
+        <th>companhia aérea</th>
+        <th>origem</th>
+        <th>destino</th>
+        <th>horário de partida previsto</th>
+        <th>horário de chegada previsto</th>
+        <th>horário de partida</th>
+        <th>horário de chegada</th>
+      </tr>
+      <tr>
+        <td>{{voo.voo_id}}</td>
+        <td>{{voo.voo.companhia_aerea}}</td>
+        {% if voo.voo.rota_voo.chegada %}
+        <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
+        <td>Este aeroporto</td>
+        {% else %}
+        <td>Este aeroporto</td>
+        <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
+        {% endif %}
+        <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
+        <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
+        {% if voo.horario_partida_real %}
+        <td>{{voo.horario_partida_real|date:"H:i"}}</td>
+        {% else %}
+        <td>-</td>
+        {% endif %}
+        {% if voo.horario_chegada_real %}
+        <td>{{voo.horario_chegada_real|date:"H:i"}}</td>
+        {% else %}
+        <td>-</td>
+        {% endif %}
+      </tr>
+  </table>
+  {% if voo.status_voo %}
+  <p>Status atual: {{voo.status_voo.status_nome}}</p>
+  {% else %}
+  <p>Status atual: -</p>
+  {% endif %}
+  <p>Selecione o próximo status:</p>
+  <form method="POST" action=".">
+    {% csrf_token %}
+    <select class="btn btn-lighter" name="status">
+      {% for status in status_possiveis %}
+      <option value="{{status.status_id}}">{{status.status_nome}}</option>
+      {% endfor %}
+    </select>
+    <input class="btn btn-success" type="submit" name="pronto" value="Pronto" />
+  </form>
+  <a href="/monitoramentodevoos/"><button class="btn btn-danger mt-2">Cancelar</button></a>
+</div>
+{% endblock content %}
 
 

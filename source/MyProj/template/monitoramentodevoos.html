@@ -1,31 +1,14 @@
+{% extends "main.html" %}
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-        table {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-        
-        td, th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #dddddd;
-        }
-        </style>
-  </head>
+{% block title %}Aeroporto - Monitoramento de Voos{% endblock %}
 
-  <body>
-    <p>Tela de monitoramento de voos</p>
-    <a href="../telainicial/"><button>Voltar</button></a>
+{% block content %}
+<div class="p-3">
+  <p>Tela de monitoramento de voos</p>
+  <a href="../telainicial/"><button class="btn btn-lighter">Voltar</button></a>
 
-    <table>
+  <div class="mt-2">
+    <table class="table table-striped">
         <tr>
           <th>id do voo</th>
           <th>companhia aérea</th>
@@ -49,9 +32,19 @@
             <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
             {% endif %}
             {% if voo.status_voo %}
-            <td>{{voo.status_voo.status_nome}}<a href="/monitoramentodevooseditar/{{voo.voo_id}}/"><button>editar</button></a></td>
+            <td>
+              <div class="d-flex flex-row justify-content-between">
+                <span class="mr-2">{{voo.status_voo.status_nome}}</span>
+                <a href="/monitoramentodevooseditar/{{voo.voo_id}}/"><button class="btn btn-lighter btn-sm">editar</button></a>
+              </div>
+            </td>
             {% else %}
-            <td>-<a href="/monitoramentodevooseditar/{{voo.voo_id}}/"><button>editar</button></a></td>
+            <td>
+              <div class="d-flex flex-row justify-content-between">
+                <span class="mr-2">-</span>
+                <a href="/monitoramentodevooseditar/{{voo.voo_id}}/"><button class="btn btn-lighter btn-sm">editar</button></a>
+              </div>
+            </td>
             {% endif %}
             <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
             <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
@@ -67,10 +60,9 @@
             {% endif %}
           </tr>
         {% endfor %}
-
-      </table>
-
-  </body>
-</html>
+    </table>
+  </div>
+</div>
+{% endblock content %}
 
 
