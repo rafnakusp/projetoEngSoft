@@ -863,6 +863,7 @@ class TesteRequestLogin(TestCase):
     resposta = cliente.post('/login/', {'username': 'operadordevoos', 'password': 'senha'})
 
     self.assertEqual(resposta.status_code, 302)
+    self.assertRedirects(resposta, '/telainicial/')
 
   def teste_login_incorreto(self):
     cliente = Client()
@@ -870,6 +871,7 @@ class TesteRequestLogin(TestCase):
     resposta = cliente.post('/login/', {'username': 'operadodevoos', 'password': 'senha'})
 
     self.assertEqual(resposta.status_code, 200)
+    self.assertTemplateUsed(resposta, "login.html")
 
 ################################################################################
 ################################################################################
