@@ -1,14 +1,15 @@
-<!doctype html>
-<html lang="en">
-  <head>
-  </head>
+{% extends "main.html" %}
 
-  <body>
-    {% if rota_errada  %}
-    <p>ERRO: Rota informada não existente</p>
-    <p>A rota em que o aeroporto {{rota_errada.aeroporto}} é {{rota_errada.aeroporto_origem}} não existe!</p>
-    {%endif%}
-    <a href="/crud/"><button>Voltar</button></a>
+{% block title %}Aeroporto - Erro{% endblock %}
 
-  </body>
-</html>
+{% block content %}
+
+<div class="p-3">
+  {% if rota_errada  %}
+  <p>ERRO: Rota informada não existente</p>
+  <p>A rota em que o aeroporto {{rota_errada.aeroporto}} é {{rota_errada.aeroporto_origem}} não existe!</p>
+  {%endif%}
+  <a href="/crud/"><button>Voltar</button></a>
+</div>
+
+{% endblock content %}

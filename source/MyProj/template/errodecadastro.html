@@ -1,9 +1,9 @@
-<!doctype html>
-<html lang="en">
-  <head>
-  </head>
+{% extends "main.html" %}
 
-  <body>
+{% block title %}Aeroporto - Erro{% endblock %}
+
+{% block content %}
+  <div class="p-3">
     {% if rota_errada  %}
     <p>ERRO: Rota informada não existente</p>
     <p>A rota em que o aeroporto {{rota_errada.aeroporto}} é {{rota_errada.aeroporto_origem}} não existe!</p>
@@ -21,7 +21,7 @@
     <p>A diferença entre a data/horário de chegada {{voo_longo.horario_chegada}} e a data/horário de partida {{voo_longo.horario_partida}} está acima de 20 horas!</p>
     
     {%endif%}
-    <a href="/crud/"><button>Voltar</button></a>
+    <a href="/crud/"><button class="btn btn-lighter">Voltar</button></a>
 
-  </body>
-</html>
+  </div>
+{% endblock content %}

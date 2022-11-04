@@ -1,24 +1,22 @@
+{% extends "main.html" %}
 
-<!doctype html>
-<html lang="en">
-  <head>
-  </head>
+{% block title %}Aeroporto - Monitoramento de Voos{% endblock %}
 
-  <body>
-    <p>Cadastro de voo</p>
-    <p>voo a ser cadastrado:</p>
+{% block content %}
+<div class="p-3">
 
-    <form action="/crud/create/" method="POST">{% csrf_token %}
-      
-      <table>
-        {{novo_voo.as_table}}
-      </table>
+  <p>Cadastro de voo</p>
+  <p>voo a ser cadastrado:</p>
 
-      <button name="tipo" value="cadastrar">Confirmar cadastro</button>
+  <form action="/crud/create/" method="POST">{% csrf_token %}
+    <table>
+      {{novo_voo.as_table}}
+    </table>
 
-    </form>
+    <button class="btn btn-success" name="tipo" value="cadastrar">Confirmar cadastro</button>
+  </form>
 
-    <a href="/crud/"><button>Cancelar</button></a>
+  <a href="/crud/"><button class="btn btn-danger mt-2">Cancelar</button></a>
 
-  </body>
-</html>
+</div>
+{% endblock content %}

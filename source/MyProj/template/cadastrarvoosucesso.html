@@ -1,45 +1,50 @@
 
-<!doctype html>
-<html lang="en">
-  <head>
-  </head>
+{% extends "main.html" %}
 
-  <body>
-    <p>Voo cadastrado com sucesso</p>
-    <p>Voo cadastrado:</p>
-    <table>
-      <tr>
-        <td>Id do voo:</td>
-        <td>{{novo_voo.voo_id}}</td>
-      </tr>
-      <tr>
-        <td>Companhia aérea do voo:</td>
-        <td>{{novo_voo.companhia_aerea}}</td>
-      </tr>
-      <tr>
-        <td>Horário de partida previsto:</td>
-        <td>{{novo_voo.horario_partida_previsto}}</td>
-      </tr>
-      <tr>
-        <td>Horário de chegada previsto:</td>
-        <td>{{novo_voo.horario_chegada_previsto}}</td>
-      </tr>
-      <tr>
-        <td>Rota do voo:</td>
-        <td>{{novo_voo.rota_voo.outro_aeroporto}}</td>
-      </tr>
-      <tr>
-        <td>O destino é este aeroporto?</td>
-        {% if novo_voo.rota_voo.chegada == 0%}
-        <td>Não</td>
-        {% elif novo_voo.rota_voo.chegada == 1%}
-        <td>Sim</td>
-        {%endif%}
-      </tr>
-    </table>
+{% block title %}Aeroporto - Voo Cadastrado{% endblock %}
 
-    <a href="/crud/"><button>Retornar</button></a>
-  </body>
-</html>
+{% block content %}
+
+<div class="p-3">
+
+  <p>Voo cadastrado com sucesso</p>
+  <p>Voo cadastrado:</p>
+
+  <table class="table table-striped w-50">
+    <tr>
+      <td>Id do voo:</td>
+      <td>{{novo_voo.voo_id}}</td>
+    </tr>
+    <tr>
+      <td>Companhia aérea do voo:</td>
+      <td>{{novo_voo.companhia_aerea}}</td>
+    </tr>
+    <tr>
+      <td>Horário de partida previsto:</td>
+      <td>{{novo_voo.horario_partida_previsto}}</td>
+    </tr>
+    <tr>
+      <td>Horário de chegada previsto:</td>
+      <td>{{novo_voo.horario_chegada_previsto}}</td>
+    </tr>
+    <tr>
+      <td>Rota do voo:</td>
+      <td>{{novo_voo.rota_voo.outro_aeroporto}}</td>
+    </tr>
+    <tr>
+      <td>O destino é este aeroporto?</td>
+      {% if novo_voo.rota_voo.chegada == 0%}
+      <td>Não</td>
+      {% elif novo_voo.rota_voo.chegada == 1%}
+      <td>Sim</td>
+      {%endif%}
+    </tr>
+  </table>
+
+  <a href="/crud/"><button class="btn btn-lighter mt-2">Retornar</button></a>
+
+</div>
+
+{% endblock content %}
 
 
