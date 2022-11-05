@@ -8,11 +8,8 @@ from django.utils import timezone
 from book.models import Rota, Voo, Status, ProgressoVoo
 from django.db import connection, transaction
 
-from .forms import formularioFiltroVoo, formularioCadastroVoo
+from .forms import formularioFiltroVoo, formularioCadastroVoo, FormularioFiltroRelatorioVoosRealizados, FormularioFiltroRelatorioVoosAtrasados
 from django.db.models import Q, F
-
-
-from .forms import formularioCadastroVoo, FormularioFiltroRelatorioVoosRealizados, FormularioFiltroRelatorioVoosAtrasados
 
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
@@ -80,7 +77,7 @@ def crud(request):
                 }
                 return render(request, template, context)
 
-        elif request.POST["tipo"] == "filtrar":
+        elif request.POST["tipo"] == "filtrar" and form.is_valid():
             voos = fronteira.apresentaVoosFiltrados(form)
             if voos == None:
                 template = 'errodeconsulta.html'
@@ -163,42 +160,42 @@ def crudUpdate(request, vooid):
 
     if request.method == "POST":
         form = formularioCadastroVoo(request.POST)
-        voo = fronteiraCrud.atualizaVoo(vooid, form)
-        print(voo)
-        if voo == "rota_errada":
-                template = 'errodecadastro.html'
-                context = {
-                    "rota_errada": {
-                        'aeroporto': form.data['rota'],
-                        'aeroporto_origem': 'origem' if 'chegada' else 'destino'
+        if form.is_valid():
+            voo = fronteiraCrud.atualizaVoo(vooid, form)
+            if voo == "rota_errada":
+                    template = 'errodecadastro.html'
+                    context = {
+                        "rota_errada": {
+                            'aeroporto': form.data['rota'],
+                            'aeroporto_origem': 'origem' if 'chegada' else 'destino'
+                        }
                     }
-                }
-                return render(request, template, context)
-        elif voo == "chegada antes da partida":
-                template = 'errodecadastro.html'
-                context = {
-                    "chegada_antes": {
-                        'horario_chegada': form.data['horario_chegada'],
-                        'horario_partida': form.data['horario_partida']
+                    return render(request, template, context)
+            elif voo == "chegada antes da partida":
+                    template = 'errodecadastro.html'
+                    context = {
+                        "chegada_antes": {
+                            'horario_chegada': form.data['horario_chegada'],
+                            'horario_partida': form.data['horario_partida']
+                        }
                     }
-                }
-                return render(request, template, context)
-        elif voo in ["horario chegada no passado", "horario partida no passado"]:
-                template = 'errodecadastro.html'
-                context = {
-                    "horario_passado": form.data['horario_chegada'] if voo == "horario chegada no passado" else form.data['horario_partida'],
-                    "chegada": "horário de chegada" if voo == "horario chegada no passado" else "horário de partida"
-                }
-                return render(request, template, context)
-        elif voo == "voo muito longo":
-                template = 'errodecadastro.html'
-                context = {
-                    "voo_longo": {
-                        'horario_chegada': form.data['horario_chegada'],
-                        'horario_partida': form.data['horario_partida']
+                    return render(request, template, context)
+            elif voo in ["horario chegada no passado", "horario partida no passado"]:
+                    template = 'errodecadastro.html'
+                    context = {
+                        "horario_passado": form.data['horario_chegada'] if voo == "horario chegada no passado" else form.data['horario_partida'],
+                        "chegada": "horário de chegada" if voo == "horario chegada no passado" else "horário de partida"
                     }
-                }
-                return render(request, template, context)
+                    return render(request, template, context)
+            elif voo == "voo muito longo":
+                    template = 'errodecadastro.html'
+                    context = {
+                        "voo_longo": {
+                            'horario_chegada': form.data['horario_chegada'],
+                            'horario_partida': form.data['horario_partida']
+                        }
+                    }
+                    return render(request, template, context)
     
     form = fronteiraCrud.geraTelaUpdate(voo)
     template = 'updatevoo.html'
@@ -450,10 +447,11 @@ def geracaoDeRelatoriosVoosRealizados(request):
     if request.method == "POST":
         form = FormularioFiltroRelatorioVoosRealizados(request.POST)
 
-        context = {
-            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(form)
-        }
-        return render(request, "relatoriovoosrealizados.html", context)
+        if form.is_valid():
+            context = {
+                "progressovoo_list": controleGeracaoRelatorios.filtrarVoosRealizados(form)
+            }
+            return render(request, "relatoriovoosrealizados.html", context)
 
     form = FormularioFiltroRelatorioVoosRealizados()
     return render(request, "geracaoderelatoriovoosrealizados.html", {'formulario': form})
@@ -464,13 +462,14 @@ def geracaoDeRelatoriosVoosAtrasados(request):
     if request.method == "POST":
         form = FormularioFiltroRelatorioVoosAtrasados(request.POST)
 
-        companhia = form.data['companhia']
-        status = form.data['status']
-
-        context = {
-            "progressovoo_list": controleGeracaoRelatorios.filtrarVoosAtrasados(status, companhia)
-        }
-        return render(request, "relatoriovoosatrasados.html", context)
+        if form.is_valid():
+            companhia = form.data['companhia']
+            status = form.data['status']
+    
+            context = {
+                "progressovoo_list": controleGeracaoRelatorios.filtrarVoosAtrasados(status, companhia)
+            }
+            return render(request, "relatoriovoosatrasados.html", context)
 
     form = FormularioFiltroRelatorioVoosAtrasados()
     return render(request, "geracaoderelatoriovoosatrasados.html", {'formulario': form})

@@ -1,42 +1,22 @@
-import datetime
-from typing import Any, Optional, Sequence, Type, Union
-from django.forms.utils import from_current_timezone
-from django.utils.dateparse import parse_datetime
-from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanField, MultiWidget, ValidationError, ChoiceField, Widget
+from datetime import datetime
+from django.forms import DateTimeField, DateTimeInput, CharField, Form, BooleanField, MultiWidget, MultipleChoiceField, ValidationError, ChoiceField, Widget
 
 formatoData = "%Y-%m-%dT%H:%M"
 
-class IntervaloDatasField(DateTimeField):
-        # def __init__(self, input_formats: Optional[Any] = ..., required: bool = ..., widget: Optional[Union[Widget, Type[Widget]]] = ..., label: Optional[Any] = ..., initial: Optional[Any] = ..., help_text: str = ..., error_messages: Optional[Any] = ..., show_hidden_initial: bool = ..., validators: Sequence[Any] = ..., localize: bool = ..., disabled: bool = ..., label_suffix: Optional[Any] = ...) -> None:
-        #     self.empty_values.append([None, None])
-        #     super().__init__()
-        def to_python(self, value):
-            """
-            Validate that the input can be converted to a datetime. Return a
-            Python datetime.datetime object.
-            """
-            print(value)
-            print(self.empty_values)
-            if value in self.empty_values:
-                return None
-            end = []
-            for v in value:
-                if v in self.empty_values:
-                    end.append(None)
-                if isinstance(v, datetime.datetime):
-                    end.append(from_current_timezone(v))
-                elif isinstance(value[0], datetime.date):
-                    result = datetime.datetime(v.year, v.month, v.day)
-                    end.append(from_current_timezone(result))
-                else:
-                    try:
-                        result = parse_datetime(v.strip())
-                    except ValueError:
-                        raise ValidationError(self.error_messages["invalid"], code="invalid")
-                if not result:
-                    result = super().to_python(v)
-                end.append(from_current_timezone(result))
-            return end
+class IntervaloDatasField(MultipleChoiceField):
+    def valid_value(self, value):
+        """Check to see if the provided value is a valid choice."""
+        if type(value) == datetime or value == '':
+            return True
+        elif value == None or value == 'None':
+            return False
+        elif type(value) == str:
+            try:
+                datetime.strptime(value, "%Y-%m-%dT%H:%M")
+                return True
+            except:
+                return False
+        return False
 
 class IntervaloDatas(MultiWidget):
         def decompress(self, value):
@@ -92,5 +72,5 @@ class FormularioFiltroRelatorioVoosAtrasados(Form):
         ('Aterrissado', 'Aterrissado')
     ]
     companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
-    status = ChoiceField(choices=opcoes_status, required=False)
+    status = ChoiceField(choices=opcoes_status, required=False, label="Status dos voos")
 

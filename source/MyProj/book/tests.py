@@ -5,7 +5,7 @@ from django.test import TestCase, Client
 # Create your tests here.
 from book.models import Rota, Voo, Status, ProgressoVoo
 from book.views import ControladorAtualizarStatusDeVoo, ControladorCrud, PainelDeMonitoracao, ControleGeracaoRelatorios, FronteiraCrud, tz
-from book.forms import formularioCadastroVoo, formularioFiltroVoo, FormularioFiltroRelatorioVoosRealizados
+from book.forms import formularioCadastroVoo, formularioFiltroVoo, FormularioFiltroRelatorioVoosRealizados, IntervaloDatas, FormularioFiltroRelatorioVoosAtrasados
 
 
 class RotaModelTest(TestCase):
@@ -880,7 +880,8 @@ class TesteRequestLogin(TestCase):
 ################################################################################
 
 class TestesForms(TestCase):
-  def teste_validade_forms_filtro_voo(self):
+  formatodata = "%Y-%m-%dT%H:%M"
+  def teste_validade_forms_cadastro_voos(self):
     dados_voo = {
         "companhia": "American Airlines", 
         "horario_partida": "", 
@@ -903,11 +904,73 @@ class TestesForms(TestCase):
     form = formularioCadastroVoo(dados_voo)
     self.assertTrue(form.is_valid())
 
+  def teste_validade_forms_filtro_voos(self):
+    dados_voo = {
+        "companhia": "American Airlines", 
+        "horario_partida": "2022-11-03T11:10", 
+        "horario_chegada": "2022-11-03T11:10", 
+        "rota": "Santos Dumont",
+        "chegada": True
+      }
+
+    form = formularioFiltroVoo(dados_voo)
+    self.assertFalse(form.is_valid())
+
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "a",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "",
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    self.assertFalse(form.is_valid())
+
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": datetime.strftime(datetime.now(tz=tz)+timedelta(hours=3, minutes=50), self.formatodata),
+      "intervalo_chegada_1": datetime.strftime((datetime.now(tz=tz)+timedelta(days=3)), self.formatodata), 
+      "rota": "",
+    }
+
+    form = formularioFiltroVoo(dados_voo)
+    self.assertTrue(form.is_valid())
+
   def teste_labels_forms_filtro_voos(self):
     form = formularioFiltroVoo()
 
     self.assertEqual(form.fields['companhia'].label, "Companhia aérea")
     self.assertEqual(form.fields['intervalo_partida'].label, "Intervalo de busca da data e horário da partida")
+    self.assertEqual(form.fields['intervalo_chegada'].label, "Intervalo de busca da data e horário da chegada")
+    self.assertIsNone(form.fields['rota'].label)
+    self.assertEqual(form.fields['chegada'].label, "O destino é este aeroporto?")
+
+  def teste_campos_filtro_relatorio_realizados(self):
+    form = FormularioFiltroRelatorioVoosRealizados()
+
+    self.assertEqual(type(form.fields['intervalo_partida'].widget), IntervaloDatas)
+    self.assertEqual(type(form.fields['intervalo_chegada'].widget), IntervaloDatas)
+
+  def teste_opcoes_status_filtro_relatorio_voos_atrasados(self):
+    opcoes_status = [
+        ('', ''),
+        ('-', '-'),
+        ('Embarque', 'Embarque'),
+        ('Programado', 'Programado'),
+        ('Taxiando', 'Taxiando'),
+        ('Pronto', 'Pronto'),
+        ('Autorizado', 'Autorizado'),
+        ('Em voo', 'Em voo'),
+        ('Aterrissado', 'Aterrissado')
+    ]
+    form = FormularioFiltroRelatorioVoosAtrasados()
+
+    self.assertListEqual(form.fields['status'].choices, opcoes_status)
+    self.assertEqual(form.fields['status'].label, "Status dos voos")
 
 ################################################################################
 ################################################################################
