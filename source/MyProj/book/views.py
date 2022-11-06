@@ -18,10 +18,6 @@ tz = timezone.get_fixed_timezone(timedelta(hours=-3))
 @csrf_exempt
 def telaLogin(request):
     global CONTAGEM_DE_FALHAS_NO_LOGIN
-    print("====================Debug======================")
-    print(f"{request.method=}")
-    print(f"{request.body=}")
-    print(f"{request.POST=}")
     
     if CONTAGEM_DE_FALHAS_NO_LOGIN >= 3:
         return render(request, "loginbloqueado.html")
@@ -97,7 +93,6 @@ def crud(request):
             return render(request, template, context)
 
 def crudCreate(request):
-    print(request.POST)
     fronteira = FronteiraCrud()
     form = formularioCadastroVoo(request.POST)
     if request.method == "POST":

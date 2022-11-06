@@ -877,6 +877,44 @@ class TesteRequestLogin(TestCase):
     self.assertEqual(resposta.status_code, 200)
     self.assertTemplateUsed(resposta, "login.html")
 
+class TesteRequestCRUDFiltro(TestCase):
+  
+  @classmethod
+  def setUpTestData(cls):
+    agora = datetime.now(tz=tz)
+
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    Rota.objects.create(outro_aeroporto='GRU',chegada=False)
+
+    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    rota_2 = Rota.objects.get(outro_aeroporto='GRU')
+
+    Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=tz),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=tz), rota_voo = rota_1)
+    Voo.objects.create(companhia_aerea='Azul',horario_partida_previsto=(agora - timedelta(minutes = 50)),horario_chegada_previsto=(agora + timedelta(hours = 2)), rota_voo = rota_2)
+    Voo.objects.create(companhia_aerea='GOL',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora + timedelta(hours = 1)), rota_voo = rota_2)
+    Voo.objects.create(companhia_aerea='LATAM',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora - timedelta(hours = 1)), rota_voo = rota_1)
+    Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto=(agora - timedelta(hours = 3)),horario_chegada_previsto=(agora - timedelta(minutes = 2)), rota_voo = rota_1)
+
+  def teste_request_crud_filtro(self):
+    url = '/crud/'
+    dados_filtro = {
+      'companhia': 'TAM',
+      'intervalo_partida_0': '',
+      'intervalo_partida_1': '',
+      'intervalo_chegada_0': '',
+      'intervalo_chegada_1': '',
+      'rota': '',
+      'tipo': 'filtrar'
+    }
+
+    resposta = self.client.post(url, dados_filtro)
+
+    self.assertEqual(resposta.status_code, 200)
+    self.assertTemplateUsed(resposta, "crud.html")
+    self.assertEqual(resposta.context['voo_list'].count(), 2)
+    rota = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    self.assertEqual(resposta.context['voo_list'].filter(rota_voo=rota).count(), 2)
+
 ################################################################################
 ################################################################################
 ####                         Testes de forms                                ####
