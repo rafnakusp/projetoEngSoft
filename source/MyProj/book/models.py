@@ -23,21 +23,25 @@ class Voo(models.Model):
     horario_chegada_previsto = models.DateTimeField(null=False)
     rota_voo = models.ForeignKey(Rota, on_delete=models.CASCADE)
     def __str__(self):
-      return f"{self.voo_id}, {self.companhia_aerea}, {self.horario_partida_previsto}, {self.horario_chegada_previsto}, {self.rota_voo}"
+      return f"{self.voo_id=}, {self.companhia_aerea=}, {self.horario_partida_previsto=}, {self.horario_chegada_previsto=}, {self.rota_voo=}"
     class Meta:
       db_table = 'voo'
 
 class Status(models.Model):
     status_id = models.AutoField(primary_key=True)
     status_nome = models.CharField(max_length=255, null=False)
+    def __str__(self):
+      return self.status_nome
     class Meta:
         db_table = 'status'
 
 class ProgressoVoo(models.Model):
- progresso_id = models.AutoField(primary_key=True)
- status_voo = models.ForeignKey(Status, on_delete=models.CASCADE, null=True)
- voo = models.ForeignKey(Voo, on_delete=models.CASCADE, null=False)
- horario_partida_real = models.DateTimeField(null=True)
- horario_chegada_real = models.DateTimeField(null=True)
- class Meta:
-   db_table = 'progressoVoo' 
+  progresso_id = models.AutoField(primary_key=True)
+  status_voo = models.ForeignKey(Status, on_delete=models.CASCADE, null=True)
+  voo = models.ForeignKey(Voo, on_delete=models.CASCADE, null=False)
+  horario_partida_real = models.DateTimeField(null=True)
+  horario_chegada_real = models.DateTimeField(null=True)
+  def __str__(self):
+    return f"{self.progresso_id=}, {self.status_voo=}, {self.voo=}, {self.horario_partida_real=}, {self.horario_chegada_real=}"
+  class Meta:
+    db_table = 'progressoVoo' 
