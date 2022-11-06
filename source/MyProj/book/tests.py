@@ -1016,6 +1016,18 @@ class TesteRequestMonitoramentoDeVoosEditar(TestCase):
     self.assertEqual(resposta.context['voo'].voo.rota_voo, rota)
     status = Status.objects.get(status_nome='Cancelado')
     self.assertEqual(resposta.context['voo'].status_voo, status)
+  
+  def teste_mudanca_proximo_estado(self):
+    url = '/monitoramentodevooseditar/7/'
+    post_payload = {
+      'status': '6',
+      'pronto': 'Pronto'
+    }
+
+    resposta = self.client.post(url, post_payload)
+
+    status = Status.objects.get(status_nome='Taxiando')
+    self.assertEquals(resposta.context['voo'].status_voo, status)
 
 ################################################################################
 ################################################################################
