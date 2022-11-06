@@ -852,23 +852,27 @@ class ControleGeracaoRelatoriosTest(TestCase):
     
 ################################################################################
 ################################################################################
-####                    Testes da interface http (requests)                 ####
+####                    Testes da interface http (views)                    ####
 ################################################################################          
 ################################################################################          
 
 class TesteRequestLogin(TestCase):
   def teste_login_correto(self):
-    cliente = Client()
+    url = '/login/'
+    nome_usuario = 'operadordevoos'
+    senha = 'senha'
 
-    resposta = cliente.post('/login/', {'username': 'operadordevoos', 'password': 'senha'})
+    resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
 
     self.assertEqual(resposta.status_code, 302)
     self.assertRedirects(resposta, '/telainicial/')
 
   def teste_login_incorreto(self):
-    cliente = Client()
+    url = '/login/'
+    nome_usuario = 'operadodevoos'
+    senha = 'senha'
 
-    resposta = cliente.post('/login/', {'username': 'operadodevoos', 'password': 'senha'})
+    resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
 
     self.assertEqual(resposta.status_code, 200)
     self.assertTemplateUsed(resposta, "login.html")
