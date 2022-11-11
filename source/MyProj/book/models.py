@@ -38,9 +38,8 @@ class ProgressoVoo(models.Model):
   progresso_id = models.AutoField(primary_key=True)
   status_voo = models.ForeignKey(Status, on_delete=models.CASCADE, null=True)
   voo = models.ForeignKey(Voo, on_delete=models.CASCADE, null=False)
-  horario_partida_real = models.DateTimeField(null=True)
-  horario_chegada_real = models.DateTimeField(null=True)
+  horario_real = models.DateTimeField(null=True)
   def __str__(self):
-    return f"{self.progresso_id=}, {self.status_voo=}, {self.voo=}, {self.horario_partida_real=}, {self.horario_chegada_real=}"
+    return f"{self.progresso_id=}, {self.status_voo=}, {self.voo=}, {self.horario_real=}"
   class Meta:
     db_table = 'progressoVoo' 

@@ -11,10 +11,9 @@
         <th>companhia aérea</th>
         <th>origem</th>
         <th>destino</th>
-        <th>horário de partida previsto</th>
-        <th>horário de chegada previsto</th>
-        <th>horário de partida</th>
-        <th>horário de chegada</th>
+        <th>horário previsto</th>
+        <th>horário real</th>
+        <th>chegada?</th>
       </tr>
       <tr>
         <td>{{voo.voo_id}}</td>
@@ -26,17 +25,16 @@
         <td>Este aeroporto</td>
         <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
         {% endif %}
-        <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
-        <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
-        {% if voo.horario_partida_real %}
-        <td>{{voo.horario_partida_real|date:"H:i"}}</td>
+        <td>{{voo.voo.horario_previsto|date:"H:i"}}</td>
+        {% if voo.horario_real %}
+        <td>{{voo.horario_real|date:"H:i"}}</td>
         {% else %}
         <td>-</td>
-        {% endif %}
-        {% if voo.horario_chegada_real %}
-        <td>{{voo.horario_chegada_real|date:"H:i"}}</td>
+        {%endif%}
+        {% if voo.voo.rota_voo.chegada %}
+        <td>Sim</td>
         {% else %}
-        <td>-</td>
+        <td>Não</td>
         {% endif %}
       </tr>
   </table>
