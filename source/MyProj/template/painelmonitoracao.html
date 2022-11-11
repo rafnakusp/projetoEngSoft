@@ -1,65 +1,99 @@
 {% extends "main.html" %}
+{% load static %}
 
 {% block title %}Aeroporto - Monitoramento de Voos{% endblock %}
 
 {% block content %}
-<div class="p-3">
-  <p>Tela de monitoramento de voos</p>
-  <a href="../telainicial/"><button class="btn btn-lighter">Voltar</button></a>
 
-  <div class="mt-2">
-    <table class="table table-striped text-center">
-        <thead class="thead-dark">
-          <th>id do voo</th>
-          <th>companhia aérea</th>
-          <th>origem</th>
-          <th>destino</th>
-          <th>status</th>
-          <th>horário de partida previsto</th>
-          <th>horário de chegada previsto</th>
-          <th>horário de partida</th>
-          <th>horário de chegada</th>
-        </thead>
-        {% for voo in voo_list %}
-          <tr>
-            <td>{{voo.voo_id}}</td>
-            <td>{{voo.voo.companhia_aerea}}</td>
-            {% if voo.voo.rota_voo.chegada %}
-            <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
-            <td>Este aeroporto</td>
-            {% else %}
-            <td>Este aeroporto</td>
-            <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
-            {% endif %}
-            {% if voo.status_voo %}
-            <td>
-              <div class="d-flex flex-row justify-content-between">
-                <span class="mr-2">{{voo.status_voo.status_nome}}</span>
-              </div>
-            </td>
-            {% else %}
-            <td>
-              <div class="d-flex flex-row justify-content-between">
-                <span class="mr-2">-</span>
-              </div>
-            </td>
-            {% endif %}
-            <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
-            <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
-            {% if voo.horario_partida_real %}
-            <td>{{voo.horario_partida_real|date:"H:i"}}</td>
-            {% else %}
-            <td>-</td>
-            {% endif %}
-            {% if voo.horario_chegada_real %}
-            <td>{{voo.horario_chegada_real|date:"H:i"}}</td>
-            {% else %}
-            <td>-</td>
-            {% endif %}
-          </tr>
-        {% endfor %}
-    </table>
-  </div>
+<div class="p-3">
+    <p>Tela de monitoramento de voos</p>
+    <div class="border border-primary bg-white d-flex flex-row p-3 mw-75 justify-content-between mb-3">
+        <h4>Aeroporto Internacional de São Paulo</h4>
+        <div class="d-flex flex-row justify-content-between">
+            <h1 id="data" class="mr-3"></h1>
+            <h1 id="relogio"></h1>
+        </div>
+    </div>
+    <a href="../telainicial/"><button class="btn btn-lighter">Voltar</button></a>
+
+    <!-- TABELA DE VOOS CHEGANDO -->
+    <div class="d-flex flex-row mt-2">
+        <div class="d-flex flex-column mr-5">
+            <h6>Painel de Chegada</h6>
+            <table class="table table-striped text-center align-content-center mr-5">
+                <thead class="thead-dark text-center">
+                    <th>Voo</th>
+                    <th>Companhia Aérea</th>
+                    <th>Origem</th>
+                    <th>Chegada Prevista</th>
+                    <th>Chegada</th>
+                  </thead>
+                  {% for voo in voo_list %}
+                  {% if voo.voo.rota_voo.chegada %}
+                  <tr>
+                      <td>{{voo.voo_id}}</td>
+                      <td>{{voo.voo.companhia_aerea}}</td>
+                      <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
+                      <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
+                      {% if voo.horario_chegada_real %}
+                      <td>{{voo.horario_chegada_real|date:"H:i"}}</td>
+                      {% else %}
+                      <td>-</td>
+                      {% endif %}
+                      {% endif %}
+                  </tr>
+                  {% endfor %}
+            </table>
+        </div>
+
+        <!-- TABELA DE VOOS PARTINDO -->
+        <div class="d-flex flex-column">
+            <h6>Painel de Partida</h6>
+            <table class="table table-striped text-center align-content-center">
+                <thead class="thead-dark text-center">
+                  <th>Voo</th>
+                  <th>Companhia Aérea</th>
+                  <th>Destino</th>
+                  <th>Situação</th>
+                  <th>Partida Prevista</th>
+                  <th>Partida</th>
+                </thead>
+                {% for voo in voo_list %}
+                {% if not voo.voo.rota_voo.chegada %}
+                  <tr>
+                    <td>{{voo.voo_id}}</td>
+                    <td>{{voo.voo.companhia_aerea}}</td>
+                    <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
+
+                    {% if voo.status_voo %}
+                    <td>
+                      <div class="">
+                        <span class="mr-2">{{voo.status_voo.status_nome}}</span>
+                      </div>
+                    </td>
+                    {% else %}
+                    <td>
+                      <div class="">
+                        <span class="mr-2">-</span>
+                      </div>
+                    </td>
+                    {% endif %}
+
+                    <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
+
+                    {% if voo.horario_partida_real %}
+                    <td>{{voo.horario_partida_real|date:"H:i"}}</td>
+                    {% else %}
+                    <td>-</td>
+                    {% endif %}
+
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+  <script src="{% static 'clock.js' %}"></script>
 </div>
 {% endblock content %}
 
