@@ -30,15 +30,19 @@
             <th>id do voo</th>
             <th>companhia aérea</th>
             <th>rota</th>
-            <th>horário de partida previsto</th>
-            <th>horário de chegada previsto</th>
+            <th>horário previsto</th>
+            <th>chegada?</th>
         </tr>
         <tr>
             <td>{{voo.voo_id}}</td>
             <td>{{voo.companhia_aerea}}</td>
             <td>{{voo.rota_voo}}</td>
-            <td>{{voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
-            <td>{{voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
+            <td>{{voo.horario_previsto|date:"d-m-Y H:i"}}</td>
+            {% if voo.rota_voo.chegada %}
+            <td>Sim</td>
+            {% else %}
+            <td>Não</td>
+            {%endif%}
         </tr>
 
       </table>

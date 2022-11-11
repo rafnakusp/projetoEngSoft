@@ -19,11 +19,10 @@ class Rota(models.Model):
 class Voo(models.Model):
     voo_id = models.AutoField(primary_key=True)
     companhia_aerea = models.CharField(max_length=255, null=False)
-    horario_partida_previsto = models.DateTimeField(null=False)
-    horario_chegada_previsto = models.DateTimeField(null=False)
+    horario_previsto = models.DateTimeField(null=False)
     rota_voo = models.ForeignKey(Rota, on_delete=models.CASCADE)
     def __str__(self):
-      return f"{self.voo_id=}, {self.companhia_aerea=}, {self.horario_partida_previsto=}, {self.horario_chegada_previsto=}, {self.rota_voo=}"
+      return f"{self.voo_id=}, {self.companhia_aerea=}, {self.horario_previsto=}, {self.rota_voo=}"
     class Meta:
       db_table = 'voo'
 

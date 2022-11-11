@@ -30,21 +30,16 @@ class IntervaloDatas(MultiWidget):
 
 class formularioFiltroVoo(Form):
     companhia = CharField(max_length=50, required=False, label="Companhia aérea")
-    intervalo_partida = IntervaloDatasField(required=False, widget=IntervaloDatas(\
+    intervalo_previsto = IntervaloDatasField(required=False, widget=IntervaloDatas(\
         widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
         DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
-        label="Intervalo de busca da data e horário da partida")
-    intervalo_chegada = IntervaloDatasField(required=False, widget=IntervaloDatas(\
-        widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
-        DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
-        label="Intervalo de busca da data e horário da chegada")
-    rota = CharField(max_length=50, required=False)
+        label="Intervalo de busca da data e horário previstos")
+    rota = CharField(max_length=50, required=False, error_messages={'required': 'O nome da rota (ou seja, aeroporto de origem/destino) é obrigatório'}, label="Aeroporto de origem/destino")
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
 
 class formularioCadastroVoo(Form):
     companhia = CharField(max_length=50, required=True, error_messages={'required': 'O nome da companhia aérea é obrigatório'}, label="Companhia aérea")
-    horario_partida = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), error_messages={'required': 'A data de partida é obrigatória'}, label="Data e horário da partida")
-    horario_chegada = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), error_messages={'required': 'A data de chegada é obrigatório'}, label="Data e horário da chegada")
+    horario_previsto = DateTimeField(required=True, widget=DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), error_messages={'required': 'A data é obrigatória'}, label="Data e horário previsto")
     rota = CharField(max_length=50, required=True, error_messages={'required': 'O nome da rota (ou seja, aeroporto de origem/destino) é obrigatório'}, label="Aeroporto de origem/destino")
     chegada = BooleanField(label="O destino é este aeroporto?", required=False)
 

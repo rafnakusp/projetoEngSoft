@@ -42,11 +42,10 @@
           </td>
           <td>{{voo.companhia_aerea}}</td>
           <td>{{voo.rota_voo}}</td>
+          <td>{{voo.horario_previsto|date:"d-m-Y H:i"}}</td>
           {% if voo.rota_voo.chegada %}
-          <td>{{voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
           <td>Sim</td>
           {% else %}
-          <td>{{voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
           <td>Não</td>
           {%endif%}
         </tr>
