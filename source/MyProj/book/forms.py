@@ -45,14 +45,10 @@ class formularioCadastroVoo(Form):
 
 class FormularioFiltroRelatorioVoosRealizados(Form):
     companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
-    intervalo_partida = IntervaloDatasField(required=False, widget=IntervaloDatas(\
+    intervalo_real = IntervaloDatasField(required=False, widget=IntervaloDatas(\
         widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
         DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
-        label="Intervalo de busca da data e horário da partida")
-    intervalo_chegada = IntervaloDatasField(required=False, widget=IntervaloDatas(\
-        widgets=[DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData), \
-        DateTimeInput(attrs={'type': 'datetime-local'}, format=formatoData)]), \
-        label="Intervalo de busca da data e horário da chegada")
+        label="Intervalo de busca da data e horário real")
 
 class FormularioFiltroRelatorioVoosAtrasados(Form):
     opcoes_status = [

@@ -10,28 +10,26 @@
         <th>id do voo</th>
         <th>companhia aérea</th>
         <th>rota</th>
-        <th>horário de partida previsto</th>
-        <th>horário de partida real</th>
-        <th>horário de chegada previsto</th>
-        <th>horário de chegada real</th>
+        <th>horário previsto</th>
+        <th>horário real</th>
+        <th>chegada?</th>
       </tr>
       {% for progressovoo in progressovoo_list %}
         <tr>
           <td>{{progressovoo.voo_id}}</td>
           <td>{{progressovoo.voo.companhia_aerea}}</td>
           <td>{{progressovoo.voo.rota_voo}}</td>
-          <td>{{progressovoo.voo.horario_partida_previsto|date:"d-m-Y H:i"}}</td>
-          {% if progressovoo.horario_partida_real %}
-          <td>{{progressovoo.horario_partida_real|date:"d-m-Y H:i"}}</td>
+          <td>{{progressovoo.voo.horario_previsto|date:"d-m-Y H:i"}}</td>
+          {% if progressovoo.horario_real %}
+          <td>{{progressovoo.horario_real|date:"d-m-Y H:i"}}</td>
           {% else %}
           <td>-</td>
           {% endif %}
-          <td>{{progressovoo.voo.horario_chegada_previsto|date:"d-m-Y H:i"}}</td>
-          {% if progressovoo.horario_chegada_real %}
-          <td>{{progressovoo.horario_chegada_real|date:"d-m-Y H:i"}}</td>
+          {% if progressovoo.voo.rota_voo.chegada %}
+          <td>Sim</td>
           {% else %}
-          <td>-</td>
-          {% endif %}
+          <td>Não</td>
+          {%endif%}
         </tr>
       {% endfor %}
   </table>
