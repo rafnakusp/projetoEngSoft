@@ -1,0 +1,66 @@
+{% extends "main.html" %}
+
+{% block title %}Aeroporto - Monitoramento de Voos{% endblock %}
+
+{% block content %}
+<div class="p-3">
+  <p>Tela de monitoramento de voos</p>
+  <a href="../telainicial/"><button class="btn btn-lighter">Voltar</button></a>
+
+  <div class="mt-2">
+    <table class="table table-striped text-center">
+        <thead class="thead-dark">
+          <th>id do voo</th>
+          <th>companhia aérea</th>
+          <th>origem</th>
+          <th>destino</th>
+          <th>status</th>
+          <th>horário de partida previsto</th>
+          <th>horário de chegada previsto</th>
+          <th>horário de partida</th>
+          <th>horário de chegada</th>
+        </thead>
+        {% for voo in voo_list %}
+          <tr>
+            <td>{{voo.voo_id}}</td>
+            <td>{{voo.voo.companhia_aerea}}</td>
+            {% if voo.voo.rota_voo.chegada %}
+            <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
+            <td>Este aeroporto</td>
+            {% else %}
+            <td>Este aeroporto</td>
+            <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
+            {% endif %}
+            {% if voo.status_voo %}
+            <td>
+              <div class="d-flex flex-row justify-content-between">
+                <span class="mr-2">{{voo.status_voo.status_nome}}</span>
+              </div>
+            </td>
+            {% else %}
+            <td>
+              <div class="d-flex flex-row justify-content-between">
+                <span class="mr-2">-</span>
+              </div>
+            </td>
+            {% endif %}
+            <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
+            <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
+            {% if voo.horario_partida_real %}
+            <td>{{voo.horario_partida_real|date:"H:i"}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+            {% if voo.horario_chegada_real %}
+            <td>{{voo.horario_chegada_real|date:"H:i"}}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock content %}
+
+

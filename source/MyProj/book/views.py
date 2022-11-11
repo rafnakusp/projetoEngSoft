@@ -33,6 +33,8 @@ def telaLogin(request):
             USUARIO_LOGADO = "usuariostatus"
         elif request.POST["username"] == "gerentedeoperacoes" and request.POST["password"] == "senha":
             USUARIO_LOGADO = "gerentedeoperacoes"        
+        elif request.POST["username"] == "paineldevoo" and request.POST["password"] == "senha":
+            USUARIO_LOGADO = "paineldevoo"          
         
         else:
             CONTAGEM_DE_FALHAS_NO_LOGIN += 1
@@ -337,6 +339,16 @@ class ControladorCrud():
 def monitoramentodevoos(request):
     if request.method == "GET":
         template = 'monitoramentodevoos.html'
+        painel = PainelDeMonitoracao()
+        context = {
+            "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
+        }
+        return render(request, template, context)
+
+@csrf_exempt
+def painelDeMonitoracao(request):
+    if request.method == "GET":
+        template = 'painelmonitoracao.html'
         painel = PainelDeMonitoracao()
         context = {
             "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
