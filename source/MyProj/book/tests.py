@@ -515,24 +515,6 @@ class ControladorCrudTest(TestCase):
     self.assertNotEqual(True if 'chegada' in form.data else False, voo.rota_voo.chegada)
     self.assertIsInstance(voo_atualizado, str)
 
-    # Voo data de chegada antes da de partida
-    dados_voo = {
-      "companhia": voo.companhia_aerea, 
-      "horario_partida": (agora+timedelta(days=1)).strftime(self.formatodata), 
-      "horario_chegada": (agora+timedelta(hours=23)).strftime(self.formatodata), 
-      "rota": voo.rota_voo.outro_aeroporto,
-      "chegada": True
-    }
-    form = formularioCadastroVoo(dados_voo)
-    self.assertNotEqual(dados_voo['horario_partida'], (voo.horario_partida_previsto-timedelta(hours=3)).strftime(self.formatodata))
-    self.assertNotEqual(dados_voo['horario_chegada'], (voo.horario_chegada_previsto-timedelta(hours=3)).strftime(self.formatodata))
-    voo_atualizado = self.controladorCrud.updateVoo(voo.voo_id, form)
-    self.assertIsInstance(voo_atualizado, str)
-    self.assertEqual(voo_atualizado, "chegada antes da partida")
-    voo = Voo.objects.select_related("rota_voo").get(voo_id='1')
-    self.assertNotEqual(dados_voo['horario_partida'], (voo.horario_partida_previsto-timedelta(hours=3)).strftime(self.formatodata))
-    self.assertNotEqual(dados_voo['horario_chegada'], (voo.horario_chegada_previsto-timedelta(hours=3)).strftime(self.formatodata))
-
     # Voo data de chegada e de partida no passado e datas antigas também no passado - deve mudar ambas as datas
     dados_voo = {
       "companhia": voo.companhia_aerea, 
