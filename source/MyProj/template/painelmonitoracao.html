@@ -34,9 +34,9 @@
                       <td>{{voo.voo_id}}</td>
                       <td>{{voo.voo.companhia_aerea}}</td>
                       <td>{{voo.voo.rota_voo.outro_aeroporto}}</td>
-                      <td>{{voo.voo.horario_chegada_previsto|date:"H:i"}}</td>
-                      {% if voo.horario_chegada_real %}
-                      <td>{{voo.horario_chegada_real|date:"H:i"}}</td>
+                      <td>{{voo.voo.horario_previsto|date:"H:i"}}</td>
+                      {% if voo.horario_real %}
+                      <td>{{voo.horario_real|date:"H:i"}}</td>
                       {% else %}
                       <td>-</td>
                       {% endif %}
@@ -79,10 +79,10 @@
                     </td>
                     {% endif %}
 
-                    <td>{{voo.voo.horario_partida_previsto|date:"H:i"}}</td>
+                    <td>{{voo.voo.horario_previsto|date:"H:i"}}</td>
 
-                    {% if voo.horario_partida_real %}
-                    <td>{{voo.horario_partida_real|date:"H:i"}}</td>
+                    {% if voo.horario_real %}
+                    <td>{{voo.horario_real|date:"H:i"}}</td>
                     {% else %}
                     <td>-</td>
                     {% endif %}
