@@ -29,7 +29,7 @@ def telaLogin(request):
     elif request.method == "POST":
         if request.POST["username"] == "operadordevoos" and request.POST["password"] == "senha":
             USUARIO_LOGADO = "operadordevoos"
-        elif request.POST["username"] == "usuariostatus" and request.POST["password"] == "senha":
+        elif (request.POST["username"] == "funcionariocompanhia" or request.POST["username"] == "operadordetorre" or request.POST["username"] == "piloto") and request.POST["password"] == "senha":
             USUARIO_LOGADO = "usuariostatus"
         elif request.POST["username"] == "gerentedeoperacoes" and request.POST["password"] == "senha":
             USUARIO_LOGADO = "gerentedeoperacoes"        
