@@ -205,7 +205,7 @@ class ControladorCrud():
         except:
             return "rota_errada"
         voo = Voo.objects.create(companhia_aerea=companhia,horario_previsto=horario_previsto, rota_voo = rota)
-        ProgressoVoo.objects.create(status_voo=None, voo = voo, horario_partida_real=None, horario_chegada_real=None)
+        ProgressoVoo.objects.create(status_voo=None, voo = voo, horario_real=None)
 
         return Voo.objects.select_related('rota_voo').get(voo_id=voo.pk)
 
