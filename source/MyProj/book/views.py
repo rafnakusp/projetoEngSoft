@@ -46,7 +46,7 @@ def telaLogin(request):
         return redirect("/telainicial/")
 
 def telainicial(request):
-    reseta_id_voos() #- descomentar quando quiser resetar a contagem das primary keys
+    # reseta_id_voos() #- descomentar quando quiser resetar a contagem das primary keys
     criarTabelasProducao()
     template = 'telainicial.html'
     context = {

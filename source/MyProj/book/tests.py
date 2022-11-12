@@ -618,281 +618,190 @@ class ControleGeracaoRelatoriosTest(TestCase):
 
     self.assertEqual(2, lista_voos_resultado.count())
     
-# ################################################################################
-# ################################################################################
-# ####                    Testes da interface http (views)                    ####
-# ################################################################################          
-# ################################################################################          
+################################################################################
+################################################################################
+####                    Testes da interface http (views)                    ####
+################################################################################          
+################################################################################          
 
-# class TesteRequestLogin(TestCase):
-#   def teste_login_correto(self):
-#     url = '/login/'
-#     nome_usuario = 'operadordevoos'
-#     senha = 'senha'
+class TesteRequestLogin(TestCase):
+  def teste_login_correto(self):
+    url = '/login/'
+    nome_usuario = 'operadordevoos'
+    senha = 'senha'
 
-#     resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
+    resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
 
-#     self.assertEqual(resposta.status_code, 302)
-#     self.assertRedirects(resposta, '/telainicial/')
+    self.assertEqual(resposta.status_code, 302)
+    self.assertRedirects(resposta, '/telainicial/')
 
-#   def teste_login_incorreto(self):
-#     url = '/login/'
-#     nome_usuario = 'operadodevoos'
-#     senha = 'senha'
+  def teste_login_incorreto(self):
+    url = '/login/'
+    nome_usuario = 'operadodevoos'
+    senha = 'senha'
 
-#     resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
+    resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
 
-#     self.assertEqual(resposta.status_code, 200)
-#     self.assertTemplateUsed(resposta, "login.html")
+    self.assertEqual(resposta.status_code, 200)
+    self.assertTemplateUsed(resposta, "login.html")
 
-# class TesteRequestCRUDFiltro(TestCase):
+class TesteRequestCRUDFiltro(TestCase):
   
-#   @classmethod
-#   def setUpTestData(cls):
-#     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
-#     Rota.objects.create(outro_aeroporto='GRU',chegada=False)
+  @classmethod
+  def setUpTestData(cls):
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    Rota.objects.create(outro_aeroporto='GRU',chegada=False)
 
-#     rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
-#     rota_2 = Rota.objects.get(outro_aeroporto='GRU')
+    rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    rota_2 = Rota.objects.get(outro_aeroporto='GRU')
 
-#     Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto='2022-11-06 16:45:49.214592-03:00',horario_chegada_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_1)
-#     Voo.objects.create(companhia_aerea='Azul',horario_partida_previsto='2022-11-06 16:45:49.214592-03:00',horario_chegada_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_2)
-#     Voo.objects.create(companhia_aerea='GOL',horario_partida_previsto='2022-11-06 16:45:49.214592-03:00',horario_chegada_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_2)
-#     Voo.objects.create(companhia_aerea='LATAM',horario_partida_previsto='2022-11-06 16:45:49.214592-03:00',horario_chegada_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_1)
-#     Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto='2022-11-06 16:45:49.214592-03:00',horario_chegada_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_1)
+    Voo.objects.create(companhia_aerea='TAM',horario_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_1)
+    Voo.objects.create(companhia_aerea='Azul',horario_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_2)
+    Voo.objects.create(companhia_aerea='GOL',horario_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_2)
+    Voo.objects.create(companhia_aerea='LATAM',horario_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_1)
+    Voo.objects.create(companhia_aerea='TAM',horario_previsto='2022-11-06 16:45:49.214592-03:00', rota_voo = rota_1)
 
-#   def teste_request_crud_filtro(self):
-#     url = '/crud/'
-#     dados_filtro = {
-#       'companhia': 'TAM',
-#       'intervalo_partida_0': '',
-#       'intervalo_partida_1': '',
-#       'intervalo_chegada_0': '',
-#       'intervalo_chegada_1': '',
-#       'rota': '',
-#       'tipo': 'filtrar'
-#     }
+  def teste_request_crud_filtro(self):
+    url = '/crud/'
+    dados_filtro = {
+      'companhia': 'TAM',
+      'intervalo_previsto_0': '',
+      'intervalo_previsto_1': '',
+      'rota': '',
+      'tipo': 'filtrar'
+    }
 
-#     resposta = self.client.post(url, dados_filtro)
+    resposta = self.client.post(url, dados_filtro)
 
-#     self.assertEqual(resposta.status_code, 200)
-#     self.assertTemplateUsed(resposta, "crud.html")
-#     self.assertEqual(resposta.context['voo_list'].count(), 2)
-#     rota = Rota.objects.get(outro_aeroporto='Santos Dumont')
-#     self.assertEqual(resposta.context['voo_list'].filter(rota_voo=rota).count(), 2)
+    self.assertEqual(resposta.status_code, 200)
+    self.assertTemplateUsed(resposta, "crud.html")
+    self.assertEqual(resposta.context['voo_list'].count(), 2)
+    rota = Rota.objects.get(outro_aeroporto='Santos Dumont')
+    self.assertEqual(resposta.context['voo_list'].filter(rota_voo=rota).count(), 2)
 
-# class TesteRequestMonitoramentoDeVoosEditar(TestCase):
+class TesteRequestMonitoramentoDeVoosEditar(TestCase):
   
-#   @classmethod
-#   def setUpTestData(cls):
-#     agora = datetime.now(tz=tz)
-#     print(agora)
-#     # rotas
-#     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
-#     Rota.objects.create(outro_aeroporto='GRU',chegada=False)
+  @classmethod
+  def setUpTestData(cls):
+    criarTabelasTestes()
 
-#     # status
-#     Status.objects.create(status_nome='Em voo')
-#     Status.objects.create(status_nome='Cancelado')
-#     Status.objects.create(status_nome='Aterrissado')
-#     Status.objects.create(status_nome='Embarque')
-#     Status.objects.create(status_nome='Programado')
-#     Status.objects.create(status_nome='Taxiando')
-#     Status.objects.create(status_nome='Pronto')
-#     Status.objects.create(status_nome='Autorizado')
+  def teste_acesso_pagina_edicao(self):
+    url = '/monitoramentodevooseditar/3/'
 
-#     # voo em progresso (diferente de 'cancelado' ou 'Aterrissado')
-#     rota_1 = Rota.objects.get(outro_aeroporto='Santos Dumont')
-#     Voo.objects.create(companhia_aerea='American Airlines',horario_partida_previsto=datetime(2022, 8, 11, 10, 30, tzinfo=tz),horario_chegada_previsto=datetime(2022, 8, 11, 12, 15, tzinfo=tz), rota_voo = rota_1)
-#     voo = Voo.objects.get(companhia_aerea='American Airlines')
-#     status = Status.objects.get(status_nome='Em voo')
-#     ProgressoVoo.objects.create(status_voo = status, voo = voo, horario_partida_real=datetime(2022, 8, 11, 10, 42, tzinfo=tz),horario_chegada_real=None)
+    resposta = self.client.get(url)
 
-#     # voo cancelado a menos de 1 hora
-#     rota_2 = Rota.objects.get(outro_aeroporto='GRU')
-#     Voo.objects.create(companhia_aerea='Azul',horario_partida_previsto=(agora - timedelta(minutes = 50)),horario_chegada_previsto=(agora + timedelta(hours = 2)), rota_voo = rota_2)
-#     voo2 = Voo.objects.get(companhia_aerea='Azul')
-#     status2 = Status.objects.get(status_nome='Cancelado')
-#     ProgressoVoo.objects.create(status_voo = status2, voo = voo2, horario_partida_real=None, horario_chegada_real=None)
-
-#     # voo cancelado a mais de 1 hora
-#     Voo.objects.create(companhia_aerea='GOL',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora + timedelta(hours = 1)), rota_voo = rota_2)
-#     voo2 = Voo.objects.get(companhia_aerea='GOL')
-#     ProgressoVoo.objects.create(status_voo = status2, voo = voo2, horario_partida_real=None, horario_chegada_real=None)
-
-#     # voo Aterrissado a menos de 1 hora
-#     Voo.objects.create(companhia_aerea='LATAM',horario_partida_previsto=(agora - timedelta(hours = 2)),horario_chegada_previsto=(agora - timedelta(hours = 1)), rota_voo = rota_1)
-#     voo2 = Voo.objects.get(companhia_aerea='LATAM')
-#     status3 = Status.objects.get(status_nome='Aterrissado')
-#     ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 118)), horario_chegada_real=(agora - timedelta(minutes = 50)))
-
-#     # voo Aterrissado a mais de 1 hora
-#     Voo.objects.create(companhia_aerea='TAM',horario_partida_previsto=(agora - timedelta(hours = 3)),horario_chegada_previsto=(agora - timedelta(minutes = 2)), rota_voo = rota_1)
-#     voo2 = Voo.objects.get(companhia_aerea='TAM')
-#     ProgressoVoo.objects.create(status_voo = status3, voo = voo2, horario_partida_real=(agora - timedelta(minutes = 179)), horario_chegada_real=(agora - timedelta(minutes = 65)))
-
-#     # voo em Embarque (diferente de 'cancelado' ou 'Aterrissado')
-#     Voo.objects.create(companhia_aerea='American Air',horario_partida_previsto=(agora + timedelta(minutes = 20)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
-#     voo = Voo.objects.get(companhia_aerea='American Air')
-#     status4 = Status.objects.get(status_nome='Embarque')
-#     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-#     # voo programado (diferente de 'cancelado' ou 'Aterrissado')
-#     Voo.objects.create(companhia_aerea='Amer',horario_partida_previsto=(agora + timedelta(minutes = 15)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
-#     voo = Voo.objects.get(companhia_aerea='Amer')
-#     status4 = Status.objects.get(status_nome='Programado')
-#     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-#     # voo taxiando (diferente de 'cancelado' ou 'Aterrissado')
-#     Voo.objects.create(companhia_aerea='American',horario_partida_previsto=(agora + timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
-#     voo = Voo.objects.get(companhia_aerea='American')
-#     status4 = Status.objects.get(status_nome='Taxiando')
-#     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-#     # voo pronto (diferente de 'cancelado' ou 'Aterrissado')
-#     Voo.objects.create(companhia_aerea='A',horario_partida_previsto=(agora),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_1)
-#     voo = Voo.objects.get(companhia_aerea='A')
-#     status4 = Status.objects.get(status_nome='Pronto')
-#     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-#     # voo autorizado (diferente de 'cancelado' ou 'Aterrissado')
-#     Voo.objects.create(companhia_aerea='B',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
-#     voo = Voo.objects.get(companhia_aerea='B')
-#     status4 = Status.objects.get(status_nome='Autorizado')
-#     ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_partida_real=agora,horario_chegada_real=None)
-
-#     # voo sem status que terminará a menos de 2 dias de agora
-#     Voo.objects.create(companhia_aerea='C',horario_partida_previsto=(agora-timedelta(minutes = 3)),horario_chegada_previsto=(agora + timedelta(minutes = 220)), rota_voo = rota_2)
-#     voo = Voo.objects.get(companhia_aerea='C')
-#     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-#     # voo sem status que terminará a mais de 2 dias de agora
-#     Voo.objects.create(companhia_aerea='D',horario_partida_previsto=(agora+timedelta(days = 1, hours=22)),horario_chegada_previsto=(agora + timedelta(days = 2, hours=1)), rota_voo = rota_2)
-#     voo = Voo.objects.get(companhia_aerea='D')
-#     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_partida_real=None,horario_chegada_real=None)
-
-#   def teste_acesso_pagina_edicao(self):
-#     url = '/monitoramentodevooseditar/3/'
-
-#     resposta = self.client.get(url)
-
-#     self.assertEqual(resposta.status_code, 200)
-#     self.assertTemplateUsed(resposta, "monitoramentodevooseditar.html")
-#     rota = Rota.objects.get(outro_aeroporto='GRU')
-#     self.assertEqual(resposta.context['voo'].voo.rota_voo, rota)
-#     status = Status.objects.get(status_nome='Cancelado')
-#     self.assertEqual(resposta.context['voo'].status_voo, status)
+    self.assertEqual(resposta.status_code, 200)
+    self.assertTemplateUsed(resposta, "monitoramentodevooseditar.html")
+    rota = Rota.objects.get(outro_aeroporto='GRU')
+    self.assertEqual(resposta.context['voo'].voo.rota_voo, rota)
+    status = Status.objects.get(status_nome='Cancelado')
+    self.assertEqual(resposta.context['voo'].status_voo, status)
   
-#   def teste_mudanca_proximo_estado(self):
-#     url = '/monitoramentodevooseditar/7/'
-#     post_payload = {
-#       'status': '6',
-#       'pronto': 'Pronto'
-#     }
+  def teste_mudanca_proximo_estado(self):
+    url = '/monitoramentodevooseditar/7/'
+    post_payload = {
+      'status': '6',
+      'pronto': 'Pronto'
+    }
 
-#     resposta = self.client.post(url, post_payload)
+    resposta = self.client.post(url, post_payload)
 
-#     status = Status.objects.get(status_nome='Taxiando')
-#     self.assertEquals(resposta.context['voo'].status_voo, status)
+    status = Status.objects.get(status_nome='Taxiando')
+    self.assertEquals(resposta.context['voo'].status_voo, status)
 
-# ################################################################################
-# ################################################################################
-# ####                         Testes de forms                                ####
-# ################################################################################          
-# ################################################################################
+################################################################################
+################################################################################
+####                         Testes de forms                                ####
+################################################################################          
+################################################################################
 
-# class TestesForms(TestCase):
-#   formatodata = "%Y-%m-%dT%H:%M"
-#   def teste_validade_forms_cadastro_voos(self):
-#     dados_voo = {
-#         "companhia": "American Airlines", 
-#         "horario_partida": "", 
-#         "horario_chegada": "2022-11-03T11:10", 
-#         "rota": "Santos Dumont",
-#         "chegada": True
-#       }
+class TestesForms(TestCase):
+  formatodata = "%Y-%m-%dT%H:%M"
+  def teste_validade_forms_cadastro_voos(self):
+    dados_voo = {
+        "companhia": "American Airlines", 
+        "horario_partida": "", 
+        "horario_chegada": "2022-11-03T11:10", 
+        "rota": "Santos Dumont",
+        "chegada": True
+      }
 
-#     form = formularioCadastroVoo(dados_voo)
-#     self.assertFalse(form.is_valid())
+    form = formularioCadastroVoo(dados_voo)
+    self.assertFalse(form.is_valid())
 
-#     dados_voo = {
-#         "companhia": "American Airlines",
-#         "horario_partida": "2022-11-03T11:10", 
-#         "horario_chegada": "2022-11-03T11:10", 
-#         "rota": "Santos Dumont",
-#         "chegada": True
-#       }
+    dados_voo = {
+        "companhia": "American Airlines",
+        "horario_previsto": "2022-11-03T11:10",
+        "rota": "Santos Dumont",
+        "chegada": True
+      }
 
-#     form = formularioCadastroVoo(dados_voo)
-#     self.assertTrue(form.is_valid())
+    form = formularioCadastroVoo(dados_voo)
+    self.assertTrue(form.is_valid())
 
-#   def teste_validade_forms_filtro_voos(self):
-#     dados_voo = {
-#         "companhia": "American Airlines", 
-#         "horario_partida": "2022-11-03T11:10", 
-#         "horario_chegada": "2022-11-03T11:10", 
-#         "rota": "Santos Dumont",
-#         "chegada": True
-#       }
+  def teste_validade_forms_filtro_voos(self):
+    dados_voo = {
+        "companhia": "American Airlines", 
+        "horario_partida": "2022-11-03T11:10", 
+        "horario_chegada": "2022-11-03T11:10", 
+        "rota": "Santos Dumont",
+        "chegada": True
+      }
 
-#     form = formularioFiltroVoo(dados_voo)
-#     self.assertFalse(form.is_valid())
+    form = formularioFiltroVoo(dados_voo)
+    self.assertFalse(form.is_valid())
 
-#     dados_voo = {
-#       "companhia": "", 
-#       "intervalo_partida_0": "a",
-#       "intervalo_partida_1": "",
-#       "intervalo_chegada_0": "",
-#       "intervalo_chegada_1": "",
-#       "rota": "",
-#     }
+    dados_voo = {
+      "companhia": "", 
+      "intervalo_partida_0": "a",
+      "intervalo_partida_1": "",
+      "intervalo_chegada_0": "",
+      "intervalo_chegada_1": "",
+      "rota": "",
+    }
 
-#     form = formularioFiltroVoo(dados_voo)
-#     self.assertFalse(form.is_valid())
+    form = formularioFiltroVoo(dados_voo)
+    self.assertFalse(form.is_valid())
 
-#     dados_voo = {
-#       "companhia": "", 
-#       "intervalo_partida_0": "",
-#       "intervalo_partida_1": "",
-#       "intervalo_chegada_0": datetime.strftime(datetime.now(tz=tz)+timedelta(hours=3, minutes=50), self.formatodata),
-#       "intervalo_chegada_1": datetime.strftime((datetime.now(tz=tz)+timedelta(days=3)), self.formatodata), 
-#       "rota": "",
-#     }
+    dados_voo = {
+      "companhia": "",
+      "intervalo_previsto_0": datetime.strftime(datetime.now(tz=tz)+timedelta(hours=3, minutes=50), self.formatodata),
+      "intervalo_previsto_1": datetime.strftime((datetime.now(tz=tz)+timedelta(days=3)), self.formatodata), 
+      "rota": "",
+    }
 
-#     form = formularioFiltroVoo(dados_voo)
-#     self.assertTrue(form.is_valid())
+    form = formularioFiltroVoo(dados_voo)
+    self.assertTrue(form.is_valid())
 
-#   def teste_labels_forms_filtro_voos(self):
-#     form = formularioFiltroVoo()
+  def teste_labels_forms_filtro_voos(self):
+    form = formularioFiltroVoo()
 
-#     self.assertEqual(form.fields['companhia'].label, "Companhia aérea")
-#     self.assertEqual(form.fields['intervalo_partida'].label, "Intervalo de busca da data e horário da partida")
-#     self.assertEqual(form.fields['intervalo_chegada'].label, "Intervalo de busca da data e horário da chegada")
-#     self.assertIsNone(form.fields['rota'].label)
-#     self.assertEqual(form.fields['chegada'].label, "O destino é este aeroporto?")
+    self.assertEqual(form.fields['companhia'].label, "Companhia aérea")
+    self.assertEqual(form.fields['intervalo_previsto'].label, "Intervalo de busca da data e horário previstos")
+    self.assertEqual(form.fields['rota'].label, 'Aeroporto de origem/destino')
+    self.assertEqual(form.fields['chegada'].label, "O destino é este aeroporto?")
 
-#   def teste_campos_filtro_relatorio_realizados(self):
-#     form = FormularioFiltroRelatorioVoosRealizados()
+  def teste_campos_filtro_relatorio_realizados(self):
+    form = FormularioFiltroRelatorioVoosRealizados()
 
-#     self.assertEqual(type(form.fields['intervalo_partida'].widget), IntervaloDatas)
-#     self.assertEqual(type(form.fields['intervalo_chegada'].widget), IntervaloDatas)
+    self.assertEqual(type(form.fields['intervalo_real'].widget), IntervaloDatas)
 
-#   def teste_opcoes_status_filtro_relatorio_voos_atrasados(self):
-#     opcoes_status = [
-#         ('', ''),
-#         ('-', '-'),
-#         ('Embarque', 'Embarque'),
-#         ('Programado', 'Programado'),
-#         ('Taxiando', 'Taxiando'),
-#         ('Pronto', 'Pronto'),
-#         ('Autorizado', 'Autorizado'),
-#         ('Em voo', 'Em voo'),
-#         ('Aterrissado', 'Aterrissado')
-#     ]
-#     form = FormularioFiltroRelatorioVoosAtrasados()
+  def teste_opcoes_status_filtro_relatorio_voos_atrasados(self):
+    opcoes_status = [
+        ('', ''),
+        ('-', '-'),
+        ('Embarque', 'Embarque'),
+        ('Programado', 'Programado'),
+        ('Taxiando', 'Taxiando'),
+        ('Pronto', 'Pronto'),
+        ('Autorizado', 'Autorizado'),
+        ('Em voo', 'Em voo'),
+        ('Aterrissado', 'Aterrissado')
+    ]
+    form = FormularioFiltroRelatorioVoosAtrasados()
 
-#     self.assertListEqual(form.fields['status'].choices, opcoes_status)
-#     self.assertEqual(form.fields['status'].label, "Status dos voos")
+    self.assertListEqual(form.fields['status'].choices, opcoes_status)
+    self.assertEqual(form.fields['status'].label, "Status dos voos")
 
 ################################################################################
 ################################################################################
