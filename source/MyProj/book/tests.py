@@ -415,218 +415,208 @@ class ControladorCrudTest(TestCase):
 
 
 
-# ################################################################################
-# ################################################################################
-# ####         Caso de uso: Atualizar o status de voos/ Painel de Monitoração ####
-# ################################################################################
-# ################################################################################
+################################################################################
+################################################################################
+####         Caso de uso: Atualizar o status de voos/ Painel de Monitoração ####
+################################################################################
+################################################################################
 
-# class ControladorAtualizarStatusDeVooTest(TestCase):
-#   def __init__(self, methodName: str = ...) -> None:
-#     self.controlador = ControladorAtualizarStatusDeVoo()
-#     super().__init__(methodName)
+class ControladorAtualizarStatusDeVooTest(TestCase):
+  def __init__(self, methodName: str = ...) -> None:
+    self.controlador = ControladorAtualizarStatusDeVoo()
+    super().__init__(methodName)
 
-#   @classmethod
-#   def setUpTestData(cls):
-#     criarTabelasTestes()
+  @classmethod
+  def setUpTestData(cls):
+    criarTabelasTestes()
 
-#   def test_apresentacao_voos(self):
-#     agora = datetime.now(tz=tz)
-#     #controlador
-#     voos = self.controlador.apresentaVoosNaoFinalizados()
+  def test_apresentacao_voos(self):
+    agora = datetime.now(tz=tz)
+    #controlador
+    voos = self.controlador.apresentaVoosNaoFinalizados()
     
-#     #verifica se os voos cancelado(id=3) e Aterrissado(id=5) a mais de 1 hora não estão na lista
-#     for voo in voos:
-#       hcr = datetime(1, 1, 1, 0, 0, tzinfo=tz) if voo.horario_chegada_real == None else voo.horario_chegada_real
-#       status = None if  voo.status_voo == None else voo.status_voo.status_nome
-#       self.assertFalse((status == 'Aterrissado') & (agora - timedelta(hours=1) >= hcr)) #testa se não existem voos Aterrissados a mais de 1 hora (não devem haver)
-#       self.assertFalse((status == 'Cancelado') & (agora - timedelta(hours=1) >= voo.voo.horario_partida_previsto)) #testa se não existem voos cancelados a mais de 1 hora (não devem haver)
-#       self.assertFalse((status == None) & (agora + timedelta(days=2) <= voo.voo.horario_chegada_previsto)) #testa se não existem voos cadastrados que ocorrerão somente em dois dias ou mais (não devem ser monitorados)
-#       self.assertNotIn(voo.voo_id, [3, 5, 12])
-#       self.assertTrue((status not in ['Em voo', 'Autorizado', 'Aterrissado']) & (voo.horario_partida_real == voo.horario_chegada_real == None) | ((status in ['Em voo', 'Autorizado']) & (voo.horario_partida_real != voo.horario_chegada_real == None)) | ((status == 'Aterrissado') & (voo.horario_partida_real != voo.horario_chegada_real != '-')))
+    #verifica se os voos cancelado(id=3) e Aterrissado(id=5) a mais de 1 hora não estão na lista
+    for voo in voos:
+      hcr = datetime(1, 1, 1, 0, 0, tzinfo=tz) if voo.horario_real == None else voo.horario_real
+      status = None if  voo.status_voo == None else voo.status_voo.status_nome
+      self.assertFalse((status == 'Aterrissado') & (agora - timedelta(hours=1) >= hcr)) #testa se não existem voos Aterrissados a mais de 1 hora (não devem haver)
+      self.assertFalse((status == 'Cancelado') & (agora - timedelta(hours=1) >= voo.voo.horario_previsto)) #testa se não existem voos cancelados a mais de 1 hora (não devem haver)
+      self.assertFalse((status == None) & (agora + timedelta(days=2) <= voo.voo.horario_previsto)) #testa se não existem voos cadastrados que ocorrerão somente em dois dias ou mais (não devem ser monitorados)
+      self.assertNotIn(voo.voo_id, [3, 5, 12])
+      self.assertTrue((status not in ['Autorizado', 'Aterrissado']) & (voo.horario_real == None) | ((status in ['Autorizado', 'Aterrissado']) & (voo.horario_real != None)))
 
-#   def test_status_possiveis(self):
-#     # status vazio
-#     vooid = Voo.objects.filter(companhia_aerea='C').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Embarque'), Status.objects.get(status_nome='Cancelado'), Status.objects.get(status_nome='Em voo')])
+  def test_status_possiveis(self):
+    # status vazio rota é de partida
+    vooid = Voo.objects.filter(companhia_aerea='C').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Embarque'), Status.objects.get(status_nome='Cancelado')])
 
-#     # status 'embarque'
-#     vooid = Voo.objects.filter(companhia_aerea='American Air').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Programado'), Status.objects.get(status_nome='Cancelado')])
+    # status 'embarque'
+    vooid = Voo.objects.filter(companhia_aerea='American Air').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Programado'), Status.objects.get(status_nome='Cancelado')])
 
-#     # status 'programado'
-#     vooid = Voo.objects.filter(companhia_aerea='Amer').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Taxiando'), Status.objects.get(status_nome='Cancelado')])
+    # status 'programado'
+    vooid = Voo.objects.filter(companhia_aerea='Amer').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Taxiando'), Status.objects.get(status_nome='Cancelado')])
 
-#     # status 'taxiando'
-#     vooid = Voo.objects.filter(companhia_aerea='American').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Pronto'), Status.objects.get(status_nome='Cancelado')])
+    # status 'taxiando'
+    vooid = Voo.objects.filter(companhia_aerea='American').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Pronto'), Status.objects.get(status_nome='Cancelado')])
 
-#     # status 'pronto'
-#     vooid = Voo.objects.filter(companhia_aerea='A').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Autorizado'), Status.objects.get(status_nome='Cancelado')])
+    # status 'pronto'
+    vooid = Voo.objects.filter(companhia_aerea='A').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Autorizado'), Status.objects.get(status_nome='Cancelado')])
 
-#     # status 'autorizado'
-#     vooid = Voo.objects.filter(companhia_aerea='B').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Em voo')])
+    # status 'autorizado'
+    vooid = Voo.objects.filter(companhia_aerea='B').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [Status.objects.get(status_nome='Em voo')])
 
-#     # status 'cancelado'
-#     vooid = Voo.objects.filter(companhia_aerea='Azul').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [])
+    # status 'cancelado'
+    vooid = Voo.objects.filter(companhia_aerea='Azul').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [])
 
-#     # status 'aterrissado'
-#     vooid = Voo.objects.filter(companhia_aerea='LATAM').values('voo_id')[0]
-#     status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
-#     self.assertListEqual(status_possiveis, [])
+    # status 'aterrissado'
+    vooid = Voo.objects.filter(companhia_aerea='LATAM').values('voo_id')[0]
+    status_possiveis = self.controlador.statusPossiveis(vooid.get('voo_id'))
+    self.assertListEqual(status_possiveis, [])
 
 
-#   def test_atualizacao_status_voo(self):
-#     agora = datetime.now(tz=tz)
+  def test_atualizacao_status_voo(self):
+    agora = datetime.now(tz=tz)
 
-#     # alteração normal (sem alteração de outros campos)
-#     vooid = Voo.objects.filter(companhia_aerea='C').values('voo_id')[0].get('voo_id')
-#     pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
-#     self.assertIsNone(pvoo.status_voo)
-#     embarqueid = Status.objects.filter(status_nome='Embarque').values('status_id')[0].get('status_id')
-#     self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
-#     pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
-#     self.assertEqual(pvoo.status_voo.status_nome, 'Embarque')
+    # alteração normal (sem alteração de outros campos)
+    vooid = Voo.objects.filter(companhia_aerea='C').values('voo_id')[0].get('voo_id')
+    pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
+    self.assertIsNone(pvoo.status_voo)
+    embarqueid = Status.objects.filter(status_nome='Embarque').values('status_id')[0].get('status_id')
+    self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
+    pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Embarque')
 
-#     # alteração para status de 'Autorizado', deve preencher campo de horario_partida_real
-#     vooid = Voo.objects.filter(companhia_aerea='A').values('voo_id')[0].get('voo_id')
-#     pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
-#     self.assertEqual(pvoo.status_voo.status_nome, 'Pronto')
-#     self.assertIsNone(pvoo.horario_partida_real)
-#     self.assertIsNone(pvoo.horario_chegada_real)
-#     embarqueid = Status.objects.filter(status_nome='Autorizado').values('status_id')[0].get('status_id')
-#     self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
-#     pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
-#     self.assertEqual(pvoo.status_voo.status_nome, 'Autorizado')
-#     self.assertTrue(abs(pvoo.horario_partida_real-agora) < timedelta(seconds=1))
-#     self.assertIsNone(pvoo.horario_chegada_real)
+    # alteração para status de 'Autorizado', deve preencher campo de horario_real
+    vooid = Voo.objects.filter(companhia_aerea='A').values('voo_id')[0].get('voo_id')
+    pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Pronto')
+    self.assertIsNone(pvoo.horario_real)
+    embarqueid = Status.objects.filter(status_nome='Autorizado').values('status_id')[0].get('status_id')
+    self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
+    pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Autorizado')
+    self.assertTrue(abs(pvoo.horario_real-agora) < timedelta(seconds=1))
 
-#     # alteração para status de 'Aterrissado', deve preencher campo de horario_chegada_real
-#     vooid = Voo.objects.filter(companhia_aerea='American Airlines').values('voo_id')[0].get('voo_id')
-#     pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
-#     self.assertEqual(pvoo.status_voo.status_nome, 'Em voo')
-#     self.assertIsNotNone(pvoo.horario_partida_real)
-#     self.assertIsNone(pvoo.horario_chegada_real)
-#     embarqueid = Status.objects.filter(status_nome='Aterrissado').values('status_id')[0].get('status_id')
-#     self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
-#     pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
-#     self.assertEqual(pvoo.status_voo.status_nome, 'Aterrissado')
-#     self.assertIsNotNone(pvoo.horario_partida_real)
-#     self.assertTrue(abs(pvoo.horario_chegada_real-agora) < timedelta(seconds=1))
+    # alteração para status de 'Aterrissado', deve preencher campo de horario_real
+    vooid = Voo.objects.filter(companhia_aerea='American Airlines').values('voo_id')[0].get('voo_id')
+    pvoo = ProgressoVoo.objects.select_related('status_voo', 'voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Em voo')
+    self.assertIsNone(pvoo.horario_real)
+    embarqueid = Status.objects.filter(status_nome='Aterrissado').values('status_id')[0].get('status_id')
+    self.controlador.atualizaStatusDeVoo(vooid, embarqueid)
+    pvoo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
+    self.assertEqual(pvoo.status_voo.status_nome, 'Aterrissado')
+    self.assertTrue(abs(pvoo.horario_real-agora) < timedelta(seconds=1))
 
-# ################################################################################
-# ################################################################################
-# ####                           Caso de uso: Geração de relatórios           ####
-# ################################################################################
-# ################################################################################
+################################################################################
+################################################################################
+####                           Caso de uso: Geração de relatórios           ####
+################################################################################
+################################################################################
 
-# class ControleGeracaoRelatoriosTest(TestCase):
-#   controleGeracaoRelatorios = ControleGeracaoRelatorios()
-#   @classmethod
-#   def setUpTestData(cls):
-#     criarTabelasTestes()
-#     status = Status.objects.get(status_nome="Aterrissado")
+class ControleGeracaoRelatoriosTest(TestCase):
+  controleGeracaoRelatorios = ControleGeracaoRelatorios()
+  @classmethod
+  def setUpTestData(cls):
+    criarTabelasTestes()
+    status = Status.objects.get(status_nome="Aterrissado")
 
-#     Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
-#     rota = Rota.objects.get(rota_id=1)
-#     voo = Voo.objects.create(companhia_aerea="A", horario_partida_previsto="2022-08-04 01:30:00+00:00", horario_chegada_previsto="2022-08-04 10:32:00+00:00", rota_voo=rota)
-#     ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-04 01:50:00+00:00", horario_chegada_real="2022-08-04 10:35:00+00:00", status_voo=status)
+    Rota.objects.create(outro_aeroporto='Santos Dumont',chegada=True)
+    rota = Rota.objects.get(rota_id=1)
+    voo = Voo.objects.create(companhia_aerea="A", horario_previsto="2022-08-04 10:32:00+00:00", rota_voo=rota)
+    ProgressoVoo.objects.create(voo=voo, horario_real="2022-08-04 10:35:00+00:00", status_voo=status)
 
-#     voo = Voo.objects.create(companhia_aerea="B", horario_partida_previsto="2022-08-06 02:30:00+00:00", horario_chegada_previsto="2022-08-06 10:40:00+00:00", rota_voo=rota)
-#     ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-06 02:37:00+00:00", horario_chegada_real="2022-08-06 10:30:00+00:00", status_voo=status)
+    voo = Voo.objects.create(companhia_aerea="B", horario_previsto="2022-08-06 10:40:00+00:00", rota_voo=rota)
+    ProgressoVoo.objects.create(voo=voo, horario_real="2022-08-06 10:30:00+00:00", status_voo=status)
 
-#     voo = Voo.objects.create(companhia_aerea="B", horario_partida_previsto="2022-08-13 07:53:00+00:00", horario_chegada_previsto="2022-08-13 10:45:00+00:00", rota_voo=rota)
-#     ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-13 07:50:00+00:00", horario_chegada_real="2022-08-13 10:30:00+00:00", status_voo=status)
+    voo = Voo.objects.create(companhia_aerea="B", horario_previsto="2022-08-13 10:45:00+00:00", rota_voo=rota)
+    ProgressoVoo.objects.create(voo=voo, horario_real="2022-08-13 10:30:00+00:00", status_voo=status)
 
-#     status = Status.objects.get(status_nome="Em voo")
-#     voo = Voo.objects.create(companhia_aerea="B", horario_partida_previsto="2022-08-13 07:53:00+00:00", horario_chegada_previsto="2022-08-13 10:45:00+00:00", rota_voo=rota)
-#     ProgressoVoo.objects.create(voo=voo, horario_partida_real="2022-08-13 07:50:00+00:00", horario_chegada_real=None, status_voo=status)
+    status = Status.objects.get(status_nome="Em voo")
+    voo = Voo.objects.create(companhia_aerea="B", horario_previsto="2022-08-13 10:45:00+00:00", rota_voo=rota)
+    ProgressoVoo.objects.create(voo=voo, horario_real=None, status_voo=status)
 
-#   def test_filtrar_voos(self):
-#     agora = datetime.now(tz=tz)
+  def test_filtrar_voos(self):
+    agora = datetime.now(tz=tz)
 
-#     filtro_teste = {
-#       "companhia": "", 
-#       "intervalo_partida_0": "",
-#       "intervalo_partida_1": "2022-08-11T10:30",
-#       "intervalo_chegada_0": "",
-#       "intervalo_chegada_1": ""
-#     }
+    filtro_teste = {
+      "companhia": "", 
+      "intervalo_real_0": "",
+      "intervalo_real_1": "2022-08-11T10:30",
+    }
 
-#     form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
+    form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
 
-#     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(form)
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoos(form)
 
-#     self.assertEqual(2, lista_voos_resultado.count())
+    self.assertEqual(2, lista_voos_resultado.count())
   
-#   def test_filtrar_voos_realizados_min_null(self):
-#     filtro_teste = {
-#       "companhia": "", 
-#       "intervalo_partida_0": "",
-#       "intervalo_partida_1": "",
-#       "intervalo_chegada_0": "",
-#       "intervalo_chegada_1": ""
-#     }
+  def test_filtrar_voos_realizados_min_null(self):
+    filtro_teste = {
+      "companhia": "", 
+      "intervalo_real_0": "",
+      "intervalo_real_1": "",
+    }
 
-#     form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
+    form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
 
-#     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(form)
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(form)
 
-#     self.assertEqual(5, lista_voos_resultado.count())
+    self.assertEqual(6, lista_voos_resultado.count())
 
-#   def test_filtrar_voos_realizados(self):
-#     filtro_teste = {
-#       "companhia": "", 
-#       "intervalo_partida_0": "",
-#       "intervalo_partida_1": "",
-#       "intervalo_chegada_0": "2022-09-11T10:30",
-#       "intervalo_chegada_1": ""
-#     }
+  def test_filtrar_voos_realizados(self):
+    filtro_teste = {
+      "companhia": "", 
+      "intervalo_real_0": "2022-09-11T10:30",
+      "intervalo_real_1": ""
+    }
 
-#     form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
+    form = FormularioFiltroRelatorioVoosRealizados(filtro_teste)
 
-#     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(form)
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosRealizados(form)
 
-#     self.assertEqual(2, lista_voos_resultado.count())
+    self.assertEqual(3, lista_voos_resultado.count())
 
-#   def test_filtrar_voos_atrasados(self):
-#     filtro_teste = {
-#       "companhia": "",
-#       "status": '-'
-#     }
+  def test_filtrar_voos_atrasados(self):
+    filtro_teste = {
+      "companhia": "",
+      "status": '-'
+    }
 
-#     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['status'], filtro_teste["companhia"])
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['status'], filtro_teste["companhia"])
 
-#     self.assertEqual(1, lista_voos_resultado.count())
+    self.assertEqual(1, lista_voos_resultado.count())
 
-#     filtro_teste = {
-#       "companhia": "",
-#       "status": ''
-#     }
+    filtro_teste = {
+      "companhia": "",
+      "status": ''
+    }
 
-#     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['status'], filtro_teste["companhia"])
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['status'], filtro_teste["companhia"])
 
-#     self.assertEqual(7, lista_voos_resultado.count())
+    self.assertEqual(6, lista_voos_resultado.count())
 
-#     filtro_teste = {
-#       "companhia": "",
-#       "status": 'Em voo'
-#     }
+    filtro_teste = {
+      "companhia": "",
+      "status": 'Em voo'
+    }
 
-#     lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['status'], filtro_teste["companhia"])
+    lista_voos_resultado = self.controleGeracaoRelatorios.filtrarVoosAtrasados(filtro_teste['status'], filtro_teste["companhia"])
 
-#     self.assertEqual(2, lista_voos_resultado.count())
+    self.assertEqual(2, lista_voos_resultado.count())
     
 # ################################################################################
 # ################################################################################
@@ -993,6 +983,6 @@ def criarTabelasTestes():
     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_real=None)
 
     # voo sem status que terminará a mais de 2 dias de agora
-    Voo.objects.create(companhia_aerea='D',horario_previsto=(agora+timedelta(days = 1, hours=22)), rota_voo = rota_2)
+    Voo.objects.create(companhia_aerea='D',horario_previsto=(agora+timedelta(days = 2, hours=1)), rota_voo = rota_2)
     voo = Voo.objects.get(companhia_aerea='D')
     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_real=None)
