@@ -39,6 +39,9 @@ Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643
 - Executar os testes: `python manage.py test`
 - Inicializar o servidor com o comando `python manage.py runserver`
 
+### Para executar os testes unitários
+- Executar os testes: `python manage.py test`
+
 ### Para acessar os templates da aplicação a partir da pasta do projeto
 - Entrar na pasta `.\template`
 
