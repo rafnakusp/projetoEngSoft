@@ -374,7 +374,7 @@ class ControladorAtualizarStatusDeVoo():
         voo = ProgressoVoo.objects.select_related('status_voo').get(voo_id=vooid)
         status_antigo = voo.status_voo
         voo.status_voo = Status.objects.get(status_id=novo_status_id)
-        if ((voo.status_voo.status_nome in ["Autorizado", "Aterrissado"]) | ((status_antigo == None) & (voo.status_voo.status_nome == "Em voo"))):
+        if ((voo.status_voo.status_nome in ["Em voo", "Aterrissado"] and status_antigo != None)):
             voo.horario_real = datetime.now(tz=tz)
         voo.save()
         
