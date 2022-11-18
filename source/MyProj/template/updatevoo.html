@@ -1,71 +1,45 @@
+{% extends "main.html" %}
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-        .apresentaVoo {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-        
-        .apresentaVoo td, .apresentaVoo th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-        
-        .apresentaVoo tr:nth-child(even) {
-          background-color: #dddddd;
-        }
-    </style>
-  </head>
+{% block title %}Aeroporto - Editar Voo{% endblock title %}
 
-  <body>
-
-    <p>Voo atual:</p>
-
-    <table class="apresentaVoo">
-        <tr>
-            <th>id do voo</th>
-            <th>companhia aérea</th>
-            <th>rota</th>
-            <th>horário previsto</th>
-            <th>chegada?</th>
-        </tr>
-        <tr>
-            <td>{{voo.voo_id}}</td>
-            <td>{{voo.companhia_aerea}}</td>
-            <td>{{voo.rota_voo}}</td>
-            <td>{{voo.horario_previsto|date:"d-m-Y H:i"}}</td>
-            {% if voo.rota_voo.chegada %}
-            <td>Sim</td>
-            {% else %}
-            <td>Não</td>
-            {%endif%}
-        </tr>
-
-      </table>
-
-    <p>Novos valores para o voo:</p>
+{% block content %}
+<div class="p-3">
+  <p>Voo atual:</p>
+  <table class="table table-striped text-center align-content-center mr-5">
+      <tr>
+          <th>id do voo</th>
+          <th>companhia aérea</th>
+          <th>rota</th>
+          <th>horário previsto</th>
+          <th>chegada?</th>
+      </tr>
+      <tr>
+          <td>{{voo.voo_id}}</td>
+          <td>{{voo.companhia_aerea}}</td>
+          <td>{{voo.rota_voo}}</td>
+          <td>{{voo.horario_previsto|date:"d-m-Y H:i"}}</td>
+          {% if voo.rota_voo.chegada %}
+          <td>Sim</td>
+          {% else %}
+          <td>Não</td>
+          {%endif%}
+      </tr>
+    </table>
+  <p>Novos valores para o voo:</p>
+  
+  <form action="." method="POST">{% csrf_token %}
     
-    <form action="." method="POST">{% csrf_token %}
-      
-      <table>
-        <tr>
-            <th>atributo</th>
-            <th>mudar valor aqui</th>
-        </tr>
-        {{formulario.as_table}}
-      </table>
-
-      <button>Confirmar</button>
-
-    </form>
-
-    <a href="/crud/"><button>Cancelar</button></a>
-
-  </body>
-</html>
+    <table>
+      <tr>
+          <th>atributo</th>
+          <th>mudar valor aqui</th>
+      </tr>
+      {{formulario.as_table}}
+    </table>
+    <button class="btn btn-success mb-3">Confirmar</button>
+  </form>
+  <a href="/crud/"><button class="btn btn-danger">Cancelar</button></a>
+</div>
+{% endblock content %}
 
 
