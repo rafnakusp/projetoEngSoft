@@ -62,6 +62,14 @@ class FormularioFiltroRelatorioVoosAtrasados(Form):
         ('Em voo', 'Em voo'),
         ('Aterrissado', 'Aterrissado')
     ]
+    opcoes_atraso = [
+        ('', ''),
+        ('1-10min', 'até 10 minutos'),
+        ('10min-1h', 'entre 10 minutos e 1 hora'),
+        ('1-3h', 'entre 1 e 3 horas'),
+        ('>3h', 'mais de 3 horas')
+    ]
     companhia = CharField(max_length=50, required=False, label="Companhia aérea:")
     status = ChoiceField(choices=opcoes_status, required=False, label="Status dos voos")
+    atraso = ChoiceField(choices=opcoes_atraso, required=False, label="Atraso do voo")
 

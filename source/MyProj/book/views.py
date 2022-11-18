@@ -411,9 +411,11 @@ def geracaoDeRelatoriosVoosAtrasados(request):
         if form.is_valid():
             companhia = form.data['companhia']
             status = form.data['status']
+            atraso = form.data['atraso']
     
             context = {
-                "progressovoo_list": controleGeracaoRelatorios.filtrarVoosAtrasados(status, companhia)
+                "progressovoo_list": controleGeracaoRelatorios.filtrarVoosAtrasados(status, companhia, atraso),
+                "label_atraso": atraso
             }
             return render(request, "relatoriovoosatrasados.html", context)
 
@@ -447,10 +449,11 @@ class ControleGeracaoRelatorios():
 
         return voosQuerySet
     
-    def filtrarVoosAtrasados(self, status, companhia):
+    def filtrarVoosAtrasados(self, status, companhia, atraso):
         agora = datetime.now(tz)
         print(agora)
         voosQuerySet = ProgressoVoo.objects.all()
+        tempo_atraso = None
         if status != "":
             if status == '-':
                 voosQuerySet = voosQuerySet.filter(status_voo__isnull=True)
@@ -458,6 +461,27 @@ class ControleGeracaoRelatorios():
                 voosQuerySet = voosQuerySet.filter(status_voo__status_nome__exact=status)
         if companhia != "":
             voosQuerySet = voosQuerySet.filter(voo__companhia_aerea__exact=companhia)
+        if atraso != '':
+            if atraso == '1-10min':
+                tempo_atraso = timedelta(minutes=10)
+                min_tempo_atraso = timedelta(minutes=1)
+                voosQuerySet = voosQuerySet.filter(Q(horario_real__isnull=True, voo__horario_previsto__range=[agora-tempo_atraso, agora-min_tempo_atraso]) | \
+                    Q(horario_real__range=[F('voo__horario_previsto') + min_tempo_atraso, F('voo__horario_previsto') + tempo_atraso]))
+            elif atraso == '10min-1h':
+                tempo_atraso = timedelta(hours=1)
+                min_tempo_atraso = timedelta(minutes=10)
+                voosQuerySet = voosQuerySet.filter(Q(horario_real__isnull=True, voo__horario_previsto__range=[agora-tempo_atraso, agora-min_tempo_atraso]) | \
+                    Q(horario_real__range=[F('voo__horario_previsto') + min_tempo_atraso, F('voo__horario_previsto') + tempo_atraso]))
+            elif atraso == '1-3h':
+                tempo_atraso = timedelta(hours=3)
+                min_tempo_atraso = timedelta(hours=1)
+                voosQuerySet = voosQuerySet.filter(Q(horario_real__isnull=True, voo__horario_previsto__range=[agora-tempo_atraso, agora-min_tempo_atraso]) | \
+                    Q(horario_real__range=[F('voo__horario_previsto') + min_tempo_atraso, F('voo__horario_previsto') + tempo_atraso]))
+            elif atraso == '>3h':
+                min_tempo_atraso = timedelta(hours=3)
+                voosQuerySet = voosQuerySet.filter(Q(horario_real__isnull=True, voo__horario_previsto__lt=agora-min_tempo_atraso) | \
+                    Q(horario_real__gt=F('voo__horario_previsto') + min_tempo_atraso))
+
         return voosQuerySet.filter(Q(horario_real__gt=F('voo__horario_previsto')) | Q(horario_real__isnull=True, voo__horario_previsto__lt=agora))\
             .exclude(status_voo__status_nome="Cancelado").order_by('voo_id').distinct() # Voos cancelados nao estao atrasados
 
@@ -559,6 +583,11 @@ def criarTabelasProducao():
     # voo sem status
     Voo.objects.create(companhia_aerea='C',horario_previsto=(agora-timedelta(minutes = 3)), rota_voo = rota_1)
     voo = Voo.objects.get(companhia_aerea='C')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_real=None)
+
+    # voo sem status
+    Voo.objects.create(companhia_aerea='E',horario_previsto=(agora-timedelta(hours= 2)), rota_voo = rota_1)
+    voo = Voo.objects.get(companhia_aerea='E')
     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_real=None)
 
 def criarTabelasProducaoComRequest(request):
