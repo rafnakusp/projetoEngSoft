@@ -2,19 +2,46 @@
 
 {% block title %}Aeroporto - Monitoramento de Voos{% endblock %}
 
+{% block head %}
+<style>
+  .error-text{
+    color: red;
+  }
+</style>
+{% endblock head %}
+
 {% block content %}
-<div class="p-3">
+<div class="column main-div p-3">
 
-  <p>Cadastro de voo</p>
-  <p>voo a ser cadastrado:</p>
+  <div class="row header-label align-middle mb-3">
+    <span>Cadastro de Voo</span>
+  </div>
+  <span class="mb-3">Dados do voo:</span>
 
-  <form action="/crud/create/" method="POST">{% csrf_token %}
-    <table>
-      {{novo_voo.as_table}}
-    </table>
+  <form class="row" action="/crud/create/" method="POST">{% csrf_token %}
 
-    <button class="btn btn-success" name="tipo" value="cadastrar">Confirmar cadastro</button>
-  </form>
+    <div class="column error-text ml-3 mb-3 mt-3">
+      <span>Os campos sinalizados com * são obrigatórios</span>
+    </div>
+    
+    {% for field in novo_voo %}
+    <div class="container mb-3">
+      <div class="column pb-2">
+        <span class="field-label">{{field.label}}
+          {% if field.field.required %}
+          <span class="error-text">*</span>
+          {% endif %}
+        </div>
+        <div class="column">
+          {{field}}
+        </div>
+      </div>
+      {% endfor %}
+
+      <button class="btn btn-success" name="tipo" value="cadastrar">Confirmar cadastro</button>
+  
+    </form>
+
 
   <a href="/crud/"><button class="btn btn-danger mt-2">Cancelar</button></a>
 

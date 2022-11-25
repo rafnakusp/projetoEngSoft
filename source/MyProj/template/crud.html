@@ -6,7 +6,7 @@
 {% block content %}
 <div class="column align-self-start main-div w-50 mw-50 p-3">
   <div class="column justify-content-left">
-    <div class="header-label align-middle">
+    <div class="header-label align-middle mb-3">
       <span>Tela de CRUD de voos</span>
     </div>
     <span>Filtrar voos:</span>
@@ -22,11 +22,6 @@
           </div>
         </div>
       {% endfor %}
-      <!--
-      <table>
-        {{formulario_voos.as_table}}
-      </table>
-      -->
       <button class="btn btn-primary" name="tipo" value="filtrar">Filtrar</button>
       <button class="btn btn-primary" name="tipo" value="cadastrar">Cadastrar Novo Voo</button>
     </form>
