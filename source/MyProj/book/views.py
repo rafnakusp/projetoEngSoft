@@ -47,6 +47,7 @@ def telaLogin(request):
         return redirect("/telainicial/")
 
 def telainicial(request):
+    global TABELAS_PADRAO_JA_FORAM_CRIADAS
     # reseta_id_voos() #- descomentar quando quiser resetar a contagem das primary keys
     if not TABELAS_PADRAO_JA_FORAM_CRIADAS:
         criarTabelasProducao()
