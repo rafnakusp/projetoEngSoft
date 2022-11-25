@@ -2,58 +2,73 @@
 
 {% block title %}Aeroporto - CRUD{% endblock %}
 
+
 {% block content %}
-<div class="p-3">
+<div class="column align-self-start main-div w-50 mw-50 p-3">
+  <div class="column justify-content-left">
+    <div class="header-label align-middle">
+      <span>Tela de CRUD de voos</span>
+    </div>
+    <span>Filtrar voos:</span>
 
-  <p>Tela de CRUD de voos</p>
-  <p>filtrar por:</p>
-
-  <form action="{% url 'crud' %}" method="POST" id="filtro">{% csrf_token %}
-    <table>
-      {{formulario_voos.as_table}}
-    </table>
-    <button class="btn btn-primary" name="tipo" value="filtrar">Filtrar</button>
-    <button class="btn btn-primary" name="tipo" value="cadastrar">Cadastrar Novo Voo</button>
-  </form>
-
-  <a href="../telainicial/"><button class="btn btn-lighter mt-2">Voltar</button></a>
-  
-  {%if voo_list %}
-
-  <p>Menu de consulta, alteração e remoção de voos</p>
-
-  <table class="table table-striped">
-      <tr>
-        <th>id do voo</th>
-        <th>companhia aérea</th>
-        <th>rota</th>
-        <th>horário previsto</th>
-        <th>chegada?</th>
-      </tr>
-      {% for voo in voo_list %}
-        <tr>
-          <td>{{voo.voo_id}}
-            <form action="./delete/confirmar/{{voo.voo_id}}/">
-              <button class="btn btn-danger btn-sm mb-1">Deletar</button>
-            </form>
-            <form action="./update/{{voo.voo_id}}/">
-              <button class="btn btn-lighter btn-sm mb-1">Editar</button>
-            </form>
-          </td>
-          <td>{{voo.companhia_aerea}}</td>
-          <td>{{voo.rota_voo}}</td>
-          <td>{{voo.horario_previsto|date:"d-m-Y H:i"}}</td>
-          {% if voo.rota_voo.chegada %}
-          <td>Sim</td>
-          {% else %}
-          <td>Não</td>
-          {%endif%}
-        </tr>
+    <form action="{% url 'crud' %}" method="POST" id="filtro">{% csrf_token %}
+      {% for field in formulario_voos %}
+        <div class="container ">
+          <div class="column pb-2">
+            <span class="field-label">{{field.label}}  
+          </div>
+          <div class="column pb-3">
+            {{field}}
+          </div>
+        </div>
       {% endfor %}
-    </table>
+      <!--
+      <table>
+        {{formulario_voos.as_table}}
+      </table>
+      -->
+      <button class="btn btn-primary" name="tipo" value="filtrar">Filtrar</button>
+      <button class="btn btn-primary" name="tipo" value="cadastrar">Cadastrar Novo Voo</button>
+    </form>
 
-    {%endif%}
+    <a href="../telainicial/"><button class="btn btn-warning mt-2">Voltar</button></a>
 
+    {%if voo_list %}
+
+    <p>Menu de consulta, alteração e remoção de voos</p>
+
+    <table class="table table-striped">
+        <tr>
+          <th>id do voo</th>
+          <th>companhia aérea</th>
+          <th>rota</th>
+          <th>horário previsto</th>
+          <th>chegada?</th>
+        </tr>
+        {% for voo in voo_list %}
+          <tr>
+            <td>{{voo.voo_id}}
+              <form action="./delete/confirmar/{{voo.voo_id}}/">
+                <button class="btn btn-danger btn-sm mb-1">Deletar</button>
+              </form>
+              <form action="./update/{{voo.voo_id}}/">
+                <button class="btn btn-lighter btn-sm mb-1">Editar</button>
+              </form>
+            </td>
+            <td>{{voo.companhia_aerea}}</td>
+            <td>{{voo.rota_voo}}</td>
+            <td>{{voo.horario_previsto|date:"d-m-Y H:i"}}</td>
+            {% if voo.rota_voo.chegada %}
+            <td>Sim</td>
+            {% else %}
+            <td>Não</td>
+            {%endif%}
+          </tr>
+        {% endfor %}
+      </table>
+
+      {%endif%}
+  </div>
 </div>
 {% endblock content %}
 
