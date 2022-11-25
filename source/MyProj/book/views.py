@@ -595,6 +595,11 @@ def criarTabelasProducao():
     voo = Voo.objects.get(companhia_aerea='E')
     ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_real=None)
 
+    # voo sem status
+    Voo.objects.create(companhia_aerea='Qatar Airways',horario_previsto=(agora-timedelta(hours= 1)), rota_voo = rota_2)
+    voo = Voo.objects.get(companhia_aerea='Qatar Airways')
+    ProgressoVoo.objects.create(status_voo = None, voo = voo, horario_real=None)
+
 def criarTabelasProducaoComRequest(request):
     # reseta_id_voos()
     criarTabelasProducao()
