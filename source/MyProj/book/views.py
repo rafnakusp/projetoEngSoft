@@ -11,6 +11,7 @@ from django.db import connection, transaction
 from .forms import formularioFiltroVoo, formularioCadastroVoo, FormularioFiltroRelatorioVoosRealizados, FormularioFiltroRelatorioVoosAtrasados
 from django.db.models import Q, F
 
+TABELAS_PADRAO_JA_FORAM_CRIADAS = False
 USUARIO_LOGADO = ""
 CONTAGEM_DE_FALHAS_NO_LOGIN = 0
 tz = timezone.get_fixed_timezone(timedelta(hours=-3))
@@ -47,7 +48,10 @@ def telaLogin(request):
 
 def telainicial(request):
     # reseta_id_voos() #- descomentar quando quiser resetar a contagem das primary keys
-    criarTabelasProducao()
+    if not TABELAS_PADRAO_JA_FORAM_CRIADAS:
+        criarTabelasProducao()
+        TABELAS_PADRAO_JA_FORAM_CRIADAS = True
+
     template = 'telainicial.html'
     context = {
         'username': USUARIO_LOGADO,
