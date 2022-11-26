@@ -279,12 +279,16 @@ class ControladorCrud():
 @csrf_exempt
 def monitoramentodevoos(request):
     if request.method == "GET":
-        template = 'monitoramentodevoos.html'
-        painel = PainelDeMonitoracao()
-        context = {
-            "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
-        }
-        return render(request, template, context)
+        if Voo.objects.all().count() > 0:
+            template = 'monitoramentodevoos.html'
+            painel = PainelDeMonitoracao()
+            context = {
+                "voo_list": painel.apresentaVoosNaoFinalizados() # context é a lista de voos já convertida
+            }
+            return render(request, template, context)
+        else:
+            template = 'erronenhumvoo.html'
+            return render(request, template)
 
 @csrf_exempt
 def painelDeMonitoracao(request):
