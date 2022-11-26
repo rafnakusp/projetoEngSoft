@@ -582,7 +582,7 @@ def criarTabelasProducao():
     Voo.objects.create(companhia_aerea='B',horario_previsto=(agora-timedelta(minutes = 3)), rota_voo = rota_2)
     voo = Voo.objects.get(companhia_aerea='B')
     status4 = Status.objects.get(status_nome='Autorizado')
-    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_real=agora)
+    ProgressoVoo.objects.create(status_voo = status4, voo = voo, horario_real=None)
 
     # voo sem status que terminará a mais de 2 dias de agora
     Voo.objects.create(companhia_aerea='D',horario_previsto=(agora+timedelta(days = 2, hours=1)), rota_voo = rota_2)
