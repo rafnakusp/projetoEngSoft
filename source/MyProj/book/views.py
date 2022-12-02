@@ -40,6 +40,7 @@ def telaLogin(request):
         else:
             CONTAGEM_DE_FALHAS_NO_LOGIN += 1
             if CONTAGEM_DE_FALHAS_NO_LOGIN >= 3:
+                CONTAGEM_DE_FALHAS_NO_LOGIN = 0
                 return render(request, "loginbloqueado.html")
             return render(request, "login.html")
 
