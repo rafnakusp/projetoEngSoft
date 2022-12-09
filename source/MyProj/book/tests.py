@@ -632,8 +632,8 @@ class ControleGeracaoRelatoriosTest(TestCase):
 class TesteRequestLogin(TestCase):
   def teste_login_correto(self):
     url = '/login/'
-    nome_usuario = 'operadordevoos'
-    senha = 'senha'
+    nome_usuario = 'operador'
+    senha = '1234'
 
     resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
 
@@ -643,7 +643,7 @@ class TesteRequestLogin(TestCase):
   def teste_login_incorreto(self):
     url = '/login/'
     nome_usuario = 'operadodevoos'
-    senha = 'senha'
+    senha = '1234'
 
     resposta = self.client.post(url, {'username': nome_usuario, 'password': senha})
 

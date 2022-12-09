@@ -28,13 +28,13 @@ def telaLogin(request):
         return render(request, "login.html")
 
     elif request.method == "POST":
-        if request.POST["username"] == "operadordevoos" and request.POST["password"] == "senha":
-            USUARIO_LOGADO = "operadordevoos"
-        elif (request.POST["username"] == "funcionariocompanhia" or request.POST["username"] == "operadordetorre" or request.POST["username"] == "piloto") and request.POST["password"] == "senha":
+        if request.POST["username"] == "operador" and request.POST["password"] == "1234":
+            USUARIO_LOGADO = "operador"
+        elif (request.POST["username"] == "funcionario" or request.POST["username"] == "torre" or request.POST["username"] == "piloto") and request.POST["password"] == "1234":
             USUARIO_LOGADO = "usuariostatus"
-        elif request.POST["username"] == "gerentedeoperacoes" and request.POST["password"] == "senha":
-            USUARIO_LOGADO = "gerentedeoperacoes"        
-        elif request.POST["username"] == "paineldevoo" and request.POST["password"] == "senha":
+        elif request.POST["username"] == "gerente" and request.POST["password"] == "1234":
+            USUARIO_LOGADO = "gerente"        
+        elif request.POST["username"] == "paineldevoo" and request.POST["password"] == "1234":
             USUARIO_LOGADO = "paineldevoo"          
         
         else:

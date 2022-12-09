@@ -6,13 +6,13 @@
       <span>Bem-vindo, </span>
       <span>{{ username }}</span>
     </div>
-    {% if username == "operadordevoos" %}
+    {% if username == "operador" %}
     <a href="/crud/"><button class="btn btn-success">CRUD</button></a>
     {% endif %}
     {% if username == "usuariostatus" %}
     <a href="/monitoramentodevoos/"><button class="btn btn-success">Monitoramento de Voos</button></a>
     {% endif %}
-    {% if username == "gerentedeoperacoes" %}
+    {% if username == "gerente" %}
     <i class="fa-regular fa-file-lines"></i>
     <a href="/geracaoderelatorios/"><button class="btn btn-success">Geração de Relatórios</button></a>
     {% endif %}
