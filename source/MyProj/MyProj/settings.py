@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-0#_a%d*qe!p9vxu9*gld413c+29efdcdbh+*42l3&b_c4ye!bd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['rafnakusp.pythonanywhere.com', 'localhost']
+ALLOWED_HOSTS = ['rafnakusp.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
