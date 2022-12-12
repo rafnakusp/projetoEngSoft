@@ -12,6 +12,20 @@ Grupo 4
 ## Informações Gerais 
 Esse é o projeto da disciplina Laboratório de Engenharia de Software - PCS3643, que é um webapp em django para monitorar os voos de um aeroporto hipotético.
 
+## Acesso e uso
+
+Link: https://rafnakusp.pythonanywhere.com/paineldemonitoracao/
+
+Usuários:
+
+- operador
+- piloto
+- funcionario
+- torre
+- gerente
+
+A senha é única para todos os usuários: "1234".
+
 ## Exigências de ambiente
 - Windows
 - Powershell
